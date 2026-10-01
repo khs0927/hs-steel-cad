@@ -1,0 +1,12 @@
+<Project>
+  <!-- Mirrors power-cad-mcp/dotnet/Directory.Build.props so the projects can be merged without changes. -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Version>0.1.0</Version>
+    <Authors>khs0927</Authors>
+    <Product>HS-Steel CAD</Product>
+  </PropertyGroup>
+</Project>
