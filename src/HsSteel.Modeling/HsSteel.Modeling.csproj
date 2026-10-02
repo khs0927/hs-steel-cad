@@ -1,11 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="ACadSharp" Version="3.8.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\HsSteel.Modeling\HsSteel.Modeling.csproj" />
+    <ProjectReference Include="..\HsSteel.Domain\HsSteel.Domain.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\HsSteel.Drafting\HsSteel.Drafting.csproj" />
+    <ProjectReference Include="..\..\src\HsSteel.Mcp\HsSteel.Mcp.csproj" />
   </ItemGroup>
 
 </Project>

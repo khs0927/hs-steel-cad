@@ -1,40 +1,53 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace HsSteel.Drafting;
 
 /// <summary>
-/// One entity to create. <see cref="Spec"/> uses exactly the JSON shape of power-cad's <c>cad_create</c>
-/// (type, layer, start/end, points, center/radius, text/position/height/justify, kind/p1/p2/line_point ...),
-/// so a plan can be sent to power-cad unchanged after the merge.
+/// One entity to create. <see cref="Spec"/> has exactly the JSON shape of power-cad's <c>cad_create</c>
+/// (type, layer, start/end, points, center/radius, text/position/height/justify, kind/p1/p2/line_point, name/scale ...),
+/// so it can be sent to power-cad unchanged. <see cref="Tag"/> carries HS-STEEL data (mark, part, assembly) that
+/// backends store as XData under the "HS-STEEL" application; it is never part of the create spec.
 /// </summary>
-public sealed record PlanEntity(JsonObject Spec)
+public sealed record PlanEntity(JsonObject Spec, JsonObject? Tag = null)
 {
     public string Type => Spec["type"]!.GetValue<string>();
 
     public string Layer => Spec["layer"]?.GetValue<string>() ?? "0";
 }
 
-/// <summary>A deterministic list of entities plus what they represent. Backend-neutral.</summary>
+/// <summary>A deterministic, backend-neutral list of entities in model units (mm).</summary>
 public sealed class DrawPlan
 {
+    private static readonly string[] PointKeys = ["start", "end", "position", "p1", "p2", "line_point", "center"];
     private readonly List<PlanEntity> _entities = [];
 
-    public string Title { get; init; } = "";
+    public string Title { get; set; } = "";
 
-    /// <summary>Drawing scale denominator (10 = 1:10).</summary>
+    /// <summary>Drawing scale denominator (10 = 1:10). Text heights and paper offsets are already multiplied by it.</summary>
     public double Scale { get; set; } = 1;
 
     public IReadOnlyList<PlanEntity> Entities => _entities;
 
     public JsonObject Meta { get; } = [];
 
-    public void Add(JsonObject spec) => _entities.Add(new PlanEntity(spec));
+    /// <summary>Current tag applied to entities added from now on (null = none).</summary>
+    public JsonObject? CurrentTag { get; set; }
 
-    public static JsonArray Pt(double x, double y) => [Math.Round(x, 4), Math.Round(y, 4)];
+    public void Add(JsonObject spec) => _entities.Add(new PlanEntity(spec, CurrentTag?.DeepClone().AsObject()));
 
-    public void Line(string layer, double x1, double y1, double x2, double y2) =>
-        Add(new JsonObject { ["type"] = "line", ["layer"] = layer, ["start"] = Pt(x1, y1), ["end"] = Pt(x2, y2) });
+    public void AddRaw(PlanEntity e) => _entities.Add(e);
+
+    public static JsonArray Pt(double x, double y) => [Math.Round(x, 3), Math.Round(y, 3)];
+
+    public void Line(string layer, double x1, double y1, double x2, double y2)
+    {
+        if (Math.Abs(x1 - x2) + Math.Abs(y1 - y2) > 1e-6)
+        {
+            Add(new JsonObject { ["type"] = "line", ["layer"] = layer, ["start"] = Pt(x1, y1), ["end"] = Pt(x2, y2) });
+        }
+    }
 
     public void Rect(string layer, double x, double y, double w, double h) =>
         Polyline(layer, true, (x, y), (x + w, y), (x + w, y + h), (x, y + h));
@@ -51,19 +64,19 @@ public sealed class DrawPlan
     }
 
     public void Circle(string layer, double cx, double cy, double r) =>
-        Add(new JsonObject { ["type"] = "circle", ["layer"] = layer, ["center"] = Pt(cx, cy), ["radius"] = r });
+        Add(new JsonObject { ["type"] = "circle", ["layer"] = layer, ["center"] = Pt(cx, cy), ["radius"] = Math.Round(r, 3) });
 
     public void Arc(string layer, double cx, double cy, double r, double a0, double a1) =>
-        Add(new JsonObject { ["type"] = "arc", ["layer"] = layer, ["center"] = Pt(cx, cy), ["radius"] = r, ["start_angle"] = a0, ["end_angle"] = a1 });
+        Add(new JsonObject { ["type"] = "arc", ["layer"] = layer, ["center"] = Pt(cx, cy), ["radius"] = Math.Round(r, 3), ["start_angle"] = a0, ["end_angle"] = a1 });
 
     public void Text(string layer, string text, double x, double y, double height, string justify = "middle_center", double rotation = 0) =>
         Add(new JsonObject
         {
             ["type"] = "text", ["layer"] = layer, ["text"] = text, ["position"] = Pt(x, y),
-            ["height"] = height, ["justify"] = justify, ["rotation"] = rotation,
+            ["height"] = Math.Round(height, 3), ["justify"] = justify, ["rotation"] = rotation,
         });
 
-    /// <summary>Linear dimension. rotation 0 = horizontal, 90 = vertical. linePoint fixes the dimension line.</summary>
+    /// <summary>Linear dimension. rotation 0 = horizontal, 90 = vertical; linePoint fixes the dimension line.</summary>
     public void Dim(string layer, (double X, double Y) p1, (double X, double Y) p2, (double X, double Y) linePoint, double rotation, string? text = null)
     {
         var o = new JsonObject
@@ -79,56 +92,147 @@ public sealed class DrawPlan
         Add(o);
     }
 
-    public void Insert(string layer, string block, double x, double y, double scale) =>
-        Add(new JsonObject { ["type"] = "insert", ["layer"] = layer, ["name"] = block, ["position"] = Pt(x, y), ["scale"] = scale });
-
-    /// <summary>Axis-aligned extents of everything except inserts and dimensions text.</summary>
-    public (double MinX, double MinY, double MaxX, double MaxY) Extents()
+    /// <summary>Leader from the arrow point through the given points (power-cad "leader").</summary>
+    public void Leader(string layer, params (double X, double Y)[] pts)
     {
-        double x0 = double.MaxValue, y0 = double.MaxValue, x1 = double.MinValue, y1 = double.MinValue;
-        void Take(JsonNode? p)
+        var arr = new JsonArray();
+        foreach (var (px, py) in pts)
         {
-            if (p is JsonArray a)
+            arr.Add(Pt(px, py));
+        }
+
+        Add(new JsonObject { ["type"] = "leader", ["layer"] = layer, ["points"] = arr });
+    }
+
+    public void Insert(string layer, string block, double x, double y, double scale, JsonObject? attributes = null)
+    {
+        var o = new JsonObject { ["type"] = "insert", ["layer"] = layer, ["name"] = block, ["position"] = Pt(x, y), ["scale"] = scale };
+        if (attributes is not null)
+        {
+            o["attributes"] = attributes;
+        }
+
+        Add(o);
+    }
+
+    /// <summary>Copies all entities of <paramref name="other"/> translated by (dx, dy).</summary>
+    public void Append(DrawPlan other, double dx, double dy)
+    {
+        foreach (var e in other.Entities)
+        {
+            var s = e.Spec.DeepClone().AsObject();
+            Translate(s, dx, dy);
+            _entities.Add(new PlanEntity(s, e.Tag?.DeepClone().AsObject()));
+        }
+    }
+
+    private static void Translate(JsonObject s, double dx, double dy)
+    {
+        static JsonArray Move(JsonNode p, double dx, double dy) => Pt(p[0]!.GetValue<double>() + dx, p[1]!.GetValue<double>() + dy);
+        foreach (var k in PointKeys)
+        {
+            if (s[k] is JsonArray a)
             {
-                var x = a[0]!.GetValue<double>();
-                var y = a[1]!.GetValue<double>();
-                (x0, y0, x1, y1) = (Math.Min(x0, x), Math.Min(y0, y), Math.Max(x1, x), Math.Max(y1, y));
+                s[k] = Move(a, dx, dy);
             }
         }
 
-        foreach (var e in _entities.Where(e => e.Type != "insert").Select(e => e.Spec))
+        if (s["points"] is JsonArray pts)
         {
-            foreach (var k in new[] { "start", "end", "position", "p1", "p2", "line_point" })
+            var moved = new JsonArray();
+            foreach (var p in pts)
             {
-                Take(e[k]);
+                moved.Add(Move(p!, dx, dy));
             }
 
-            if (e["points"] is JsonArray pts)
+            s["points"] = moved;
+        }
+    }
+
+    /// <summary>Extents of all entities except inserts (frames). Text is approximated by its insertion box.</summary>
+    public (double MinX, double MinY, double MaxX, double MaxY) Extents() => Extents(_ => true);
+
+    /// <summary>Extents of the entities accepted by <paramref name="filter"/> (inserts are always excluded).</summary>
+    public (double MinX, double MinY, double MaxX, double MaxY) Extents(Func<PlanEntity, bool> filter)
+    {
+        double x0 = double.MaxValue, y0 = double.MaxValue, x1 = double.MinValue, y1 = double.MinValue;
+        void Take(double x, double y) => (x0, y0, x1, y1) = (Math.Min(x0, x), Math.Min(y0, y), Math.Max(x1, x), Math.Max(y1, y));
+        foreach (var e in _entities.Where(e => e.Type != "insert" && filter(e)))
+        {
+            var s = e.Spec;
+            foreach (var k in PointKeys)
             {
-                foreach (var p in pts)
+                if (s[k] is JsonArray a)
                 {
-                    Take(p);
+                    double x = a[0]!.GetValue<double>(), y = a[1]!.GetValue<double>();
+                    if (k == "center" && s["radius"] is JsonNode r)
+                    {
+                        var rr = r.GetValue<double>();
+                        Take(x - rr, y - rr);
+                        Take(x + rr, y + rr);
+                    }
+                    else
+                    {
+                        Take(x, y);
+                    }
                 }
             }
 
-            if (e["center"] is JsonArray c && e["radius"] is JsonNode r)
+            if (s["points"] is JsonArray pts)
             {
-                var rr = r.GetValue<double>();
-                Take(Pt(c[0]!.GetValue<double>() - rr, c[1]!.GetValue<double>() - rr));
-                Take(Pt(c[0]!.GetValue<double>() + rr, c[1]!.GetValue<double>() + rr));
+                foreach (var p in pts)
+                {
+                    Take(p![0]!.GetValue<double>(), p[1]!.GetValue<double>());
+                }
+            }
+
+            if (e.Type == "text")
+            {
+                var (tx, ty, tw, th) = TextBox(s);
+                Take(tx, ty);
+                Take(tx + tw, ty + th);
             }
         }
 
-        return (x0, y0, x1, y1);
+        return x0 == double.MaxValue ? (0, 0, 0, 0) : (x0, y0, x1, y1);
     }
+
+    /// <summary>Approximate text box (left, bottom, width, height) for layout checks; width = 0.8 h per character.</summary>
+    public static (double X, double Y, double W, double H) TextBox(JsonObject s)
+    {
+        var h = s["height"]!.GetValue<double>();
+        var text = s["text"]!.GetValue<string>();
+        var w = TextWidth(text, h);
+        var p = s["position"]!.AsArray();
+        double x = p[0]!.GetValue<double>(), y = p[1]!.GetValue<double>();
+        var rot = s["rotation"]?.GetValue<double>() ?? 0;
+        var j = s["justify"]?.GetValue<string>() ?? "left";
+        double ox = j.EndsWith("center", StringComparison.Ordinal) ? -w / 2 : j.EndsWith("right", StringComparison.Ordinal) ? -w : 0;
+        double oy = j.StartsWith("middle", StringComparison.Ordinal) ? -h / 2 : j.StartsWith("top", StringComparison.Ordinal) ? -h : 0;
+        return Math.Abs(rot - 90) < 1e-6 ? (x - h - oy, y + ox, h, w) : (x + ox, y + oy, w, h);
+    }
+
+    /// <summary>Text width estimate: Korean characters are full width.</summary>
+    public static double TextWidth(string text, double h) => text.Sum(c => c > 0x2E80 ? 1.0 : 0.75) * h;
 
     public JsonObject ToJson() => new()
     {
         ["title"] = Title,
         ["scale"] = Scale,
         ["meta"] = Meta.DeepClone(),
-        ["entities"] = new JsonArray([.. _entities.Select(e => (JsonNode)e.Spec.DeepClone())]),
+        ["entities"] = new JsonArray([.. _entities.Select(e =>
+        {
+            var o = e.Spec.DeepClone().AsObject();
+            if (e.Tag is not null)
+            {
+                o["hs"] = e.Tag.DeepClone();
+            }
+
+            return (JsonNode)o;
+        })]),
     };
 
     public string ToJsonString() => ToJson().ToJsonString(new JsonSerializerOptions { WriteIndented = true });
+
+    public static string N(double v) => v.ToString("0.#", CultureInfo.InvariantCulture);
 }
