@@ -30,6 +30,14 @@ public sealed class LegacyAssetFactAttribute : FactAttribute
     }
 }
 
+public sealed class LegacyAssetTheoryAttribute : TheoryAttribute
+{
+    public LegacyAssetTheoryAttribute()
+    {
+        if (!Fx.HasLegacy) Skip = "NOT_RUN: HS_STEEL_LEGACY attributes are unavailable";
+    }
+}
+
 public class AssetTests
 {
     [LegacyAssetFact]
@@ -56,14 +64,10 @@ public class AssetTests
         Assert.Equal(17.2, row.UnitWeight);
     }
 
-    [Fact]
+    [LegacyAssetFact]
     public void Theoretical_weight_matches_table_weight_independently()
     {
         // Independent oracle: area from our outline x 7.85 vs the HS-STEEL table (which includes fillets).
-        if (!Fx.HasLegacy)
-        {
-            return;
-        }
 
         foreach (var family in new[] { "H-BEAM", "SQ-PIPE", "STEEL-PIPE", "ANGLE" })
         {
@@ -255,15 +259,11 @@ public class DrawingTests
         Assert.Contains(a.Sheets, s => s.Number.StartsWith('M'));
     }
 
-    [Theory]
+    [LegacyAssetTheory]
     [InlineData(".dxf")]
     [InlineData(".dwg")]
     public void Writes_files_that_read_back_with_xdata(string ext)
     {
-        if (!Fx.HasLegacy)
-        {
-            return;
-        }
 
         var ws = Fx.Ws.Value;
         var set = DrawingSet.Generate(Demo.Sample(), ws.Catalog, ws.Splices, SheetFrame.A3Default, DrawingSet.Kinds.Assembly);
