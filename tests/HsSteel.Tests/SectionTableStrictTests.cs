@@ -104,6 +104,38 @@ public class SectionTableStrictTests
         Assert.Equal(2, issue.LineNumber);
     }
 
+    [Theory]
+    [InlineData("")]
+    [InlineData("HEADER\n")]
+    [InlineData("HEADER\n  \n")]
+    public void Empty_required_table_fails_even_with_another_valid_table(string contents)
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "hs-empty-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        try
+        {
+            File.Copy(FixturePath, Path.Combine(directory, "VALID.dat"));
+            File.WriteAllText(Path.Combine(directory, "EMPTY.dat"), contents, SectionTable.Cp949);
+            var report = SectionCatalogValidator.ValidateDirectory(directory, ["VALID.dat", "EMPTY.dat"]);
+            Assert.Equal(SectionCatalogValidationStatus.FAIL, report.Status);
+            Assert.Equal(1.0, report.Coverage);
+            Assert.Equal(2, report.AcceptedRows);
+            Assert.Equal(0, report.QuarantinedRows);
+            var empty = Assert.Single(report.Files, file => file.FileName == "EMPTY.dat");
+            Assert.Equal(0, empty.AcceptedRows);
+            Assert.Equal(64, empty.SourceSha256!.Length);
+            Assert.Contains(empty.Issues, issue => issue.ErrorCode == "EMPTY_TABLE");
+        }
+        finally { Directory.Delete(directory, recursive: true); }
+    }
+
+    [Fact]
+    public void Empty_required_file_set_cannot_pass_vacuously()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            SectionCatalogValidator.ValidateDirectory(Path.GetDirectoryName(FixturePath)!, []));
+    }
+
     [Fact]
     public void Missing_private_assets_report_not_run()
     {
