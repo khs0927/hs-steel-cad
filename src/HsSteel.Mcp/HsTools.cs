@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using HsSteel.Assets;
 using HsSteel.Domain;
 using HsSteel.Drafting;
 using HsSteel.Modeling;
@@ -70,7 +71,7 @@ public sealed class HsTools(Workspace ws)
                 + (first is null ? "." : $": {first.ErrorCode} at line {first.LineNumber}."));
         }
 
-        return SectionCatalogHandoff.Build(report, query, limit).ToJsonString();
+        return HsSteel.Assets.SectionCatalogHandoff.Build(report, query, limit).ToJsonString();
     }
 
     [McpServerTool(Name = "hs_splice_standard", ReadOnly = true, Idempotent = true)]
