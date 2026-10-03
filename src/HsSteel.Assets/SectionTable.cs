@@ -315,7 +315,7 @@ public static class SectionTable
         var first = report.Issues[0];
         throw new FormatException(
             $"Section table {report.Family} contains {report.QuarantinedRows} quarantined row(s); " +
-            $"first issue: line {first.LineNumber} {first.Column} {first.ErrorCode}: {first.RawValue!r}");
+            $"first issue: line {first.LineNumber} {first.Column} {first.ErrorCode}: '{first.RawValue}'");
     }
 }
 
