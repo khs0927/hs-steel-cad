@@ -40,8 +40,9 @@ public static class SectionCatalogValidator
         var required = requiredFiles
             .Select(Path.GetFileName)
             .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Select(name => name!)
             .Distinct(StringComparer.OrdinalIgnoreCase)
-            .Order(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
             .ToArray();
 
         if (required.Length == 0)
