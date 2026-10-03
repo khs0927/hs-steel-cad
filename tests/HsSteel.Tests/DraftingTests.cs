@@ -103,14 +103,10 @@ public class AssetTests
             issue.Column == "M3" && issue.ErrorCode == "NON_FINITE");
     }
 
-    [Fact]
+    [LegacyAssetFact]
     public void Theoretical_weight_matches_table_weight_independently()
     {
         // Independent oracle: area from our outline x 7.85 vs the HS-STEEL table (which includes fillets).
-        if (!Fx.HasLegacy)
-        {
-            return;
-        }
 
         foreach (var family in new[] { "H-BEAM", "SQ-PIPE", "STEEL-PIPE", "ANGLE" })
         {
