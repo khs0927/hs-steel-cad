@@ -1,0 +1,46 @@
+name: HS Steel catalog validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main, "feat/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore HsSteel.sln
+
+      - name: Build
+        run: dotnet build HsSteel.sln -c Release --no-restore
+
+      - name: Strict public section fixture tests
+        run: >-
+          dotnet test tests/HsSteel.Tests/HsSteel.Tests.csproj
+          -c Release --no-build
+          --filter FullyQualifiedName~SectionTableValidationTests
+          --logger "console;verbosity=normal"
+
+      - name: Full test suite
+        run: >-
+          dotnet test tests/HsSteel.Tests/HsSteel.Tests.csproj
+          -c Release --no-build
+          --logger "console;verbosity=normal"
+
+      - name: Hosted CI asset boundary
+        shell: bash
+        run: |
+          echo "Proprietary HS-STEEL legacy assets are not vendored in this repository."
+          echo "Asset-backed capability status on hosted CI is therefore NOT_RUN unless HS_STEEL_LEGACY is explicitly provisioned."
