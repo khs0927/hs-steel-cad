@@ -111,7 +111,7 @@ public class SectionTableStrictTests
         var report = SectionCatalogValidator.ValidateDirectory(path, ["H-BEAM.dat"]);
 
         Assert.Equal(SectionCatalogValidationStatus.NOT_RUN, report.Status);
-        Assert.Equal(["H-BEAM.dat"], report.MissingFiles);
+        Assert.Equal(new[] { "H-BEAM.dat" }, report.MissingFiles);
         Assert.Equal(0, report.ParsedFiles);
         Assert.Equal(0, report.AcceptedRows);
     }
@@ -124,7 +124,7 @@ public class SectionTableStrictTests
             ["H-BEAM-mini.dat", "MISSING.dat"]);
 
         Assert.Equal(SectionCatalogValidationStatus.FAIL, report.Status);
-        Assert.Equal(["MISSING.dat"], report.MissingFiles);
+        Assert.Equal(new[] { "MISSING.dat" }, report.MissingFiles);
         Assert.Equal(0.5, report.Coverage);
     }
 
