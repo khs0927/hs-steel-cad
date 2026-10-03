@@ -83,11 +83,15 @@ public static class SectionCatalogValidator
                 report.ReadRows,
                 report.AcceptedRows,
                 report.QuarantinedRows,
-                report.Issues));
+                report.AcceptedRows == 0
+                    ? report.Issues.Append(new SectionParseIssue(0, "table", "", "EMPTY_TABLE",
+                        "Required section table contains no accepted data rows.", "")).ToArray()
+                    : report.Issues));
         }
 
         var quarantined = files.Sum(file => file.QuarantinedRows);
-        var status = missing.Count == 0 && quarantined == 0
+        var status = missing.Count == 0 && quarantined == 0 &&
+            files.All(file => file.AcceptedRows > 0 && file.Issues.Count == 0)
             ? SectionCatalogValidationStatus.PASS
             : SectionCatalogValidationStatus.FAIL;
         return new(
@@ -101,7 +105,7 @@ public static class SectionCatalogValidator
             quarantined,
             files,
             status == SectionCatalogValidationStatus.PASS
-                ? "All required section tables parsed without quarantine."
-                : "Missing assets or quarantined rows prevent catalog promotion.");
+                ? "All required section tables contain accepted rows and parsed without issues."
+                : "Missing assets, empty tables or parse issues prevent catalog promotion.");
     }
 }
