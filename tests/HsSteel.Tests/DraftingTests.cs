@@ -22,15 +22,19 @@ public static class Fx
     public static ModelResult Sample() => Ws.Value.Build(Demo.Sample());
 }
 
+public sealed class LegacyAssetFactAttribute : FactAttribute
+{
+    public LegacyAssetFactAttribute()
+    {
+        if (!Fx.HasLegacy) Skip = "NOT_RUN: HS_STEEL_LEGACY attributes are unavailable";
+    }
+}
+
 public class AssetTests
 {
-    [Fact]
+    [LegacyAssetFact]
     public void All_section_tables_parse_into_profiles()
     {
-        if (!Fx.HasLegacy)
-        {
-            return;
-        }
 
         var files = Directory.GetFiles(Fx.Attr, "*.dat").Where(f => !f.EndsWith("Project.dat") && !Path.GetFileName(f).StartsWith("SCSS")).ToList();
         Assert.Equal(19, files.Count);
@@ -77,13 +81,9 @@ public class AssetTests
         }
     }
 
-    [Fact]
+    [LegacyAssetFact]
     public void Project_dat_rules_are_read()
     {
-        if (!Fx.HasLegacy)
-        {
-            return;
-        }
 
         var p = ProjectSettings.Load(Path.Combine(Fx.Attr, "Project.dat"));
         Assert.Equal("00공장 신축공사", p["PROJECT"]);
@@ -91,13 +91,9 @@ public class AssetTests
         Assert.Equal((30, 40, 22, 5), (rules.Scallop, rules.EndGauge, rules.HoleDia, rules.WeldGap));
     }
 
-    [Fact]
+    [LegacyAssetFact]
     public void Splice_tables_decode_consistently_on_every_row()
     {
-        if (!Fx.HasLegacy)
-        {
-            return;
-        }
 
         var rows = Directory.GetFiles(Fx.Attr, "SCSS-*.dat").SelectMany(SpliceSpec.Load).ToList();
         Assert.Equal(175, rows.Count);
@@ -148,13 +144,9 @@ public class AssetTests
 
 public class ModelTests
 {
-    [Fact]
+    [LegacyAssetFact]
     public void Sample_frame_resolves_cuts_holes_plates_and_numbering()
     {
-        if (!Fx.HasLegacy)
-        {
-            return;
-        }
 
         var r = Fx.Sample();
         Assert.Empty(r.Warnings);
@@ -177,13 +169,9 @@ public class ModelTests
         Assert.True(r.Assemblies.Count < p.Members.Count);
     }
 
-    [Fact]
+    [LegacyAssetFact]
     public void Splice_puts_holes_40_from_the_end_and_symmetric_plates()
     {
-        if (!Fx.HasLegacy)
-        {
-            return;
-        }
 
         var p = new Project { Name = "SPLICE" };
         p.Members.Add(new MemberDef("A", AssemblyType.Girder, "H400x200x8x13", new V3(0, 0, 0), new V3(5000, 0, 0)));
@@ -242,13 +230,9 @@ public class DrawingTests
         Assert.Equal(["40", "3@60=180", "40"], texts);
     }
 
-    [Fact]
+    [LegacyAssetFact]
     public void Every_sheet_fits_the_frame_and_output_is_deterministic()
     {
-        if (!Fx.HasLegacy)
-        {
-            return;
-        }
 
         var ws = Fx.Ws.Value;
         var a = DrawingSet.Generate(Demo.Sample(), ws.Catalog, ws.Splices, SheetFrame.A3Default);
@@ -292,13 +276,9 @@ public class DrawingTests
         File.Delete(path);
     }
 
-    [Fact]
+    [LegacyAssetFact]
     public void Plan_entities_are_valid_power_cad_create_specs()
     {
-        if (!Fx.HasLegacy)
-        {
-            return;
-        }
 
         var r = Fx.Sample();
         var plan = AssemblyDetail.Generate(r.Assemblies[0]);
@@ -323,13 +303,9 @@ public class DrawingTests
 
 public class McpToolTests
 {
-    [Fact]
+    [LegacyAssetFact]
     public void Frame_project_to_dwg_through_the_tools()
     {
-        if (!Fx.HasLegacy)
-        {
-            return;
-        }
 
         var ws = Workspace.Create(Fx.Legacy, Path.Combine(Path.GetTempPath(), "hs-mcp-" + Guid.NewGuid().ToString("N")));
         var tools = new HsTools(ws);
