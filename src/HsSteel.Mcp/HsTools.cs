@@ -41,6 +41,38 @@ public sealed class HsTools(Workspace ws)
         return Json(rows);
     }
 
+    [McpServerTool(Name = "hs_section_catalog_handoff", ReadOnly = true, Idempotent = true)]
+    [Description("Return one strict source-hashed section family as hs-steel-section-catalog/1. This proves only the selected family file parsed cleanly; it does not claim the whole legacy catalog is verified.")]
+    public string SectionCatalogHandoff(
+        [Description("Family/file stem, e.g. H-BEAM")] string family,
+        [Description("Optional spec substring")] string? query = null,
+        [Description("Maximum returned rows, 1-500")] int limit = 200)
+    {
+        var safeFamily = Path.GetFileNameWithoutExtension(family.Trim());
+        if (string.IsNullOrWhiteSpace(safeFamily)
+            || !string.Equals(safeFamily, family.Trim(), StringComparison.OrdinalIgnoreCase))
+        {
+            throw Fail("family must be a file stem such as H-BEAM.");
+        }
+
+        var path = Path.Combine(ws.AttributesDir, safeFamily + ".dat");
+        if (!File.Exists(path))
+        {
+            throw Fail($"Section family '{safeFamily}' is unavailable in the configured HS-STEEL assets.");
+        }
+
+        var report = SectionTable.LoadDetailed(path);
+        if (!report.IsValid)
+        {
+            var first = report.Issues.FirstOrDefault();
+            throw Fail(
+                $"Section family '{safeFamily}' failed strict validation"
+                + (first is null ? "." : $": {first.ErrorCode} at line {first.LineNumber}."));
+        }
+
+        return SectionCatalogHandoff.Build(report, query, limit).ToJsonString();
+    }
+
     [McpServerTool(Name = "hs_splice_standard", ReadOnly = true, Idempotent = true)]
     [Description("Standard bolted H splice (HS-STEEL SCSS tables) for a section: web/flange plates and bolt layout in HS-STEEL notation.")]
     public string SpliceStandard(string section, [Description("true = column splice (SCSS-C), false = girder (SCSS-G)")] bool column = false, [Description("16, 20 or 22; 0 = first available")] int boltSize = 0)
