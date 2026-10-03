@@ -241,6 +241,20 @@ public sealed class DrawPlan
     /// separate from HS-STEEL tags because Power CAD CreateSpec rejects unknown fields.
     /// Tags remain evidence for later XData persistence and must never be silently dropped.
     /// </summary>
+    private static string CanonicalJson(JsonNode? node) => node switch
+    {
+        null => "null",
+        JsonObject obj => "{" + string.Join(",", obj
+            .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+            .Select(pair => $"{JsonSerializer.Serialize(pair.Key)}:{CanonicalJson(pair.Value)}")) + "}",
+        JsonArray arr => "[" + string.Join(",", arr.Select(CanonicalJson)) + "]",
+        _ => node.ToJsonString(new JsonSerializerOptions { WriteIndented = false }),
+    };
+
+    private static string Digest(JsonNode node) =>
+        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(CanonicalJson(node))))
+            .ToLowerInvariant();
+
     public JsonObject ToPowerCadHandoff()
     {
         var entities = new JsonArray();
@@ -267,9 +281,7 @@ public sealed class DrawPlan
             ["requires_live_document_binding"] = true,
             ["tags_require_xdata_persistence"] = true,
         };
-        var bytes = Encoding.UTF8.GetBytes(
-            payload.ToJsonString(new JsonSerializerOptions { WriteIndented = false }));
-        payload["contract_digest"] = Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
+        payload["contract_digest"] = Digest(payload);
         return payload;
     }
 
