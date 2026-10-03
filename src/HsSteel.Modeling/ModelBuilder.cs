@@ -90,7 +90,50 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
     {
         var rules = project.Rules ?? new DetailRules();
         var result = new ModelResult { Project = project, Rules = rules };
-        var work = project.Members.ToDictionary(m => m.Id, m => new Work(m, catalog.Resolve(m.Section), MemberFrame.Of(m)));
+        var work = new Dictionary<string, Work>(StringComparer.Ordinal);
+        foreach (var m in project.Members)
+        {
+            // Bad members are reported and left out instead of aborting the whole build: a duplicate
+            // id used to throw from ToDictionary, an unknown section threw FormatException, and a
+            // zero-length axis produced NaN frames that were written into the DXF/DWG output.
+            if (string.IsNullOrWhiteSpace(m.Id))
+            {
+                result.Warnings.Add($"member with an empty id ({m.Section}) skipped.");
+                continue;
+            }
+
+            if (work.ContainsKey(m.Id))
+            {
+                result.Warnings.Add($"{m.Id}: duplicate member id; the later definition is ignored.");
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(m.Section))
+            {
+                result.Warnings.Add($"{m.Id}: no section given; member skipped.");
+                continue;
+            }
+
+            var length = m.AxisLength;
+            if (!double.IsFinite(length) || length < 1e-6)
+            {
+                result.Warnings.Add($"{m.Id}: start and end coincide or are not finite; member skipped.");
+                continue;
+            }
+
+            Profile profile;
+            try
+            {
+                profile = catalog.Resolve(m.Section);
+            }
+            catch (FormatException ex)
+            {
+                result.Warnings.Add($"{m.Id}: {ex.Message} Member skipped.");
+                continue;
+            }
+
+            work[m.Id] = new Work(m, profile, MemberFrame.Of(m));
+        }
 
         foreach (var (id, w) in work)
         {

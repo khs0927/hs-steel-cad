@@ -10,8 +10,12 @@ public static class LayoutPlan
     public static IEnumerable<DrawPlan> Generate(ModelResult model, SheetFrame frame)
     {
         var project = model.Project;
-        var horizontal = project.Members.Where(m => Math.Abs((m.End - m.Start).Unit.Z) < 0.2).ToList();
-        var columns = project.Members.Where(m => Math.Abs((m.End - m.Start).Unit.Z) >= 0.2).ToList();
+
+        // Only members the model builder accepted (it skips duplicates, zero-length axes and unknown
+        // sections with a warning); anything else has no profile and no mark.
+        var built = project.Members.Where(m => model.Profiles.ContainsKey(m.Id)).DistinctBy(m => m.Id).ToList();
+        var horizontal = built.Where(m => Math.Abs((m.End - m.Start).Unit.Z) < 0.2).ToList();
+        var columns = built.Where(m => Math.Abs((m.End - m.Start).Unit.Z) >= 0.2).ToList();
         var levels = horizontal.GroupBy(m => Math.Round((m.Start.Z + m.End.Z) / 2 / 10) * 10).OrderBy(g => g.Key).ToList();
         if (levels.Count == 0 && columns.Count > 0)
         {
