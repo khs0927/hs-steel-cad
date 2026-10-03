@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -233,6 +235,43 @@ public sealed class DrawPlan
     };
 
     public string ToJsonString() => ToJson().ToJsonString(new JsonSerializerOptions { WriteIndented = true });
+
+    /// <summary>
+    /// Versioned, non-authorizing handoff for Power CAD. Entity create specs are kept
+    /// separate from HS-STEEL tags because Power CAD CreateSpec rejects unknown fields.
+    /// Tags remain evidence for later XData persistence and must never be silently dropped.
+    /// </summary>
+    public JsonObject ToPowerCadHandoff()
+    {
+        var entities = new JsonArray();
+        foreach (var entity in _entities)
+        {
+            entities.Add(new JsonObject
+            {
+                ["spec"] = entity.Spec.DeepClone(),
+                ["tag"] = entity.Tag?.DeepClone(),
+            });
+        }
+
+        var payload = new JsonObject
+        {
+            ["schema"] = "hs-steel-draw-plan/1",
+            ["producer"] = "khs0927/hs-steel-cad",
+            ["title"] = Title,
+            ["units"] = "mm",
+            ["scale"] = Scale,
+            ["meta"] = Meta.DeepClone(),
+            ["entities"] = entities,
+            ["execution_authorized"] = false,
+            ["may_execute_mutation"] = false,
+            ["requires_live_document_binding"] = true,
+            ["tags_require_xdata_persistence"] = true,
+        };
+        var bytes = Encoding.UTF8.GetBytes(
+            payload.ToJsonString(new JsonSerializerOptions { WriteIndented = false }));
+        payload["contract_digest"] = Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
+        return payload;
+    }
 
     public static string N(double v) => v.ToString("0.#", CultureInfo.InvariantCulture);
 }
