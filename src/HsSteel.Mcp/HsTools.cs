@@ -253,27 +253,37 @@ public sealed class HsTools(Workspace ws)
     }
 
     [McpServerTool(Name = "hs_draw_plan", ReadOnly = true)]
-    [Description("Return one sheet (or one view) as a power-cad draw plan: entities in cad_create JSON plus HS-STEEL tags. "
-        + "Feed the entities to power-cad (create_many) to draw them live in AutoCAD 2027. sheet = dwg number like 'A-001'; or kind+mark for a single view.")]
-    public string DrawPlanOf(string name, string? sheet = null, [Description("assembly | part | plate")] string? kind = null, string? mark = null)
+    [Description("Legacy HS-STEEL draw-plan JSON. Entity rows include an 'hs' tag field, so this payload is for inspection/backward compatibility and must not be sent directly to Power CAD cad_create.")]
+    public string DrawPlanOf(string name, string? sheet = null, [Description("assembly | part | plate")] string? kind = null, string? mark = null) =>
+        ResolveDrawPlan(name, sheet, kind, mark).ToJson().ToJsonString();
+
+    [McpServerTool(Name = "hs_draw_plan_handoff", ReadOnly = true, Idempotent = true)]
+    [Description("Return hs-steel-draw-plan/1 for Power CAD. Each row separates the strict cad_create 'spec' from the HS-STEEL 'tag'. The handoff is read-only provenance, never mutation authorization.")]
+    public string DrawPlanHandoff(
+        string name,
+        string? sheet = null,
+        [Description("assembly | part | plate")] string? kind = null,
+        string? mark = null) =>
+        ResolveDrawPlan(name, sheet, kind, mark).ToPowerCadHandoff().ToJsonString();
+
+    private DrawPlan ResolveDrawPlan(string name, string? sheet, string? kind, string? mark)
     {
         var p = ws.Load(name);
         if (sheet is not null)
         {
             var set = ws.Drawings(p, DrawingSet.Kinds.All);
-            var s = set.Sheets.FirstOrDefault(x => x.Number == sheet) ?? throw Fail($"Sheet {sheet} not found.");
-            return s.Plan.ToJson().ToJsonString();
+            return set.Sheets.FirstOrDefault(x => x.Number == sheet)?.Plan
+                ?? throw Fail($"Sheet {sheet} not found.");
         }
 
         var r = ws.Build(p);
-        DrawPlan plan = kind switch
+        return kind switch
         {
             "assembly" => AssemblyDetail.Generate(r.Assemblies.FirstOrDefault(a => a.Mark == mark) ?? throw Fail($"Assembly {mark} not found.")),
             "part" => PartDetail.Generate(r.ShapeParts.FirstOrDefault(a => a.Mark == mark) ?? throw Fail($"Part {mark} not found.")),
             "plate" => PlateDetail.Generate(r.PlateParts.FirstOrDefault(a => a.Mark == mark) ?? throw Fail($"Plate {mark} not found.")),
             _ => throw Fail("Give sheet, or kind (assembly|part|plate) and mark."),
         };
-        return plan.ToJson().ToJsonString();
     }
 
     public static DrawingSet.Kinds ParseKinds(string[]? kinds)
