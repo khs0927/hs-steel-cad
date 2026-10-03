@@ -59,7 +59,7 @@ public static class SectionCatalogHandoff
             {
                 ["spec"] = row.Spec,
                 ["shape"] = row.Shape,
-                ["dimensions_mm"] = new JsonArray(row.M.Select(JsonValue.Create<double>).ToArray()),
+                ["dimensions_mm"] = new JsonArray(row.M.Select(value => (JsonNode?)JsonValue.Create(value)).ToArray()),
                 ["unit_weight_kg_m"] = row.UnitWeight,
                 ["paint_area_m2_m"] = row.PaintArea,
                 ["aci_color"] = row.Color,
