@@ -19,6 +19,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Fixtures\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\HsSteel.Drafting\HsSteel.Drafting.csproj" />
     <ProjectReference Include="..\..\src\HsSteel.Mcp\HsSteel.Mcp.csproj" />
   </ItemGroup>
