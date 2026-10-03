@@ -34,3 +34,20 @@ Section parser가 공개 fixture를 PASS해도 실제 HS-STEEL catalog가 VERIFI
 - private asset missing: native asset validation NOT_RUN
 - private asset present + all required files + quarantine 0: asset parse candidate PASS
 - modeling / drawing generation: 별도 capability이며 이 결과로 승격하지 않음
+
+
+## Cross-repository section catalog handoff
+
+`hs_section_catalog_handoff` emits `hs-steel-section-catalog/1` only from a
+specific source family file that has been parsed with `SectionTable.LoadDetailed`.
+The handoff includes the source file SHA-256, encoding, read/accepted/quarantined
+counts, bounded rows, a canonical contract digest and non-authorizing flags.
+
+The contract deliberately carries
+`capability_scope=single_family_file` and
+`global_legacy_catalog_verified=false`. Passing the public fixture and the
+handoff contract tests therefore proves the parser/contract behavior, not that
+the private full legacy asset set has been validated.
+
+Power CAD must revalidate the contract digest, row counts, dimensions, unit
+weight, paint area and ACI color before using the rows as read-only planning data.
