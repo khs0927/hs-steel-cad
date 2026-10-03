@@ -45,7 +45,7 @@ native/HsSteel.Arx  C++ ObjectARX 커스텀 엔티티 HsMember (P5)
 
 | 지금(별도 저장소) | 병합 후 |
 |---|---|
-| `DrawPlan` 엔티티 = `cad_create` JSON | 같은 JSON을 power-cad 디스패처로 전송 |
+| `DrawPlan` 내부 spec = `cad_create` JSON, HS tag는 별도 | `hs_draw_plan_handoff`의 `spec`만 Power CAD create plan으로 전달하고 `tag`는 XData 증거로 별도 보존 |
 | `HsSteel.Mcp` 독립 서버 | 툴 클래스를 `PowerCad.Server`에 등록 (같은 MCP SDK 2.2) |
 | `DxfExporter` (ACadSharp) | `PowerCad.Dxf` 백엔드로 승격 |
 | — | power-cad에 추가 필요: XData 읽기/쓰기, 대량 생성(`create_many`, 현재 20단계 한도), 블록 속성 읽기, TABLE 생성 |
@@ -82,3 +82,16 @@ native/HsSteel.Arx  C++ ObjectARX 커스텀 엔티티 HsMember (P5)
 | D5 | 원본 블록 114개 라이브러리화(ACadSharp 읽기), 원본 `.Mxx` 가져오기 |
 | M | power-cad 병합 (XData, create_many 추가 후) |
 | P5 | C++ HsMember 커스텀 엔티티 |
+
+
+### Power CAD handoff safety
+
+`hs_draw_plan`은 기존 호환용이며 각 엔티티에 `hs` 태그가 포함되므로 Power CAD
+`cad_create`에 직접 전달하지 않는다. 신규 `hs_draw_plan_handoff`는
+`hs-steel-draw-plan/1`을 반환하며 `spec`과 `tag`를 분리한다.
+
+handoff는 canonical JSON SHA-256 `contract_digest`를 포함하고
+`execution_authorized=false`, `may_execute_mutation=false`이다. Power CAD는 이
+계약을 검증하고 create steps로 준비할 뿐이며, 실제 수정은 별도의 live document
+binding, snapshot, plan preview, 승인, commit 절차를 거친다. 현재 XData 쓰기는
+아직 구현되지 않았으므로 tag를 조용히 버리지 않고 pending evidence로 유지한다.
