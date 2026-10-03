@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using HsSteel.Assets;
 using HsSteel.Domain;
 using HsSteel.Drafting;
 using HsSteel.Modeling;
@@ -24,6 +25,10 @@ public sealed class HsTools(Workspace ws)
     private static McpException Fail(string message) => new(message);
 
     // ------------------------------------------------------------------ catalogue
+
+    [McpServerTool(Name = "hs_catalog_validation", ReadOnly = true, Idempotent = true)]
+    [Description("Validate the HS-STEEL section catalogue source files without modifying them. Returns PASS, FAIL or NOT_RUN plus file SHA-256, CP949 encoding, accepted/quarantined row counts and diagnostics.")]
+    public string CatalogValidation() => Json(SectionCatalogValidation.ValidateDirectory(ws.AttributesDir));
 
     [McpServerTool(Name = "hs_section_search", ReadOnly = true, Idempotent = true)]
     [Description("Search the HS-STEEL section tables (H-BEAM, BH, ANGLE, CHANNEL, C-CHANNEL, SQ-PIPE, STEEL-PIPE, T-BAR, Z-BAR, FLAT-BAR, ROUND-BAR, PLATE, ...). "
