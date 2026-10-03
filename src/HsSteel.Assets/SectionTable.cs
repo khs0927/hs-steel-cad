@@ -91,8 +91,7 @@ public static class SectionTable
         var issues = new List<SectionParseIssue>();
         var readRows = 0;
         var quarantinedRows = 0;
-        var lines = text.Replace("", "", StringComparison.Ordinal).Split('
-');
+        var lines = text.Replace("\r", "", StringComparison.Ordinal).Split('\n');
 
         for (var index = 1; index < lines.Length; index++)
         {
@@ -327,11 +326,10 @@ public static class ProjectSettings
     public static IReadOnlyDictionary<string, string> Parse(string text)
     {
         var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var raw in text.Split('
-'))
+        foreach (var raw in text.Split('\n'))
         {
             var line = raw.Trim();
-            if (!line.StartsWith("("", StringComparison.Ordinal) || !line.EndsWith(')'))
+            if (!line.StartsWith("(\"", StringComparison.Ordinal) || !line.EndsWith(')'))
             {
                 continue;
             }
