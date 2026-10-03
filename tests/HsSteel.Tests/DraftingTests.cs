@@ -53,6 +53,39 @@ public class AssetTests
     }
 
     [Fact]
+    public void Malformed_section_numbers_are_quarantined_instead_of_becoming_zero()
+    {
+        const string text =
+            "SPEC SHAPE M2 M3 M4 M5 M6 M7 WEIGHT PAINT COLOR FAMILY\n" +
+            "H100x100x6x8 H 100 BROKEN 6 8 10 0 17.2 0.75 3 H-BEAM\n";
+
+        var report = SectionTable.ParseDetailed(text, "H-BEAM");
+
+        Assert.False(report.IsValid);
+        Assert.Empty(report.Rows);
+        Assert.Equal(1, report.QuarantinedRows);
+        Assert.Contains(report.Issues, issue =>
+            issue.Column == "M3" &&
+            issue.ErrorCode == "NUMERIC_FORMAT" &&
+            issue.RawValue == "BROKEN");
+        Assert.Throws<FormatException>(() => SectionTable.Parse(text, "H-BEAM"));
+    }
+
+    [Fact]
+    public void Non_finite_section_numbers_are_rejected()
+    {
+        const string text =
+            "SPEC SHAPE M2 M3 M4 M5 M6 M7 WEIGHT PAINT COLOR FAMILY\n" +
+            "H100x100x6x8 H 100 NaN 6 8 10 0 17.2 0.75 3 H-BEAM\n";
+
+        var report = SectionTable.ParseDetailed(text, "H-BEAM");
+
+        Assert.Empty(report.Rows);
+        Assert.Contains(report.Issues, issue =>
+            issue.Column == "M3" && issue.ErrorCode == "NON_FINITE");
+    }
+
+    [Fact]
     public void Theoretical_weight_matches_table_weight_independently()
     {
         // Independent oracle: area from our outline x 7.85 vs the HS-STEEL table (which includes fillets).
