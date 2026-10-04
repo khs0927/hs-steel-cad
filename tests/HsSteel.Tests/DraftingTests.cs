@@ -17,6 +17,11 @@ public static class Fx
 
     public static bool HasLegacy => Directory.Exists(Attr);
 
+    /// <summary>Skip reason for tests that need the licensed HS-STEEL assets (not in the repo, so CI skips them).</summary>
+    public static string LegacySkipReason =>
+        $"NOT_RUN: legacy HS-STEEL assets not found at '{Attr}'. These licensed files are not in the repository; "
+        + "set HS_STEEL_LEGACY to an HS-STEEL install folder that contains attributes/*.dat to run this test.";
+
     public static readonly Lazy<Workspace> Ws = new(() => Workspace.Create(Legacy, Path.Combine(Path.GetTempPath(), "hs-tests-" + Guid.NewGuid().ToString("N"))));
 
     public static ModelResult Sample() => Ws.Value.Build(Demo.Sample());
@@ -28,7 +33,7 @@ public sealed class LegacyAssetFactAttribute : FactAttribute
     {
         if (!Fx.HasLegacy)
         {
-            Skip = "NOT_RUN: HS_STEEL_LEGACY attributes are unavailable";
+            Skip = Fx.LegacySkipReason;
         }
     }
 }
@@ -39,7 +44,7 @@ public sealed class LegacyAssetTheoryAttribute : TheoryAttribute
     {
         if (!Fx.HasLegacy)
         {
-            Skip = "NOT_RUN: HS_STEEL_LEGACY attributes are unavailable";
+            Skip = Fx.LegacySkipReason;
         }
     }
 }

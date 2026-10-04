@@ -24,6 +24,29 @@ public sealed class HsTools(Workspace ws)
 
     private static McpException Fail(string message) => new(message);
 
+    private static V3 Point(string what, double[]? xyz)
+    {
+        if (xyz is null || xyz.Length < 2 || xyz.Length > 3 || !xyz.All(double.IsFinite))
+        {
+            throw Fail($"'{what}' must be [x,y] or [x,y,z] with finite numbers (mm).");
+        }
+
+        return new V3(xyz[0], xyz[1], xyz.Length > 2 ? xyz[2] : 0);
+    }
+
+    private static void RequireLengths(string what, double[]? values, bool allowEmpty)
+    {
+        if (values is null || (!allowEmpty && values.Length == 0))
+        {
+            throw Fail($"'{what}' needs at least one value (mm).");
+        }
+
+        if (!values.All(v => double.IsFinite(v) && v > 0))
+        {
+            throw Fail($"'{what}' values must be positive finite lengths in mm.");
+        }
+    }
+
     // ------------------------------------------------------------------ catalogue
 
     [McpServerTool(Name = "hs_section_search", ReadOnly = true, Idempotent = true)]
@@ -131,6 +154,9 @@ public sealed class HsTools(Workspace ws)
             throw Fail($"Project '{name}' exists; pass overwrite=true to replace it.");
         }
 
+        RequireLengths(nameof(spansX), spansX, allowEmpty: true);
+        RequireLengths(nameof(spansY), spansY, allowEmpty: true);
+        RequireLengths(nameof(storeys), storeys, allowEmpty: false);
         var p = ProjectTemplates.Frame(name, new FrameSpec(spansX, spansY, storeys, column, girderX, girderY, maxColumnPiece, subBeams, subBeam));
         p.Date = date;
         ws.Save(p);
@@ -145,7 +171,12 @@ public sealed class HsTools(Workspace ws)
     [Description("Replace a project with the given JSON (same schema as hs_project_get). Use for bulk edits.")]
     public string ProjectPut(string json)
     {
-        var p = Project.FromJson(json);
+        var p = Workspace.Parse(json);
+        if (string.IsNullOrWhiteSpace(p.Name))
+        {
+            throw Fail("Project JSON needs a non-empty \"name\".");
+        }
+
         ws.Save(p);
         return Summary(p, ws.Build(p));
     }
@@ -171,11 +202,37 @@ public sealed class HsTools(Workspace ws)
         + "Points are [x,y,z] in mm; grid names can be used instead of numbers via hs_project_put.")]
     public string MemberAdd(string name, string id, string type, string section, double[] start, double[] end, double roll = 0, string? material = null)
     {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            throw Fail("Member id must not be empty.");
+        }
+
+        // Enum.Parse alone also accepts numeric strings such as "99" and throws an ArgumentException
+        // the client never sees; resolve against the defined names only.
+        var key = (type ?? "").Replace("_", "").Trim();
+        var typeName = Enum.GetNames<AssemblyType>().FirstOrDefault(n => string.Equals(n, key, StringComparison.OrdinalIgnoreCase))
+            ?? throw Fail($"Unknown member type '{type}'. Use one of: {string.Join(", ", Enum.GetNames<AssemblyType>())}.");
+        var t = Enum.Parse<AssemblyType>(typeName);
+
+        try
+        {
+            ws.Catalog.Resolve(section); // validates the spec
+        }
+        catch (FormatException ex)
+        {
+            throw Fail(ex.Message);
+        }
+
+        var a = Point(nameof(start), start);
+        var b = Point(nameof(end), end);
+        if ((b - a).Length < 1e-6)
+        {
+            throw Fail($"Member '{id}' has zero length (start == end).");
+        }
+
         var p = ws.Load(name);
-        var t = Enum.Parse<AssemblyType>(type.Replace("_", ""), ignoreCase: true);
-        ws.Catalog.Resolve(section); // validates the spec
         p.Members.RemoveAll(m => m.Id == id);
-        p.Members.Add(new MemberDef(id, t, section, new V3(start[0], start[1], start.Length > 2 ? start[2] : 0), new V3(end[0], end[1], end.Length > 2 ? end[2] : 0), roll, material));
+        p.Members.Add(new MemberDef(id, t, section, a, b, roll, material));
         ws.Save(p);
         return Json(new { members = p.Members.Count });
     }
@@ -206,7 +263,17 @@ public sealed class HsTools(Workspace ws)
     public string ConnectionAdd(string name, string connectionJson)
     {
         var p = ws.Load(name);
-        var c = JsonSerializer.Deserialize<ConnectionDef>(connectionJson, Project.Json) ?? throw Fail("Empty connection.");
+        ConnectionDef? parsed;
+        try
+        {
+            parsed = JsonSerializer.Deserialize<ConnectionDef>(connectionJson, Project.Json);
+        }
+        catch (Exception ex) when (ex is JsonException or NotSupportedException)
+        {
+            throw Fail($"Connection JSON is not valid: {ex.Message}");
+        }
+
+        var c = parsed ?? throw Fail("Empty connection.");
         p.Connections.RemoveAll(x => x.Id == c.Id);
         p.Connections.Add(c);
         ws.Save(p);

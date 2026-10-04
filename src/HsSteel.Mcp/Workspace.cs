@@ -2,6 +2,8 @@ using HsSteel.Assets;
 using HsSteel.Domain;
 using HsSteel.Drafting;
 using HsSteel.Modeling;
+using System.Text.Json;
+using ModelContextProtocol;
 
 namespace HsSteel.Mcp;
 
@@ -72,10 +74,25 @@ public sealed class Workspace
         var path = PathOf(project);
         if (!File.Exists(path))
         {
-            throw new FileNotFoundException($"Project '{project}' does not exist. Create it with hs_project_new or hs_project_frame.", path);
+            // McpException: the MCP SDK only forwards McpException messages to the client; any other
+            // exception becomes a generic "An error occurred invoking ..." without the hint.
+            throw new McpException($"Project '{project}' does not exist. Create it with hs_project_new or hs_project_frame.");
         }
 
-        return Project.FromJson(File.ReadAllText(path));
+        return Parse(File.ReadAllText(path), $"Project file '{path}'");
+    }
+
+    /// <summary>Deserialises project JSON, turning schema errors into a client-visible <see cref="McpException"/>.</summary>
+    public static Project Parse(string json, string what = "Project JSON")
+    {
+        try
+        {
+            return Project.FromJson(json);
+        }
+        catch (Exception ex) when (ex is JsonException or InvalidDataException or NotSupportedException)
+        {
+            throw new McpException($"{what} is not valid: {ex.Message}");
+        }
     }
 
     public void Save(Project p)

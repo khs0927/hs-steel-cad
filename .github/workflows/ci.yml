@@ -1,14 +1,22 @@
 name: CI
 
+# Single workflow (previously duplicated by validation.yml): build + test on Linux and Windows.
+# Tests that need the licensed HS-STEEL assets skip with a NOT_RUN reason (see the test log and the
+# job summary); run them locally with HS_STEEL_LEGACY set.
+
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, "feat/strict-section-catalog-*"]
   pull_request:
     branches: [main]
 
 permissions:
   contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   dotnet:
@@ -17,11 +25,29 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "10.0.x"
-      - run: dotnet restore HsSteel.sln
-      - run: dotnet build HsSteel.sln -c Release --no-restore
-      - run: dotnet test tests/HsSteel.Tests/HsSteel.Tests.csproj -c Release --no-build --logger "console;verbosity=normal"
+      - name: Restore
+        run: dotnet restore HsSteel.sln
+      - name: Build
+        run: dotnet build HsSteel.sln -c Release --no-restore
+      - name: Test
+        shell: bash
+        run: |
+          set -o pipefail
+          dotnet test tests/HsSteel.Tests/HsSteel.Tests.csproj -c Release --no-build --logger "console;verbosity=normal" | tee test-output.txt
+      - name: Summarize skipped legacy-asset tests
+        if: always()
+        shell: bash
+        run: |
+          skipped=$(grep -c "NOT_RUN: legacy HS-STEEL assets" test-output.txt || true)
+          {
+            echo "### ${{ matrix.os }}"
+            grep -E "Total tests|Passed:|Failed:|Skipped:" test-output.txt | sed "s/^ */- /" || true
+            echo ""
+            echo "Legacy-asset tests skipped (NOT_RUN, HS_STEEL_LEGACY not available on CI): ${skipped}"
+          } >> "$GITHUB_STEP_SUMMARY"
