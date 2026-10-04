@@ -249,8 +249,27 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
         var bp = beam.Profile;
         var sp = support.Profile;
         var spec = splices.Find(bp.Spec, false, t.BoltSize);
-        var rowsAxis = spec?.WebY ?? DefaultRows(bp);
-        var boltDia = spec?.WebBoltDia ?? 20;
+        var boltDia = spec?.WebBoltDia ?? (t.BoltSize > 0 ? t.BoltSize : 20);
+        BoltAxis rowsAxis;
+        IReadOnlyList<string> rowFlags;
+        if (spec?.WebY is { } standardRows)
+        {
+            rowsAxis = standardRows;
+            rowFlags = ShearTabLayout.Check(bp, rowsAxis);
+        }
+        else
+        {
+            // No splice-standard entry: rows that fit the clear web with code edge distances (ShearTabLayout).
+            var layout = ShearTabLayout.Default(bp, boltDia);
+            rowsAxis = layout.Rows;
+            rowFlags = layout.Flags;
+        }
+
+        foreach (var flag in rowFlags)
+        {
+            result.Warnings.Add($"{t.Id}: beam {beam.Def.Id} ({bp.Spec}): {flag}");
+        }
+
         var hole = boltDia + 2;
         var plateT = t.PlateT > 0 ? t.PlateT : spec?.WebPlateT ?? 9;
         var gap = rules.ConnectionGap;
@@ -338,13 +357,6 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
         var plate = PlatePart.Rect(c.Thickness, p.Width, p.Depth, [], "CAP", rules.Material);
         var x = c.End == MemberEnd.Start ? -c.Thickness : m.Def.AxisLength;
         m.Plates.Add((plate, new Placement(PlateOrientation.End, new V3(x, 0, 0), 1, 1), true));
-    }
-
-    private static BoltAxis DefaultRows(Profile p)
-    {
-        var clear = p.Depth - (2 * p.Tf) - 80;
-        var n = Math.Max(1, (int)Math.Floor(clear / 70));
-        return BoltAxis.Parse($"40+{n}A70+40");
     }
 
     /// <summary>Hole positions of a per-side axis mirrored about the centre of a plate of length <paramref name="total"/>.</summary>
