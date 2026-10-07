@@ -4,7 +4,10 @@ using System.Text.Json.Serialization;
 
 namespace HsSteel.Knowledge.Rules;
 
-public sealed record RuleEvidence(string Source, string Note);
+public sealed record RuleEvidence(string Source, string Note, string Locator = "");
+
+/// <summary>How a rule was checked: method (numeric-fit, cross-source, identity-check, recompute, geometry, code-read, doc, none), result (pass|partial|fail|unverified).</summary>
+public sealed record RuleVerification(string Method, string Result, string Detail);
 
 public sealed record SteelRule(
     string Id,
@@ -14,7 +17,19 @@ public sealed record SteelRule(
     IReadOnlyList<RuleEvidence> Evidence,
     IReadOnlyList<string> EngineRefs,
     IReadOnlyList<string> Tags,
-    JsonElement? Value = null);
+    JsonElement? Value = null,
+    string Trust = "stated",
+    JsonElement? Formula = null,
+    string? Rationale = null,
+    string? InferredBy = null,
+    RuleVerification? Verification = null,
+    string EngineStatus = "n/a",
+    string? EngineNote = null,
+    IReadOnlyList<string>? Governs = null)
+{
+    /// <summary>verified = a numeric/cross-source check passed; stated = single source as written; inferred = model interpretation (see Rationale).</summary>
+    public static readonly IReadOnlyList<string> TrustLevels = ["verified", "stated", "inferred"];
+}
 
 public sealed class RulesCatalog
 {
@@ -107,7 +122,8 @@ public sealed class RulesCatalog
         foreach (var el in arr.EnumerateArray())
         {
             var evidence = el.GetProperty("evidence").EnumerateArray()
-                .Select(e => new RuleEvidence(e.GetProperty("source").GetString()!, e.GetProperty("note").GetString() ?? ""))
+                .Select(e => new RuleEvidence(e.GetProperty("source").GetString()!, e.GetProperty("note").GetString() ?? "",
+                    e.TryGetProperty("locator", out var loc) ? loc.GetString() ?? "" : ""))
                 .ToList();
             var engine = el.TryGetProperty("engine_refs", out var er)
                 ? er.EnumerateArray().Select(x => x.GetString()!).ToList()
@@ -116,16 +132,29 @@ public sealed class RulesCatalog
                 ? tg.EnumerateArray().Select(x => x.GetString()!).ToList()
                 : [];
             JsonElement? value = el.TryGetProperty("value", out var v) ? v.Clone() : null;
+            JsonElement? formula = el.TryGetProperty("formula", out var f) ? f.Clone() : null;
+            RuleVerification? ver = el.TryGetProperty("verification", out var vr)
+                ? new RuleVerification(Str(vr, "method") ?? "none", Str(vr, "result") ?? "unverified", Str(vr, "detail") ?? "")
+                : null;
+            var governs = el.TryGetProperty("governs", out var gv) ? gv.EnumerateArray().Select(x => x.GetString()!).ToList() : null;
             list.Add(new SteelRule(
                 el.GetProperty("id").GetString()!,
                 el.GetProperty("title").GetString()!,
                 el.GetProperty("statement").GetString()!,
                 el.GetProperty("category").GetString()!,
-                evidence, engine, tags, value));
+                evidence, engine, tags, value,
+                Str(el, "trust") ?? "stated", formula, Str(el, "rationale"), Str(el, "inferred_by"), ver,
+                Str(el, "engine_status") ?? "n/a", Str(el, "engine_note"), governs));
         }
 
         return new RulesCatalog(new ReadOnlyCollection<SteelRule>(list));
     }
+
+    private static string? Str(JsonElement el, string name) =>
+        el.TryGetProperty(name, out var p) && p.ValueKind == JsonValueKind.String ? p.GetString() : null;
+
+    public IReadOnlyList<SteelRule> ByTrust(string trust) =>
+        all.Where(r => r.Trust.Equals(trust, StringComparison.OrdinalIgnoreCase)).ToList();
 
     private static string? TryReadEmbedded()
     {

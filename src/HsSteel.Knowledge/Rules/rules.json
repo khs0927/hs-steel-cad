@@ -1,6 +1,6 @@
 {
-  "schema": "hs-steel-rules/1",
-  "count": 100,
+  "schema": "hs-steel-rules/2",
+  "count": 135,
   "rules": [
     {
       "id": "PD-001",
@@ -10,6 +10,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=WDGAP",
           "note": "(\"WDGAP\" 5)"
         }
       ],
@@ -20,7 +21,14 @@
         "project.dat",
         "wdgap"
       ],
-      "value": 5
+      "value": 5,
+      "trust": "stated",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Single source (Project.dat key); meaning evident from key name."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "PD-002",
@@ -30,6 +38,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=SCALLOP",
           "note": "(\"SCALLOP\" 30)"
         }
       ],
@@ -40,7 +49,14 @@
         "project.dat",
         "scallop"
       ],
-      "value": 30
+      "value": 30,
+      "trust": "stated",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Single source (Project.dat key); meaning evident from key name."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "PD-003",
@@ -50,6 +66,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=RCCR",
           "note": "(\"RCCR\" 30)"
         }
       ],
@@ -58,7 +75,16 @@
         "project.dat",
         "rccr"
       ],
-      "value": 30
+      "value": 30,
+      "trust": "inferred",
+      "rationale": "RCCR meaning (column corner radius/clearance) is guessed from the key name; no DCL label or manual page found.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-004",
@@ -68,6 +94,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=SHOLE",
           "note": "(\"SHOLE\" 22)"
         }
       ],
@@ -78,7 +105,14 @@
         "project.dat",
         "shole"
       ],
-      "value": 22
+      "value": 22,
+      "trust": "verified",
+      "verification": {
+        "method": "cross-source",
+        "result": "pass",
+        "detail": "SHOLE 22 = M20 + 2 per BT-001 hole rule and DetailRules default (DR-003); M20 is the dominant SCSS bolt (162/350 .dat bolt lines)."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "PD-005",
@@ -88,6 +122,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=ENDGAGE",
           "note": "(\"ENDGAGE\" 40)"
         }
       ],
@@ -98,7 +133,14 @@
         "project.dat",
         "endgage"
       ],
-      "value": 40
+      "value": 40,
+      "trust": "verified",
+      "verification": {
+        "method": "cross-source",
+        "result": "pass",
+        "detail": "ENDGAGE 40 equals 단중.xlsx!SCSS edge columns AA/AE/AH = 40 on 324/350 rows."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "PD-006",
@@ -108,6 +150,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=HOLELEN",
           "note": "(\"HOLELEN\" 60)"
         }
       ],
@@ -116,7 +159,16 @@
         "project.dat",
         "holelen"
       ],
-      "value": 60
+      "value": 60,
+      "trust": "inferred",
+      "rationale": "HOLELEN read as slotted-hole length from the key name only.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-007",
@@ -126,6 +178,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=stffsqgage",
           "note": "(\"stffsqgage\" \"60\")"
         }
       ],
@@ -134,7 +187,16 @@
         "project.dat",
         "stffsqgage"
       ],
-      "value": "60"
+      "value": "60",
+      "trust": "inferred",
+      "rationale": "stffsqgage read as stiffener square gauge from the key name only.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-008",
@@ -144,6 +206,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=STFFGAP",
           "note": "(\"STFFGAP\" 0)"
         }
       ],
@@ -152,7 +215,16 @@
         "project.dat",
         "stffgap"
       ],
-      "value": 0
+      "value": 0,
+      "trust": "inferred",
+      "rationale": "STFFGAP semantics (toggle vs value) not confirmed by any dialog/manual.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-009",
@@ -162,6 +234,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=STFFIN",
           "note": "(\"STFFIN\" 0)"
         }
       ],
@@ -170,7 +243,16 @@
         "project.dat",
         "stffin"
       ],
-      "value": 0
+      "value": 0,
+      "trust": "inferred",
+      "rationale": "STFFIN semantics (toggle vs value) not confirmed by any dialog/manual.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-010",
@@ -180,6 +262,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=SWS",
           "note": "(\"SWS\" \"SS400\")"
         }
       ],
@@ -190,7 +273,15 @@
         "project.dat",
         "sws"
       ],
-      "value": "SS400"
+      "value": "SS400",
+      "trust": "stated",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Single source (Project.dat key); meaning evident from key name."
+      },
+      "engine_status": "differs",
+      "engine_note": "Engine default SS275 vs Project.dat SS400 (intentional KS D 3503:2018 rename)."
     },
     {
       "id": "PD-011",
@@ -200,6 +291,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=WELDTIP",
           "note": "(\"WELDTIP\" \"AWS_EXXXX_GRADE\")"
         }
       ],
@@ -208,7 +300,16 @@
         "project.dat",
         "weldtip"
       ],
-      "value": "AWS_EXXXX_GRADE"
+      "value": "AWS_EXXXX_GRADE",
+      "trust": "inferred",
+      "rationale": "WELDTIP value is a literal placeholder string; 'electrode grade' role inferred from the key name.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-012",
@@ -218,6 +319,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=PAINT",
           "note": "(\"PAINT\" \"SEE_PAINT_SPEC.\")"
         }
       ],
@@ -226,7 +328,14 @@
         "project.dat",
         "paint"
       ],
-      "value": "SEE_PAINT_SPEC."
+      "value": "SEE_PAINT_SPEC.",
+      "trust": "stated",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Single source (Project.dat key); meaning evident from key name."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-013",
@@ -236,6 +345,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=SET_COL_STFF_JBX",
           "note": "(\"SET_COL_STFF_JBX\" 75)"
         }
       ],
@@ -244,7 +354,16 @@
         "project.dat",
         "set_col_stff_jbx"
       ],
-      "value": 75
+      "value": 75,
+      "trust": "inferred",
+      "rationale": "SET_COL_STFF_JBX: 'J-box related size' is a guess from the key name.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-014",
@@ -254,6 +373,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=SET_ASY_BOMLEN",
           "note": "(\"SET_ASY_BOMLEN\" 73)"
         }
       ],
@@ -262,7 +382,16 @@
         "project.dat",
         "set_asy_bomlen"
       ],
-      "value": 73
+      "value": 73,
+      "trust": "inferred",
+      "rationale": "SET_ASY_BOMLEN: 'BOM length field width' is a guess from the key name.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-015",
@@ -272,6 +401,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=hs-dimrnd-box",
           "note": "(\"hs-dimrnd-box\" \"0.5\")"
         }
       ],
@@ -280,7 +410,14 @@
         "project.dat",
         "hs-dimrnd-box"
       ],
-      "value": "0.5"
+      "value": "0.5",
+      "trust": "stated",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Single source (Project.dat key); meaning evident from key name."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-016",
@@ -290,6 +427,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=m32-dim-txt-box",
           "note": "(\"m32-dim-txt-box\" 3)"
         }
       ],
@@ -298,7 +436,14 @@
         "project.dat",
         "m32-dim-txt-box"
       ],
-      "value": 3
+      "value": 3,
+      "trust": "stated",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Single source (Project.dat key); meaning evident from key name."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-017",
@@ -308,6 +453,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=m32-marktxt-box",
           "note": "(\"m32-marktxt-box\" 1.6)"
         }
       ],
@@ -316,7 +462,14 @@
         "project.dat",
         "m32-marktxt-box"
       ],
-      "value": 1.6
+      "value": 1.6,
+      "trust": "stated",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Single source (Project.dat key); meaning evident from key name."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-018",
@@ -326,6 +479,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=m32-gridasy-box",
           "note": "(\"m32-gridasy-box\" 5)"
         }
       ],
@@ -334,7 +488,16 @@
         "project.dat",
         "m32-gridasy-box"
       ],
-      "value": 5
+      "value": 5,
+      "trust": "inferred",
+      "rationale": "Grid text size meaning of m32-gridasy-box inferred from key name (no DCL ingested).",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-019",
@@ -344,6 +507,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=m32-griddan-box",
           "note": "(\"m32-griddan-box\" 4)"
         }
       ],
@@ -352,7 +516,16 @@
         "project.dat",
         "m32-griddan-box"
       ],
-      "value": 4
+      "value": 4,
+      "trust": "inferred",
+      "rationale": "Grid text size meaning of m32-griddan-box inferred from key name (no DCL ingested).",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-020",
@@ -362,6 +535,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=m32-bom-txt-box",
           "note": "(\"m32-bom-txt-box\" 1.5)"
         }
       ],
@@ -370,7 +544,14 @@
         "project.dat",
         "m32-bom-txt-box"
       ],
-      "value": 1.5
+      "value": 1.5,
+      "trust": "stated",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Single source (Project.dat key); meaning evident from key name."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-021",
@@ -380,6 +561,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=m32-splise-gap-box",
           "note": "(\"m32-splise-gap-box\" \"5\")"
         }
       ],
@@ -388,7 +570,14 @@
         "project.dat",
         "m32-splise-gap-box"
       ],
-      "value": "5"
+      "value": "5",
+      "trust": "verified",
+      "verification": {
+        "method": "cross-source",
+        "result": "pass",
+        "detail": "m32-splise-gap-box 5 = SCSS-*.dat S22 = 5 on 175/175 rows = constant +5 in 단중.xlsx!SCSS!AK5 formula."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-022",
@@ -398,6 +587,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=m32-share1-gap-box",
           "note": "(\"m32-share1-gap-box\" \"5\")"
         }
       ],
@@ -406,7 +596,16 @@
         "project.dat",
         "m32-share1-gap-box"
       ],
-      "value": "5"
+      "value": "5",
+      "trust": "inferred",
+      "rationale": "share1 read as shear-connection gap 1 from key name only.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-023",
@@ -416,6 +615,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=m32-share2-gap-box",
           "note": "(\"m32-share2-gap-box\" \"5\")"
         }
       ],
@@ -424,7 +624,16 @@
         "project.dat",
         "m32-share2-gap-box"
       ],
-      "value": "5"
+      "value": "5",
+      "trust": "inferred",
+      "rationale": "share2 read as shear-connection gap 2 from key name only.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-024",
@@ -434,6 +643,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=m32-pipejun-ang-box",
           "note": "(\"m32-pipejun-ang-box\" \"3\")"
         }
       ],
@@ -442,7 +652,16 @@
         "project.dat",
         "m32-pipejun-ang-box"
       ],
-      "value": "3"
+      "value": "3",
+      "trust": "inferred",
+      "rationale": "Pipe junction angle tolerance meaning inferred from key name.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-025",
@@ -452,6 +671,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=m32-pipejun-las-123",
           "note": "(\"m32-pipejun-las-123\" \"3\")"
         }
       ],
@@ -460,7 +680,16 @@
         "project.dat",
         "m32-pipejun-las-123"
       ],
-      "value": "3"
+      "value": "3",
+      "trust": "inferred",
+      "rationale": "pipejun-las-123 meaning unknown beyond key name.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-026",
@@ -470,6 +699,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=m32-dimtad-pop",
           "note": "(\"m32-dimtad-pop\" \"2\")"
         }
       ],
@@ -478,7 +708,16 @@
         "project.dat",
         "m32-dimtad-pop"
       ],
-      "value": "2"
+      "value": "2",
+      "trust": "inferred",
+      "rationale": "*-pop values are popup-list indexes; mapping index→DIMTAD value is not documented in ingested DCL.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-027",
@@ -488,6 +727,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=m32-dimdec-pop",
           "note": "(\"m32-dimdec-pop\" \"1\")"
         }
       ],
@@ -496,7 +736,16 @@
         "project.dat",
         "m32-dimdec-pop"
       ],
-      "value": "1"
+      "value": "1",
+      "trust": "inferred",
+      "rationale": "*-pop values are popup-list indexes; mapping index→DIMDEC value is not documented in ingested DCL.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-028",
@@ -506,6 +755,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=m32-dimlunit-pop",
           "note": "(\"m32-dimlunit-pop\" \"1\")"
         }
       ],
@@ -514,7 +764,16 @@
         "project.dat",
         "m32-dimlunit-pop"
       ],
-      "value": "1"
+      "value": "1",
+      "trust": "inferred",
+      "rationale": "*-pop values are popup-list indexes; mapping index→DIMLUNIT value is not documented in ingested DCL.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-029",
@@ -524,6 +783,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=m32-gitabolt-pop",
           "note": "(\"m32-gitabolt-pop\" \"3\")"
         }
       ],
@@ -532,7 +792,16 @@
         "project.dat",
         "m32-gitabolt-pop"
       ],
-      "value": "3"
+      "value": "3",
+      "trust": "inferred",
+      "rationale": "gitabolt-pop is a popup index; bolt list order not in ingested DCL.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-030",
@@ -542,6 +811,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=m32-spgpbolt-pop",
           "note": "(\"m32-spgpbolt-pop\" \"0\")"
         }
       ],
@@ -550,7 +820,16 @@
         "project.dat",
         "m32-spgpbolt-pop"
       ],
-      "value": "0"
+      "value": "0",
+      "trust": "inferred",
+      "rationale": "spgpbolt-pop is a popup index; bolt list order not in ingested DCL.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "PD-031",
@@ -560,6 +839,7 @@
       "evidence": [
         {
           "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=set-bom-matl-elss-tog",
           "note": "(\"set-bom-matl-elss-tog\" \"1\")"
         }
       ],
@@ -568,7 +848,16 @@
         "project.dat",
         "set-bom-matl-elss-tog"
       ],
-      "value": "1"
+      "value": "1",
+      "trust": "inferred",
+      "rationale": "ELSS toggle meaning inferred from key name.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Value read verbatim from Project.dat; meaning not corroborated."
+      },
+      "engine_status": "missing"
     },
     {
       "id": "DR-001",
@@ -578,6 +867,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs",
           "note": "DetailRules record default Scallop=30"
         }
       ],
@@ -587,7 +877,14 @@
       "tags": [
         "detailrules"
       ],
-      "value": 30
+      "value": 30,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "DR-002",
@@ -597,6 +894,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs",
           "note": "EndGauge=40"
         }
       ],
@@ -606,7 +904,14 @@
       "tags": [
         "detailrules"
       ],
-      "value": 40
+      "value": 40,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "DR-003",
@@ -616,10 +921,12 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs",
           "note": "HoleDia=22"
         },
         {
           "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Fabrication.cs",
           "note": "Bolts.HoleFor: bolt+2 up to M22"
         }
       ],
@@ -630,7 +937,14 @@
       "tags": [
         "detailrules"
       ],
-      "value": 22
+      "value": 22,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "DR-004",
@@ -640,6 +954,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs",
           "note": "WeldGap=5"
         }
       ],
@@ -649,7 +964,14 @@
       "tags": [
         "detailrules"
       ],
-      "value": 5
+      "value": 5,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "DR-005",
@@ -659,6 +981,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs",
           "note": "Material default SS275; Project.dat SWS=SS400"
         }
       ],
@@ -669,7 +992,15 @@
         "detailrules",
         "grade"
       ],
-      "value": "SS275"
+      "value": "SS275",
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "differs",
+      "engine_note": "Engine default SS275 vs Project.dat SS400 (intentional KS D 3503:2018 rename)."
     },
     {
       "id": "DR-006",
@@ -679,6 +1010,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs",
           "note": "ConnectionGap=10"
         }
       ],
@@ -688,7 +1020,14 @@
       "tags": [
         "detailrules"
       ],
-      "value": 10
+      "value": 10,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "DR-007",
@@ -698,6 +1037,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs",
           "note": "TextHeight=2.5 DimGap=7"
         }
       ],
@@ -710,7 +1050,15 @@
       "value": {
         "text": 2.5,
         "dim_gap": 7
-      }
+      },
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "differs",
+      "engine_note": "Template DIM-100 text height 3.4 and Project.dat m32-dim-txt-box 3 vs engine 2.5 (see DFT-001)."
     },
     {
       "id": "WL-6",
@@ -720,10 +1068,12 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Fabrication.cs:WeldRules",
           "note": "WeldRules.MinFillet KDS 14 31 25 / AWS D1.1 Table 5.7"
         },
         {
           "source": "KDS 14 31 25",
+          "locator": "KDS 14 31 25",
           "note": "min fillet by thicker part"
         }
       ],
@@ -737,7 +1087,14 @@
       "value": {
         "upto": 6,
         "min_leg": 3
-      }
+      },
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "WL-12",
@@ -747,10 +1104,12 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Fabrication.cs:WeldRules",
           "note": "WeldRules.MinFillet KDS 14 31 25 / AWS D1.1 Table 5.7"
         },
         {
           "source": "KDS 14 31 25",
+          "locator": "KDS 14 31 25",
           "note": "min fillet by thicker part"
         }
       ],
@@ -764,7 +1123,14 @@
       "value": {
         "upto": 12,
         "min_leg": 5
-      }
+      },
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "WL-20",
@@ -774,10 +1140,12 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Fabrication.cs:WeldRules",
           "note": "WeldRules.MinFillet KDS 14 31 25 / AWS D1.1 Table 5.7"
         },
         {
           "source": "KDS 14 31 25",
+          "locator": "KDS 14 31 25",
           "note": "min fillet by thicker part"
         }
       ],
@@ -791,7 +1159,14 @@
       "value": {
         "upto": 20,
         "min_leg": 6
-      }
+      },
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "WL-999",
@@ -801,10 +1176,12 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Fabrication.cs:WeldRules",
           "note": "WeldRules.MinFillet KDS 14 31 25 / AWS D1.1 Table 5.7"
         },
         {
           "source": "KDS 14 31 25",
+          "locator": "KDS 14 31 25",
           "note": "min fillet by thicker part"
         }
       ],
@@ -818,7 +1195,14 @@
       "value": {
         "upto": 999,
         "min_leg": 8
-      }
+      },
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "WL-CAP",
@@ -828,6 +1212,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Fabrication.cs",
           "note": "WeldRules.FilletLeg"
         }
       ],
@@ -837,7 +1222,14 @@
       "tags": [
         "fillet"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "BT-001",
@@ -847,10 +1239,12 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Fabrication.cs:Bolts.HoleFor",
           "note": "Bolts.HoleFor"
         },
         {
           "source": "Project.dat SHOLE",
+          "locator": "Project.dat SHOLE",
           "note": "22 for M20"
         }
       ],
@@ -860,7 +1254,14 @@
       "tags": [
         "hole"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "BT-002",
@@ -870,6 +1271,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Fabrication.cs",
           "note": "Bolts.HoleFor boltDia>=24"
         }
       ],
@@ -879,7 +1281,14 @@
       "tags": [
         "hole"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "BT-003",
@@ -889,6 +1298,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Fabrication.cs",
           "note": "Bolts.GradeOf"
         }
       ],
@@ -899,7 +1309,14 @@
         "grade",
         "s10t"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "BT-004",
@@ -909,6 +1326,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Fabrication.cs",
           "note": "Bolts.GradeOf"
         }
       ],
@@ -919,7 +1337,14 @@
         "grade",
         "f10t"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "BT-005",
@@ -929,6 +1354,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Fabrication.cs",
           "note": "Bolts.GradeOf"
         }
       ],
@@ -938,7 +1364,14 @@
       "tags": [
         "grade"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "BT-006",
@@ -948,6 +1381,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Fabrication.cs",
           "note": "GradeOf return F10T"
         }
       ],
@@ -957,7 +1391,14 @@
       "tags": [
         "grade"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "GG-001",
@@ -967,6 +1408,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Fabrication.cs:BoltGauges",
           "note": "BoltGauges.Angle"
         }
       ],
@@ -977,7 +1419,14 @@
         "gauge",
         "angle"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "GG-002",
@@ -987,6 +1436,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Fabrication.cs",
           "note": "BoltGauges.Flange"
         }
       ],
@@ -997,7 +1447,14 @@
         "gauge",
         "flange"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "GG-003",
@@ -1007,6 +1464,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Fabrication.cs",
           "note": "BoltGauges.For e=max(1.5*bolt,20)"
         }
       ],
@@ -1016,7 +1474,14 @@
       "tags": [
         "edge"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "GG-004",
@@ -1026,6 +1491,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Fabrication.cs",
           "note": "BoltGauges.DefaultBolt"
         }
       ],
@@ -1035,7 +1501,14 @@
       "tags": [
         "default-bolt"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "GG-005",
@@ -1045,6 +1518,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Fabrication.cs",
           "note": "BoltGauges.For ShapeKind.I/Channel"
         }
       ],
@@ -1055,7 +1529,14 @@
         "pitch",
         "web"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "ST-001",
@@ -1065,10 +1546,12 @@
       "evidence": [
         {
           "source": "docs/SHEAR-TAB-ROWS.md",
+          "locator": "SHEAR-TAB-ROWS.md § clear web rule",
           "note": "clear web rule"
         },
         {
           "source": "src/HsSteel.Modeling/ShearTabLayout.cs",
+          "locator": "ShearTabLayout.cs",
           "note": "ClearWebDepth"
         }
       ],
@@ -1078,7 +1561,14 @@
       "tags": [
         "shear-tab"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "ST-002",
@@ -1088,10 +1578,12 @@
       "evidence": [
         {
           "source": "docs/SHEAR-TAB-ROWS.md",
+          "locator": "SHEAR-TAB-ROWS.md § ShopEdge=40",
           "note": "ShopEdge=40"
         },
         {
           "source": "KDS 14 31 25",
+          "locator": "KDS 14 31 25",
           "note": "sheared edge table"
         }
       ],
@@ -1102,7 +1594,14 @@
         "shear-tab",
         "edge"
       ],
-      "value": 40
+      "value": 40,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "ST-003",
@@ -1112,6 +1611,7 @@
       "evidence": [
         {
           "source": "docs/SHEAR-TAB-ROWS.md",
+          "locator": "SHEAR-TAB-ROWS.md § ShopPitch=70 preferred 3d",
           "note": "ShopPitch=70 preferred 3d"
         }
       ],
@@ -1122,7 +1622,14 @@
         "shear-tab",
         "pitch"
       ],
-      "value": 70
+      "value": 70,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "ST-004",
@@ -1132,10 +1639,12 @@
       "evidence": [
         {
           "source": "src/HsSteel.Modeling/ShearTabLayout.cs",
+          "locator": "ShearTabLayout.cs",
           "note": "MinEdgeSheared"
         },
         {
           "source": "AISC 360-05 Table J3.4M",
+          "locator": "AISC 360-05 Table J3.4M",
           "note": "same as KDS"
         }
       ],
@@ -1146,7 +1655,14 @@
         "edge",
         "kds"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "ST-005",
@@ -1156,6 +1672,7 @@
       "evidence": [
         {
           "source": "docs/SHEAR-TAB-ROWS.md",
+          "locator": "SHEAR-TAB-ROWS.md § row formula",
           "note": "row formula"
         }
       ],
@@ -1165,7 +1682,14 @@
       "tags": [
         "shear-tab"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "ST-006",
@@ -1175,6 +1699,7 @@
       "evidence": [
         {
           "source": "docs/SHEAR-TAB-ROWS.md",
+          "locator": "SHEAR-TAB-ROWS.md § n<2 warning",
           "note": "n<2 warning"
         }
       ],
@@ -1185,7 +1710,14 @@
         "shear-tab",
         "warning"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "ST-007",
@@ -1195,6 +1727,7 @@
       "evidence": [
         {
           "source": "docs/SHEAR-TAB-ROWS.md",
+          "locator": "SHEAR-TAB-ROWS.md § splice override",
           "note": "splice override"
         }
       ],
@@ -1206,7 +1739,14 @@
         "shear-tab",
         "scss"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "SP-001",
@@ -1216,6 +1756,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Connections.cs",
+          "locator": "Connections.cs",
           "note": "BoltPattern.Parse"
         }
       ],
@@ -1225,7 +1766,14 @@
       "tags": [
         "bolt-pattern"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "SP-002",
@@ -1235,6 +1783,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Connections.cs",
+          "locator": "Connections.cs",
           "note": "BoltAxis.Parse"
         }
       ],
@@ -1244,7 +1793,14 @@
       "tags": [
         "bolt-axis"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "SP-003",
@@ -1254,6 +1810,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Connections.cs",
+          "locator": "Connections.cs",
           "note": "BoltPattern.HoleDia"
         }
       ],
@@ -1263,7 +1820,15 @@
       "tags": [
         "hole"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "differs",
+      "engine_note": "BoltPattern.HoleDia is always d+2; Bolts.HoleFor gives d+3 from M24 (see HL-001)."
     },
     {
       "id": "SP-004",
@@ -1273,10 +1838,12 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Connections.cs",
+          "locator": "Connections.cs:SpliceSpec",
           "note": "SpliceSpec remarks"
         },
         {
           "source": "HSSTEEL/attributes/SCSS-*.dat",
+          "locator": "SCSS-*.dat",
           "note": "6 tables 175 rows"
         }
       ],
@@ -1286,7 +1853,14 @@
       "tags": [
         "scss"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "SP-005",
@@ -1296,6 +1870,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Connections.cs",
+          "locator": "Connections.cs",
           "note": "SpliceSpec"
         }
       ],
@@ -1305,7 +1880,14 @@
       "tags": [
         "scss"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "SP-006",
@@ -1315,10 +1897,12 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Connections.cs",
+          "locator": "Connections.cs",
           "note": "Gap => N(22)"
         },
         {
           "source": "Project.dat",
+          "locator": "key=gap",
           "note": "m32-splise-gap-box 5"
         }
       ],
@@ -1329,7 +1913,14 @@
         "scss",
         "gap"
       ],
-      "value": 5
+      "value": 5,
+      "trust": "verified",
+      "verification": {
+        "method": "cross-source",
+        "result": "pass",
+        "detail": "S22 = 5 on 175/175 SCSS .dat rows; Project.dat m32-splise-gap-box = 5; 단중.xlsx!SCSS!AK uses +5."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "SP-007",
@@ -1339,6 +1930,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Connections.cs",
+          "locator": "Connections.cs",
           "note": "FlangeLines"
         }
       ],
@@ -1348,7 +1940,14 @@
       "tags": [
         "scss"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "SP-008",
@@ -1358,6 +1957,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Connections.cs",
+          "locator": "Connections.cs",
           "note": "WebBoltCount"
         }
       ],
@@ -1367,7 +1967,14 @@
       "tags": [
         "scss"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "cross-source",
+        "result": "partial",
+        "detail": "2·(n+1)·(m+1) web bolt identity holds on 292/350 단중.xlsx!SCSS rows (AM=0); engine notes S25 agrees on 148/175 .dat rows."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "SP-009",
@@ -1377,6 +1984,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Connections.cs",
+          "locator": "Connections.cs",
           "note": "Find"
         }
       ],
@@ -1386,7 +1994,14 @@
       "tags": [
         "scss"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "AS-C",
@@ -1396,6 +2011,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs:AssemblyTypes",
           "note": "AssemblyTypes.Prefix(Column)"
         }
       ],
@@ -1406,7 +2022,14 @@
         "mark",
         "assembly"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "AS-SC",
@@ -1416,6 +2039,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs:AssemblyTypes",
           "note": "AssemblyTypes.Prefix(SubColumn)"
         }
       ],
@@ -1426,7 +2050,15 @@
         "mark",
         "assembly"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "differs",
+      "engine_note": "Legacy Numbering.dat M83-SUBCOL-HD-BOX = C001 (engine SC)."
     },
     {
       "id": "AS-PT",
@@ -1436,6 +2068,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs:AssemblyTypes",
           "note": "AssemblyTypes.Prefix(Post)"
         }
       ],
@@ -1446,7 +2079,15 @@
         "mark",
         "assembly"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "differs",
+      "engine_note": "Legacy Numbering.dat M83-POST---HD-BOX = C001 (engine PT)."
     },
     {
       "id": "AS-G",
@@ -1456,6 +2097,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs:AssemblyTypes",
           "note": "AssemblyTypes.Prefix(Girder)"
         }
       ],
@@ -1466,7 +2108,14 @@
         "mark",
         "assembly"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "AS-B",
@@ -1476,6 +2125,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs:AssemblyTypes",
           "note": "AssemblyTypes.Prefix(Beam)"
         }
       ],
@@ -1486,7 +2136,14 @@
         "mark",
         "assembly"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "AS-CG",
@@ -1496,6 +2153,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs:AssemblyTypes",
           "note": "AssemblyTypes.Prefix(CraneGirder)"
         }
       ],
@@ -1506,7 +2164,15 @@
         "mark",
         "assembly"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "differs",
+      "engine_note": "Legacy Numbering.dat M83-CRANEG-HD-BOX = G001 (engine CG)."
     },
     {
       "id": "AS-BR",
@@ -1516,6 +2182,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs:AssemblyTypes",
           "note": "AssemblyTypes.Prefix(Brace)"
         }
       ],
@@ -1526,7 +2193,15 @@
         "mark",
         "assembly"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "differs",
+      "engine_note": "Legacy Numbering.dat M83-BRACE--HD-BOX = R001 (engine BR)."
     },
     {
       "id": "AS-PU",
@@ -1536,6 +2211,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs:AssemblyTypes",
           "note": "AssemblyTypes.Prefix(Purlin)"
         }
       ],
@@ -1546,7 +2222,14 @@
         "mark",
         "assembly"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "AS-GT",
@@ -1556,6 +2239,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs:AssemblyTypes",
           "note": "AssemblyTypes.Prefix(Girth)"
         }
       ],
@@ -1566,7 +2250,14 @@
         "mark",
         "assembly"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "AS-RF",
@@ -1576,6 +2267,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs:AssemblyTypes",
           "note": "AssemblyTypes.Prefix(Rafter)"
         }
       ],
@@ -1586,7 +2278,15 @@
         "mark",
         "assembly"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "differs",
+      "engine_note": "Legacy Numbering.dat M83-RAFTER-HD-BOX = G001 (engine RF)."
     },
     {
       "id": "AS-TR",
@@ -1596,6 +2296,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs:AssemblyTypes",
           "note": "AssemblyTypes.Prefix(Truss)"
         }
       ],
@@ -1606,7 +2307,15 @@
         "mark",
         "assembly"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "differs",
+      "engine_note": "Legacy Numbering.dat M83-TRUSS--HD-BOX = G001 (engine TR)."
     },
     {
       "id": "AS-ST",
@@ -1616,6 +2325,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs:AssemblyTypes",
           "note": "AssemblyTypes.Prefix(Stair)"
         }
       ],
@@ -1626,7 +2336,15 @@
         "mark",
         "assembly"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "differs",
+      "engine_note": "Legacy Numbering.dat M83-STAIR--HD-BOX = S001 (engine ST)."
     },
     {
       "id": "AS-HR",
@@ -1636,6 +2354,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs:AssemblyTypes",
           "note": "AssemblyTypes.Prefix(HandRail)"
         }
       ],
@@ -1646,7 +2365,15 @@
         "mark",
         "assembly"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "differs",
+      "engine_note": "Legacy Numbering.dat M83-HANDRL-HD-BOX = H001 (engine HR)."
     },
     {
       "id": "AS-EM",
@@ -1656,6 +2383,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs:AssemblyTypes",
           "note": "AssemblyTypes.Prefix(Embed)"
         }
       ],
@@ -1666,7 +2394,14 @@
         "mark",
         "assembly"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "AS-LYR",
@@ -1676,6 +2411,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs",
           "note": "FromLayer FAFTER"
         }
       ],
@@ -1685,7 +2421,14 @@
       "tags": [
         "layer"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "code-read",
+        "result": "unverified",
+        "detail": "Engine constant/table; external standard (KDS/AISC/AIJ) cited but not re-checked against a second source."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "DRF-001",
@@ -1695,10 +2438,12 @@
       "evidence": [
         {
           "source": "docs/COLLAB.md",
+          "locator": "COLLAB.md § issue #3",
           "note": "issue #3"
         },
         {
           "source": "docs/D4_RESULTS.md",
+          "locator": "D4_RESULTS.md § LeaderIfLongEnough",
           "note": "LeaderIfLongEnough"
         }
       ],
@@ -1709,7 +2454,14 @@
         "leader",
         "weld"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "doc",
+        "result": "unverified",
+        "detail": "Stated in project docs/ledger; not re-derived."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "DRF-002",
@@ -1719,6 +2471,7 @@
       "evidence": [
         {
           "source": "docs/COLLAB.md",
+          "locator": "COLLAB.md § Claude-sonnet #4",
           "note": "Claude-sonnet #4"
         }
       ],
@@ -1729,7 +2482,14 @@
         "text-style",
         "hangul"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "doc",
+        "result": "unverified",
+        "detail": "Stated in project docs/ledger; not re-derived."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "DRF-003",
@@ -1739,6 +2499,7 @@
       "evidence": [
         {
           "source": "docs/COLLAB.md",
+          "locator": "COLLAB.md § live verify #1",
           "note": "live verify #1"
         }
       ],
@@ -1748,7 +2509,14 @@
       "tags": [
         "power-cad"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "doc",
+        "result": "unverified",
+        "detail": "Stated in project docs/ledger; not re-derived."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "RB-001",
@@ -1758,10 +2526,12 @@
       "evidence": [
         {
           "source": "HS-STEEL_REBORN/orch/bom_schema.json",
+          "locator": "bom_schema.json",
           "note": "derived_spec trust unverified"
         },
         {
           "source": "docs/REBORN_LEDGER.md",
+          "locator": "REBORN_LEDGER.md § ingest",
           "note": "ingest"
         }
       ],
@@ -1770,7 +2540,14 @@
         "bom",
         "reborn"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "doc",
+        "result": "unverified",
+        "detail": "Stated in project docs/ledger; not re-derived."
+      },
+      "engine_status": "n/a"
     },
     {
       "id": "RB-002",
@@ -1780,10 +2557,12 @@
       "evidence": [
         {
           "source": "docs/REBORN_LEDGER.md",
+          "locator": "REBORN_LEDGER.md § reborn_weight_crosscheck",
           "note": "reborn_weight_crosscheck"
         },
         {
           "source": "meta.reborn_weight_crosscheck",
+          "locator": "meta.reborn_weight_crosscheck",
           "note": "DB meta"
         }
       ],
@@ -1792,7 +2571,14 @@
         "weight",
         "trust"
       ],
-      "value": null
+      "value": null,
+      "trust": "verified",
+      "verification": {
+        "method": "recompute",
+        "result": "pass",
+        "detail": "Density 7.85 now independently verified by WT-001/WT-002 (BH 159/159, H 81/81, FLAT-BAR 40/41 vs section .dat tables)."
+      },
+      "engine_status": "n/a"
     },
     {
       "id": "RB-003",
@@ -1802,6 +2588,7 @@
       "evidence": [
         {
           "source": "HS-STEEL_REBORN/orch/cut_plan_spec.json",
+          "locator": "cut_plan_spec.json",
           "note": "derived_spec"
         }
       ],
@@ -1810,7 +2597,16 @@
         "cut-plan",
         "reborn"
       ],
-      "value": null
+      "value": null,
+      "trust": "inferred",
+      "verification": {
+        "method": "cross-source",
+        "result": "fail",
+        "detail": "Spec loss_rule differs from VBA 커팅플랜계산 (kerf 3 mm per cut, stock rounding by 1000 mm increments)."
+      },
+      "inferred_by": "claude-opus-5-5",
+      "rationale": "REBORN cut_plan_spec summarises loss as quotient/remainder; BOM자재산출서.xlsm VBA 형강커팅플랜.bas actually does priority-stock bin packing with kerf (see CUT-001..CUT-004).",
+      "engine_status": "n/a"
     },
     {
       "id": "RB-004",
@@ -1820,6 +2616,7 @@
       "evidence": [
         {
           "source": "docs/REBORN_LEDGER.md",
+          "locator": "REBORN_LEDGER.md § 232/302 described_by",
           "note": "232/302 described_by"
         }
       ],
@@ -1828,7 +2625,14 @@
         "commands",
         "reborn"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "doc",
+        "result": "unverified",
+        "detail": "Stated in project docs/ledger; not re-derived."
+      },
+      "engine_status": "n/a"
     },
     {
       "id": "RB-005",
@@ -1838,6 +2642,7 @@
       "evidence": [
         {
           "source": "docs/REBORN_LEDGER.md",
+          "locator": "REBORN_LEDGER.md § verified 1",
           "note": "verified 1"
         }
       ],
@@ -1846,7 +2651,14 @@
         "blocks",
         "trust"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "doc",
+        "result": "unverified",
+        "detail": "Stated in project docs/ledger; not re-derived."
+      },
+      "engine_status": "n/a"
     },
     {
       "id": "RB-006",
@@ -1856,10 +2668,12 @@
       "evidence": [
         {
           "source": "docs/ARCHITECTURE.md",
+          "locator": "ARCHITECTURE.md § clean-room",
           "note": "clean-room"
         },
         {
           "source": "docs/ASSET_LEDGER.md",
+          "locator": "ASSET_LEDGER.md § VLX reference",
           "note": "VLX reference"
         }
       ],
@@ -1867,7 +2681,14 @@
       "tags": [
         "vlx"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "doc",
+        "result": "unverified",
+        "detail": "Stated in project docs/ledger; not re-derived."
+      },
+      "engine_status": "n/a"
     },
     {
       "id": "RB-007",
@@ -1877,6 +2698,7 @@
       "evidence": [
         {
           "source": "docs/ASSET_LEDGER.md",
+          "locator": "ASSET_LEDGER.md § excluded license",
           "note": "excluded license"
         }
       ],
@@ -1884,7 +2706,14 @@
       "tags": [
         "license"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "doc",
+        "result": "unverified",
+        "detail": "Stated in project docs/ledger; not re-derived."
+      },
+      "engine_status": "n/a"
     },
     {
       "id": "SEC-001",
@@ -1894,6 +2723,7 @@
       "evidence": [
         {
           "source": "docs/FEATURE_EXPLORATION.md",
+          "locator": "FEATURE_EXPLORATION.md § D2 list",
           "note": "D2 list"
         }
       ],
@@ -1903,7 +2733,14 @@
       "tags": [
         "family"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "doc",
+        "result": "unverified",
+        "detail": "Stated in project docs/ledger; not re-derived."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "SEC-002",
@@ -1913,6 +2750,7 @@
       "evidence": [
         {
           "source": "src/HsSteel.Domain/Model.cs",
+          "locator": "Model.cs",
           "note": "SectionCatalog.Load"
         }
       ],
@@ -1922,7 +2760,14 @@
       "tags": [
         "catalog"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "doc",
+        "result": "unverified",
+        "detail": "Stated in project docs/ledger; not re-derived."
+      },
+      "engine_status": "implemented"
     },
     {
       "id": "ARCH-001",
@@ -1932,6 +2777,7 @@
       "evidence": [
         {
           "source": "docs/ARCHITECTURE.md",
+          "locator": "ARCHITECTURE.md § model-first",
           "note": "model-first"
         }
       ],
@@ -1939,7 +2785,14 @@
       "tags": [
         "architecture"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "doc",
+        "result": "unverified",
+        "detail": "Stated in project docs/ledger; not re-derived."
+      },
+      "engine_status": "n/a"
     },
     {
       "id": "ARCH-002",
@@ -1949,6 +2802,7 @@
       "evidence": [
         {
           "source": "docs/ARCHITECTURE.md",
+          "locator": "ARCHITECTURE.md § Drafting rule",
           "note": "Drafting rule"
         }
       ],
@@ -1956,7 +2810,14 @@
       "tags": [
         "architecture"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "doc",
+        "result": "unverified",
+        "detail": "Stated in project docs/ledger; not re-derived."
+      },
+      "engine_status": "n/a"
     },
     {
       "id": "ARCH-003",
@@ -1966,6 +2827,7 @@
       "evidence": [
         {
           "source": "docs/ARCHITECTURE.md",
+          "locator": "ARCHITECTURE.md § design principles",
           "note": "design principles"
         }
       ],
@@ -1973,7 +2835,1412 @@
       "tags": [
         "architecture"
       ],
-      "value": null
+      "value": null,
+      "trust": "stated",
+      "verification": {
+        "method": "doc",
+        "result": "unverified",
+        "detail": "Stated in project docs/ledger; not re-derived."
+      },
+      "engine_status": "n/a"
+    },
+    {
+      "id": "BL-001",
+      "title": "Bolt length = ROUNDUP((grip + add(d))/5)*5",
+      "statement": "High-strength (TS/HTB/TUB) bolt length is the grip plus a diameter-dependent add-length, rounded up to the next 5 mm.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\Excel\\XLSTART\\단중.xlsx",
+          "locator": "SCSS!F5:F547,T5:T547 (bolt lengths) vs I/M (plate t) and B (section)",
+          "note": "lengths fit the rule on every row"
+        },
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\SCSS-G20.dat",
+          "locator": "S24/S26 bolt names vs S1/S11/S12",
+          "note": "HS-STEEL program splice tables"
+        },
+        {
+          "source": "C:\\HS-STEEL\\HS03\\견적용-2017\\자재산출-2017.xlsm",
+          "locator": "JOINT-BASE!AF2",
+          "note": "ROUNDUP((R2+VLOOKUP(Q2,BOLTADDLEN,3,0))/5,0)*5 — same shape, add-length from named range BOLTADDLEN"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "bolt",
+        "length",
+        "grip",
+        "boltaddlen",
+        "ts",
+        "htb"
+      ],
+      "trust": "verified",
+      "formula": {
+        "expr": "ceil((grip + add[d]) / 5) * 5",
+        "vars": {
+          "grip": "mm",
+          "d": "bolt diameter mm"
+        },
+        "returns": "bolt length mm",
+        "table_ref": [
+          "BL-002",
+          "BL-003"
+        ]
+      },
+      "verification": {
+        "method": "numeric-fit",
+        "result": "pass",
+        "detail": "SCSS-*.dat: 350/350 bolt lengths reproduced; 단중.xlsx!SCSS: 700/700; every resulting TS length exists in the TS bolt table (31/31)."
+      },
+      "engine_status": "missing",
+      "engine_note": "Engine takes tabulated bolt names (SpliceSpec.FlangeBolt/WebBolt = S24/S26); no grip-based length computation.",
+      "governs": [
+        "bolt:*TS",
+        "workbook_sheet:HS03/Excel/XLSTART/단중.xlsx!SCSS"
+      ]
+    },
+    {
+      "id": "BL-002",
+      "title": "Bolt add-length table (HS-STEEL SCSS .dat)",
+      "statement": "In the HS-STEEL program splice tables the add-length is M16 25, M20 30, M22 35 mm (grip + add, ceil to 5).",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\SCSS-C16.dat",
+          "locator": "S24/S26 vs S1/S11/S12, all rows",
+          "note": ""
+        },
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\SCSS-G22.dat",
+          "locator": "S24/S26 vs S1/S11/S12, all rows",
+          "note": ""
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "bolt",
+        "boltaddlen",
+        "scss",
+        "add-length"
+      ],
+      "value": {
+        "16": 25,
+        "20": 30,
+        "22": 35
+      },
+      "trust": "verified",
+      "formula": {
+        "expr": "add[d]",
+        "table": {
+          "add": {
+            "16": 25,
+            "20": 30,
+            "22": 35
+          }
+        }
+      },
+      "verification": {
+        "method": "numeric-fit",
+        "result": "pass",
+        "detail": "Unique add value per diameter reproduces 350/350 .dat bolt lengths (flange grip tf+S11+S12, web grip tw+2·S1)."
+      },
+      "engine_status": "missing",
+      "governs": [
+        "bolt:*TS",
+        "family:H-BEAM"
+      ]
+    },
+    {
+      "id": "BL-003",
+      "title": "Bolt add-length table (단중.xlsx SCSS) — +5 vs program",
+      "statement": "The estimating workbook 단중.xlsx!SCSS uses add-lengths M16 30, M20 35, M22 40 mm, i.e. 5 mm longer bolts than the program .dat tables.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\Excel\\XLSTART\\단중.xlsx",
+          "locator": "SCSS!F5:F547 / T5:T547",
+          "note": "flange and web TS lengths"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "bolt",
+        "boltaddlen",
+        "estimate",
+        "add-length"
+      ],
+      "value": {
+        "16": 30,
+        "20": 35,
+        "22": 40
+      },
+      "trust": "verified",
+      "formula": {
+        "expr": "add[d]",
+        "table": {
+          "add": {
+            "16": 30,
+            "20": 35,
+            "22": 40
+          }
+        }
+      },
+      "verification": {
+        "method": "numeric-fit",
+        "result": "pass",
+        "detail": "700/700 rows fit; vs .dat the same (section, dia) differs in flange length on 174/175 rows (always +5)."
+      },
+      "engine_status": "n/a",
+      "engine_note": "Estimating-only table; engine follows .dat (BL-002). Decide which add-length is canonical.",
+      "governs": [
+        "workbook_sheet:HS03/Excel/XLSTART/단중.xlsx!SCSS"
+      ]
+    },
+    {
+      "id": "BL-004",
+      "title": "Splice bolt grip definitions",
+      "statement": "Flange splice grip = tf + outer plate t + inner plate t; web splice grip = tw + 2 × web plate t.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\SCSS-G16.dat",
+          "locator": "S11 outer t, S12 inner t, S1 web plate t",
+          "note": ""
+        },
+        {
+          "source": "C:\\HS-STEEL\\HS03\\Excel\\XLSTART\\단중.xlsx",
+          "locator": "SCSS!I (outer t), N (inner t), W (web plate t)",
+          "note": ""
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "bolt",
+        "grip",
+        "splice"
+      ],
+      "trust": "verified",
+      "formula": {
+        "expr": "flange: tf + t_out + t_in; web: tw + 2*t_wp",
+        "vars": {
+          "tf": "mm",
+          "tw": "mm",
+          "t_out": "mm",
+          "t_in": "mm",
+          "t_wp": "mm"
+        }
+      },
+      "verification": {
+        "method": "numeric-fit",
+        "result": "pass",
+        "detail": "These grip definitions are the ones under which BL-001 fits 100% of both tables."
+      },
+      "engine_status": "missing"
+    },
+    {
+      "id": "BL-005",
+      "title": "BOLTADDLEN named range columns (HTB/TS/TUB) — broken ref",
+      "statement": "자재산출-2017.xlsm defines BOLTADDLEN (=TITLE!#REF!, broken); formulas read column 2 for HTB, 3 for TS, 4 for TUB.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\견적용-2017\\자재산출-2017.xlsm",
+          "locator": "definedName BOLTADDLEN = TITLE!#REF!",
+          "note": ""
+        },
+        {
+          "source": "C:\\HS-STEEL\\HS03\\견적용-2017\\자재산출-2017.xlsm",
+          "locator": "JOINT-BASE!AF18 (col 2, HTB), AF2 (col 3, TS), AF19 (col 4, TUB)",
+          "note": ""
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "boltaddlen",
+        "named-range",
+        "htb",
+        "tub"
+      ],
+      "trust": "stated",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "Range is broken in the shipped workbook; values recovered only via BL-002/BL-003 fits."
+      },
+      "engine_status": "n/a",
+      "governs": [
+        "workbook_sheet:HS03/견적용-2017/자재산출-2017.xlsm!JOINT-BASE"
+      ]
+    },
+    {
+      "id": "BL-006",
+      "title": "Anchor bolt length & naming",
+      "statement": "Anchor bolt length = ROUND((S11+S12+3d+H)/10)*10 (newer rows round to 50 mm: ROUND(x/50)*50); named \"AB M{d}(L-{len})\" or J-type \"AB M{d}(J-{len})\". Used when S11 > 99, else a TS bolt is emitted.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\견적용-2017\\자재산출-2017.xlsm",
+          "locator": "JOINT-BASE!AF2,AG2",
+          "note": "ROUND((R2+S2+Q2*3+H2)*0.1,0)*10"
+        },
+        {
+          "source": "C:\\HS-STEEL\\HS03\\견적용-2017\\자재산출-2017.xlsm",
+          "locator": "JOINT-BASE!AG7,AF9",
+          "note": "ROUND(...*0.02,0)*50"
+        },
+        {
+          "source": "C:\\HS-STEEL\\HS03\\견적용-2017\\자재산출-2017.xlsm",
+          "locator": "JOINT-BASE!AO11",
+          "note": "'앙카길이를 50mm 단위로 계산함'"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "anchor",
+        "ab",
+        "base-plate",
+        "length"
+      ],
+      "trust": "stated",
+      "formula": {
+        "expr": "round((embed + proj + 3*d + t_base) / step) * step",
+        "params": {
+          "step": [
+            10,
+            50
+          ]
+        },
+        "returns": "anchor length mm"
+      },
+      "verification": {
+        "method": "recompute",
+        "result": "pass",
+        "detail": "Cached JOINT-BASE!AG2 = 740, AG7 = 650 reproduce from the row inputs (same workbook; non-independent)."
+      },
+      "engine_status": "missing",
+      "governs": [
+        "workbook_sheet:HS03/견적용-2017/자재산출-2017.xlsm!JOINT-BASE"
+      ]
+    },
+    {
+      "id": "BL-007",
+      "title": "Bolt set weight table",
+      "statement": "Bolt set weight [g] = L·π·r²·0.00785 + const(d); bolt alone = set − nut − 2·washer. const/nut/washer: M12 71.8/30/10, M16 138.56/57/20, M20 237.5/97/32, M22 346.3/137/52, M24 470.3/201/62.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\Excel\\XLSTART\\단중.xlsx",
+          "locator": "bolt!H3:AA12 (=H$2*$AD3+$AE3), AD3:AD11 (=r^2*3.141592*0.00785), AB/AC nut/washer",
+          "note": ""
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "bolt",
+        "weight",
+        "nut",
+        "washer"
+      ],
+      "trust": "stated",
+      "formula": {
+        "expr": "L * pi * (d/2)^2 * 0.00785 + c[d]",
+        "table": {
+          "c": {
+            "12": 71.8,
+            "16": 138.56,
+            "20": 237.5,
+            "22": 346.3,
+            "24": 470.3
+          },
+          "nut": {
+            "12": 30,
+            "16": 57,
+            "20": 97,
+            "22": 137,
+            "24": 201
+          },
+          "washer": {
+            "12": 10,
+            "16": 20,
+            "20": 32,
+            "22": 52,
+            "24": 62
+          }
+        },
+        "returns": "g per set"
+      },
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": "No second bolt-weight source in the asset set."
+      },
+      "engine_status": "missing",
+      "governs": [
+        "workbook_sheet:HS03/Excel/XLSTART/단중.xlsx!bolt"
+      ]
+    },
+    {
+      "id": "BL-008",
+      "title": "SCSS bolt weight per splice",
+      "statement": "Splice bolt weight [kg] = ROUND(set_g(d, L) × 0.001 × qty, 2), looking up the bolt table column L/5.",
+      "category": "bom",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\Excel\\XLSTART\\단중.xlsx",
+          "locator": "SCSS!G5",
+          "note": "=ROUND(VLOOKUP(E5,bolt,F5*0.2,0)*0.001*D5,2)"
+        },
+        {
+          "source": "C:\\HS-STEEL\\HS03\\Excel\\XLSTART\\단중.xlsx",
+          "locator": "SCSS!U5",
+          "note": "web bolts, same shape"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "bolt",
+        "weight",
+        "scss"
+      ],
+      "trust": "stated",
+      "formula": {
+        "expr": "round(set_g(d, L) * 0.001 * qty, 2)",
+        "returns": "kg"
+      },
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": ""
+      },
+      "engine_status": "missing"
+    },
+    {
+      "id": "HL-001",
+      "title": "Engine hole-diameter rules disagree from M24",
+      "statement": "Bolts.HoleFor returns d+2 up to M22 and d+3 from M24 (KDS 14 31 25 standard hole), but BoltPattern.HoleDia always returns d+2 — M24 splice holes come out 26 instead of 27.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "locator": "Bolts.HoleFor (line ~71)",
+          "note": ""
+        },
+        {
+          "source": "src/HsSteel.Domain/Connections.cs",
+          "locator": "BoltPattern.HoleDia (line ~69)",
+          "note": ""
+        },
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "locator": "key=SHOLE",
+          "note": "22 (= M20+2)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Fabrication.cs:Bolts.HoleFor",
+        "src/HsSteel.Domain/Connections.cs:BoltPattern.HoleDia"
+      ],
+      "tags": [
+        "hole",
+        "bolt",
+        "kds"
+      ],
+      "trust": "stated",
+      "formula": {
+        "expr": "d + (d >= 24 ? 3 : 2)",
+        "vars": {
+          "d": "bolt diameter mm"
+        },
+        "returns": "hole mm"
+      },
+      "verification": {
+        "method": "code-read",
+        "result": "fail",
+        "detail": "Two engine call paths give different holes for d ≥ 24."
+      },
+      "engine_status": "differs",
+      "engine_note": "Fix: BoltPattern.HoleDia should delegate to Bolts.HoleFor.",
+      "governs": [
+        "block:HOLE-DIA-TABLE"
+      ]
+    },
+    {
+      "id": "HL-002",
+      "title": "Hole/bolt symbol blocks D{d}x{L}",
+      "statement": "Blocks D12x22 … D28x78 are side-view symbols whose half-height is d/2; most are drawn L/2 long from the base point. The name encodes diameter × length.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\block\\D22x52.dwg",
+          "locator": "block extents (ext_maxy − base_y = 11)",
+          "note": ""
+        },
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\block\\D28x78.dwg",
+          "locator": "block extents (ext_maxx − base_x = 39)",
+          "note": ""
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "hole",
+        "block",
+        "symbol"
+      ],
+      "trust": "inferred",
+      "formula": {
+        "expr": "half_height == d/2",
+        "vars": {
+          "d": "from name"
+        }
+      },
+      "rationale": "Geometry confirms d; whether d is the bolt or the hole diameter (D26 → M24 hole 26 would contradict KDS 27) cannot be decided without the HOLE-DIA-TABLE text, which is not extractable from the DWG here.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "geometry",
+        "result": "pass",
+        "detail": "half-height = d/2 on 11/11 blocks; half-length = L/2 on 8/11 (D18x40, D18x48, D26x56 differ)."
+      },
+      "engine_status": "n/a",
+      "governs": [
+        "block:D12x22",
+        "block:D13x22",
+        "block:D18x40",
+        "block:D18x48",
+        "block:D22x48",
+        "block:D22x52",
+        "block:D22x62",
+        "block:D24x54",
+        "block:D26x56",
+        "block:D26x76",
+        "block:D28x78"
+      ]
+    },
+    {
+      "id": "SPL-001",
+      "title": "Splice table key = {C|G}{bolt d}{spec}",
+      "statement": "Splice standards are keyed by member role (C column / G girder), bolt diameter and section spec; program files are SCSS-{C|G}{16|20|22}.dat.",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\Excel\\XLSTART\\단중.xlsx",
+          "locator": "SCSS!A5",
+          "note": "=LEFT(C5,1)&E5&B5 → \"G16H198*99*4.5*7\""
+        },
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes",
+          "locator": "SCSS-C16/C20/C22/G16/G20/G22.dat file names",
+          "note": ""
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Connections.cs:SpliceStandards.Find"
+      ],
+      "tags": [
+        "scss",
+        "splice",
+        "key"
+      ],
+      "trust": "verified",
+      "formula": {
+        "expr": "role[0] + str(d) + spec"
+      },
+      "verification": {
+        "method": "cross-source",
+        "result": "pass",
+        "detail": "Key shape in 단중.xlsx matches the 6 .dat file names (role × {16,20,22})."
+      },
+      "engine_status": "implemented",
+      "governs": [
+        "family:H-BEAM",
+        "workbook_sheet:HS03/Excel/XLSTART/단중.xlsx!SCSS"
+      ]
+    },
+    {
+      "id": "SPL-002",
+      "title": "Web splice plate length",
+      "statement": "Web splice plate length = 2·e_end + 2·e_gap + 2·n·p + 5 (splice gap).",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\Excel\\XLSTART\\단중.xlsx",
+          "locator": "SCSS!AK5:AK547",
+          "note": "=AA5*2+AD5*2+AB5*AC5*2+5-Y5 (residual)"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "scss",
+        "splice",
+        "web-plate"
+      ],
+      "trust": "verified",
+      "formula": {
+        "expr": "2*e_end + 2*e_gap + 2*n*p + gap",
+        "params": {
+          "gap": 5
+        },
+        "returns": "mm"
+      },
+      "verification": {
+        "method": "identity-check",
+        "result": "pass",
+        "detail": "Residual AK = 0 on 350/350 rows (plate lengths are hand-entered literals, check formulas are separate)."
+      },
+      "engine_status": "missing",
+      "engine_note": "Engine derives plate extents from BoltAxis patterns; no explicit check.",
+      "governs": [
+        "workbook_sheet:HS03/Excel/XLSTART/단중.xlsx!SCSS"
+      ]
+    },
+    {
+      "id": "SPL-003",
+      "title": "Web splice plate height",
+      "statement": "Web splice plate height = e_top + m·g + e_bot (bolt rows m intervals at pitch g).",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\Excel\\XLSTART\\단중.xlsx",
+          "locator": "SCSS!AL5:AL547",
+          "note": "=AE5+AF5*AG5+AH5-X5 (residual)"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "scss",
+        "splice",
+        "web-plate"
+      ],
+      "trust": "verified",
+      "formula": {
+        "expr": "e_top + m*g + e_bot",
+        "returns": "mm"
+      },
+      "verification": {
+        "method": "identity-check",
+        "result": "pass",
+        "detail": "Residual AL = 0 on 350/350 rows."
+      },
+      "engine_status": "missing",
+      "governs": [
+        "workbook_sheet:HS03/Excel/XLSTART/단중.xlsx!SCSS"
+      ]
+    },
+    {
+      "id": "SPL-004",
+      "title": "Web splice bolt count",
+      "statement": "Web splice bolts = 2·(n+1)·(m+1) (both sides of the joint).",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\Excel\\XLSTART\\단중.xlsx",
+          "locator": "SCSS!AM5:AM547",
+          "note": "=(AB5+1)*(AF5+1)*2-R5 (residual)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Connections.cs:SpliceSpec.WebBoltCount"
+      ],
+      "tags": [
+        "scss",
+        "splice",
+        "bolt-count"
+      ],
+      "trust": "stated",
+      "formula": {
+        "expr": "2*(n+1)*(m+1)"
+      },
+      "verification": {
+        "method": "identity-check",
+        "result": "partial",
+        "detail": "Residual AM = 0 on 292/350 rows; remaining rows have hand-edited bolt counts."
+      },
+      "engine_status": "implemented"
+    },
+    {
+      "id": "SPL-005",
+      "title": "Splice plate thickness per section (xlsx vs .dat)",
+      "statement": "Flange/web splice plate thicknesses per (section, bolt d) are tabulated; the program .dat and 단중.xlsx agree on most rows.",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\Excel\\XLSTART\\단중.xlsx",
+          "locator": "SCSS!I,N,W",
+          "note": ""
+        },
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\SCSS-G20.dat",
+          "locator": "S1,S11,S12",
+          "note": ""
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Connections.cs:SpliceSpec"
+      ],
+      "tags": [
+        "scss",
+        "splice",
+        "plate-thickness"
+      ],
+      "trust": "stated",
+      "verification": {
+        "method": "cross-source",
+        "result": "partial",
+        "detail": "Matched 175 (section,d) pairs: flange t agree 172, web t agree 152."
+      },
+      "engine_status": "implemented"
+    },
+    {
+      "id": "SPL-006",
+      "title": "Splice plate weight",
+      "statement": "Plate weight [kg] = ROUNDDOWN(qty·t·w·l·7.85e-6, 2).",
+      "category": "fabrication",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\Excel\\XLSTART\\단중.xlsx",
+          "locator": "SCSS!L5,Q5,Z5",
+          "note": "=ROUNDDOWN(K5*J5*I5*H5*0.00000785,2)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Modeling/Parts.cs:PlatePart.Weight"
+      ],
+      "tags": [
+        "plate",
+        "weight",
+        "scss"
+      ],
+      "trust": "verified",
+      "formula": {
+        "expr": "floor(qty*t*w*l*7.85e-6, 2)",
+        "returns": "kg"
+      },
+      "verification": {
+        "method": "cross-source",
+        "result": "pass",
+        "detail": "Recomputed 350/350 cached plate weights; density cross-checked by WT-001."
+      },
+      "engine_status": "implemented",
+      "engine_note": "Engine rounds to 2 dp (Math.Round, not floor)."
+    },
+    {
+      "id": "WT-001",
+      "title": "Steel density 7.85 (0.00785 kg/mm²/m)",
+      "statement": "All weight formulas use ρ = 7.85 t/m³: kg/m = area[mm²]·0.00785; kg = volume[mm³]·7.85e-6.",
+      "category": "materials",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\Excel\\XLSTART\\단중.xlsx",
+          "locator": "HLCCT!I2",
+          "note": "…*0.00785"
+        },
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\새공사-설치용\\BOM자재산출서.xlsm",
+          "locator": "VBA 철판단품정리/BomList: TmpThk * 7.85",
+          "note": "plate kg/m²"
+        },
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\FLAT-BAR.dat",
+          "locator": "all rows",
+          "note": ""
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Profile.cs:FromSpec",
+        "src/HsSteel.Modeling/Parts.cs"
+      ],
+      "tags": [
+        "density",
+        "weight",
+        "7.85"
+      ],
+      "trust": "verified",
+      "formula": {
+        "expr": "rho = 7.85e-6",
+        "units": "kg/mm³"
+      },
+      "verification": {
+        "method": "cross-source",
+        "result": "pass",
+        "detail": "BH-BEAM.dat 159/159, H-BEAM.dat 81/81, FLAT-BAR.dat 40/41 (F915x3.2 is a mislabelled row)."
+      },
+      "engine_status": "implemented",
+      "governs": [
+        "family:BH-BEAM",
+        "family:H-BEAM",
+        "family:FLAT-BAR"
+      ]
+    },
+    {
+      "id": "WT-002",
+      "title": "H/BH unit weight formula",
+      "statement": "H/BH kg/m = ROUND((2·B·tf + (H−2·tf)·tw + (4−π)·r²)·0.00785, 1), r = root radius (BH: r = tw).",
+      "category": "materials",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\Excel\\XLSTART\\단중.xlsx",
+          "locator": "HLCCT!I2",
+          "note": "=ROUND((D2*F2*2+(C2-F2*2)*E2+(G2*2)^2-G2^2*3.141592)*0.00785,1)"
+        },
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\BH-BEAM.dat",
+          "locator": "unit weight column",
+          "note": ""
+        },
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\H-BEAM.dat",
+          "locator": "unit weight column",
+          "note": ""
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Profile.cs:Area"
+      ],
+      "tags": [
+        "weight",
+        "h-beam",
+        "bh-beam",
+        "fillet"
+      ],
+      "trust": "verified",
+      "formula": {
+        "expr": "round((2*B*tf + (H-2*tf)*tw + (4-pi)*r^2) * 0.00785, 1)",
+        "vars": {
+          "H": "mm",
+          "B": "mm",
+          "tw": "mm",
+          "tf": "mm",
+          "r": "mm"
+        },
+        "returns": "kg/m"
+      },
+      "verification": {
+        "method": "cross-source",
+        "result": "pass",
+        "detail": "BH-BEAM.dat 159/159, H-BEAM.dat 81/81 within max(0.1, 0.5%)."
+      },
+      "engine_status": "differs",
+      "engine_note": "Table lookup is used first; the parsed-spec fallback ignores the root fillet (4−π)r² and rounds to 2 dp.",
+      "governs": [
+        "family:BH-BEAM",
+        "family:H-BEAM"
+      ]
+    },
+    {
+      "id": "WT-003",
+      "title": "H/BH paint area per metre",
+      "statement": "H/BH paint area [m²/m] = ROUND((2H + 4B − 2tw)/1000, 3).",
+      "category": "finishing",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\Excel\\XLSTART\\단중.xlsx",
+          "locator": "HLCCT!J2",
+          "note": "=ROUND((C2*2+D2*4-E2*2)*0.001,3)"
+        },
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\BH-BEAM.dat",
+          "locator": "paint column",
+          "note": ""
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Profile.cs:Perimeter"
+      ],
+      "tags": [
+        "paint",
+        "area",
+        "h-beam"
+      ],
+      "trust": "verified",
+      "formula": {
+        "expr": "round((2*H + 4*B - 2*tw) / 1000, 3)",
+        "returns": "m2/m"
+      },
+      "verification": {
+        "method": "cross-source",
+        "result": "pass",
+        "detail": "BH-BEAM.dat 159/159, H-BEAM.dat 81/81 within 0.011."
+      },
+      "engine_status": "implemented",
+      "governs": [
+        "family:BH-BEAM",
+        "family:H-BEAM"
+      ]
+    },
+    {
+      "id": "WT-004",
+      "title": "Plate weight = t × area × 7.85",
+      "statement": "Plate unit weight = t[mm]·7.85 kg/m²; plate weight = t·w·l·7.85e-6 kg.",
+      "category": "materials",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\새공사-설치용\\BOM자재산출서.xlsm",
+          "locator": "VBA BomList.bas: Cells(NthScsRow,13) = TmpThk * 7.85 '단중",
+          "note": ""
+        },
+        {
+          "source": "C:\\HS-STEEL\\HS03\\Excel\\XLSTART\\단중.xlsx",
+          "locator": "SCSS!L5",
+          "note": ""
+        },
+        {
+          "source": "src/HsSteel.Modeling/Parts.cs",
+          "locator": "PlatePart.Weight = |Area|·t·7.85e-6",
+          "note": ""
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Modeling/Parts.cs"
+      ],
+      "tags": [
+        "plate",
+        "weight"
+      ],
+      "trust": "verified",
+      "formula": {
+        "expr": "t * area_m2 * 7.85",
+        "returns": "kg"
+      },
+      "verification": {
+        "method": "cross-source",
+        "result": "pass",
+        "detail": "Workbook VBA, SCSS formula and engine agree; FLAT-BAR table 40/41."
+      },
+      "engine_status": "implemented",
+      "governs": [
+        "family:FLAT-BAR"
+      ]
+    },
+    {
+      "id": "WT-005",
+      "title": "BOM weight = length[m] × unit kg/m",
+      "statement": "BOM line length [m] = qty·L[mm]·0.001; weight [kg] = length[m] × unit weight.",
+      "category": "bom",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\견적용-2017\\자재산출-2017.xlsm",
+          "locator": "BOM_작성!M2",
+          "note": "=L2*K2*0.001"
+        },
+        {
+          "source": "C:\\HS-STEEL\\HS03\\견적용-2017\\자재산출-2017.xlsm",
+          "locator": " 자재산출서!O2:O9",
+          "note": "literal weights"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Drafting/Bom.cs"
+      ],
+      "tags": [
+        "bom",
+        "weight"
+      ],
+      "trust": "verified",
+      "formula": {
+        "expr": "qty * L / 1000 * unit_kg_m",
+        "returns": "kg"
+      },
+      "verification": {
+        "method": "cross-source",
+        "result": "pass",
+        "detail": "자재산출서 literal O = M×N on 8/8 rows."
+      },
+      "engine_status": "implemented"
+    },
+    {
+      "id": "WT-006",
+      "title": "BOM paint area = length[m] × paint m²/m",
+      "statement": "Paint area per BOM line = length[m] × PAINT[m²/m] from the section table, bucketed by finish (내화페인트/내화피복/광명단 …).",
+      "category": "finishing",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\견적용-2017\\자재산출-2017.xlsm",
+          "locator": "BOM_작성!V2:Y2",
+          "note": "=IF(finish=V$1,$M2*$U2,0)"
+        },
+        {
+          "source": "C:\\HS-STEEL\\HS03\\견적용-2017\\자재산출-2017.xlsm",
+          "locator": " 자재산출서!Q2:Q9",
+          "note": "literal areas"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Profile.cs:PaintFor"
+      ],
+      "tags": [
+        "paint",
+        "bom"
+      ],
+      "trust": "verified",
+      "formula": {
+        "expr": "length_m * paint_m2_m"
+      },
+      "verification": {
+        "method": "cross-source",
+        "result": "pass",
+        "detail": "Q = M × HLCCT paint on 8/8 rows."
+      },
+      "engine_status": "implemented"
+    },
+    {
+      "id": "BOM-001",
+      "title": "BOM part name = {drawing}-{MARK}-{seq}",
+      "statement": "BOM piece names are '{drawing no}-{member mark}-{running number}', the running number continuing within a drawing.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\견적용-2017\\자재산출-2017.xlsm",
+          "locator": "BOM_작성!D2,D3",
+          "note": "=IF(C3=C2,C3&\"-\"&G3&\"-\"&(seq+1),C3&\"-\"&G3&\"-1\") → \"100-SC1-1\""
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "bom",
+        "mark",
+        "numbering"
+      ],
+      "trust": "stated",
+      "formula": {
+        "expr": "f'{dwg}-{mark}-{seq}'"
+      },
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": ""
+      },
+      "engine_status": "missing"
+    },
+    {
+      "id": "BOM-002",
+      "title": "Shear stud quantity",
+      "statement": "Studs per metre = (1000/pitch)·ROUNDUP(B/225); stud rows across the flange = ROUNDUP(B/225); row spacing = ROUNDDOWN(B/2).",
+      "category": "bom",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\견적용-2017\\자재산출-2017.xlsm",
+          "locator": "member!Q2,T2,U2",
+          "note": "=IF(5<LEN(TRIM(R2)),(1000/S2)*T2,0); =ROUNDUP(G2/225,0); =ROUNDDOWN(G2*0.5,0)"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "stud",
+        "bom",
+        "composite"
+      ],
+      "trust": "stated",
+      "formula": {
+        "expr": "(1000/pitch) * ceil(B/225)"
+      },
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": ""
+      },
+      "engine_status": "missing"
+    },
+    {
+      "id": "BOM-003",
+      "title": "Cover-sheet tonnage factor 0.0005",
+      "statement": "견적표지 tonnage = SUM(자재집계표!F:F)·0.0005: the whole-column SUM double-counts the subtotal row, so ×0.0005 equals kg/1000.",
+      "category": "bom",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\견적용-2017\\자재산출-2017.xlsm",
+          "locator": "견적표지!J9",
+          "note": "=SUM(자재집계표!F:F)*0.0005 → 16.868 TON"
+        },
+        {
+          "source": "C:\\HS-STEEL\\HS03\\견적용-2017\\자재산출-2017.xlsm",
+          "locator": "자재집계표!F10",
+          "note": "=SUM($F$2:F9) = 16868"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "quote",
+        "tonnage"
+      ],
+      "trust": "inferred",
+      "formula": {
+        "expr": "sum(kg) / 1000",
+        "returns": "t"
+      },
+      "rationale": "0.0005 is only correct while F:F holds rows + one subtotal; adding a second subtotal would silently overstate tonnage.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "recompute",
+        "result": "pass",
+        "detail": "16868 kg subtotal + 16868 rows = 33736 × 0.0005 = 16.868 t."
+      },
+      "engine_status": "n/a"
+    },
+    {
+      "id": "QT-001",
+      "title": "Material markup (할증): shapes 9 %, plates 12 %, bolts 3 %",
+      "statement": "Ordered quantity = ROUNDUP(net × (1 + m), 0) with m = 0.09 for rolled/built shapes and deck, 0.12 for steel plate, 0.03 for bolts/anchors/studs/turnbuckles.",
+      "category": "bom",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\견적용-2017\\자재산출-2017.xlsm",
+          "locator": "VBA 자재집계표.bas 매크로5: Case \"STEEL-PLATE\" → ROUNDUP(RC[-4]*1.12,0); HTB/TS/AB/STUD → *1.03; shapes → *1.09",
+          "note": ""
+        },
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\새공사-설치용\\BOM자재산출서.xlsm",
+          "locator": "사용자!J36:L36",
+          "note": "0.09 / 0.12 / 0.03 '자재종류별 표준할증'"
+        },
+        {
+          "source": "C:\\HS-STEEL\\HS03\\견적용-2017\\자재산출-2017.xlsm",
+          "locator": "자재집계표!J2:J9",
+          "note": "=IF(ISBLANK(H2),ROUNDUP(F2*1.09,0),…)"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "quote",
+        "markup",
+        "할증",
+        "loss"
+      ],
+      "trust": "verified",
+      "formula": {
+        "expr": "ceil(net * (1 + m[kind]))",
+        "table": {
+          "m": {
+            "shape": 0.09,
+            "plate": 0.12,
+            "bolt": 0.03
+          }
+        }
+      },
+      "verification": {
+        "method": "cross-source",
+        "result": "pass",
+        "detail": "2017 VBA and the BOM template's 사용자 sheet agree; cached J2:J9 reproduce 8/8."
+      },
+      "engine_status": "missing"
+    },
+    {
+      "id": "QT-002",
+      "title": "Markup override by ordered lengths",
+      "statement": "If an ordered length (H) is given, ordered weight = count × length[m] × unit weight instead of the % markup.",
+      "category": "bom",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\견적용-2017\\자재산출-2017.xlsm",
+          "locator": "자재집계표!J2",
+          "note": "…,I2*H2*E2)"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "quote",
+        "markup"
+      ],
+      "trust": "stated",
+      "formula": {
+        "expr": "count * len_m * unit_kg_m"
+      },
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": ""
+      },
+      "engine_status": "missing"
+    },
+    {
+      "id": "CUT-001",
+      "title": "Cutting kerf 3 mm per cut",
+      "statement": "Each saw/torch cut consumes 3 mm (절단두께) in the shape cutting plan.",
+      "category": "fabrication",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\새공사-설치용\\BOM자재산출서.xlsm",
+          "locator": "사용자!N15 = 3",
+          "note": "'절단두께가 3mm 이면 1회 절단시 … 3mm 로 계산'"
+        },
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\새공사-설치용\\BOM자재산출서.xlsm",
+          "locator": "VBA 형강커팅플랜.bas: CutThk = 사용자.Cells(15,14)",
+          "note": ""
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "cut-plan",
+        "kerf"
+      ],
+      "value": 3,
+      "trust": "stated",
+      "formula": {
+        "expr": "kerf = 3",
+        "units": "mm"
+      },
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": ""
+      },
+      "engine_status": "missing"
+    },
+    {
+      "id": "CUT-002",
+      "title": "Stock lengths for cutting plan",
+      "statement": "Preferred stock 10000 then 12000 mm (3rd preference off), orderable 6000–15000 mm in 1000 mm steps; 21 mm over-length usable.",
+      "category": "fabrication",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\새공사-설치용\\BOM자재산출서.xlsm",
+          "locator": "사용자!N5,N6,N7,N10,N11,N12,N14",
+          "note": "10000/12000/0/6000/15000/1000/21"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "cut-plan",
+        "stock"
+      ],
+      "trust": "stated",
+      "formula": {
+        "params": {
+          "pref": [
+            10000,
+            12000
+          ],
+          "min": 6000,
+          "max": 15000,
+          "step": 1000,
+          "overuse": 21
+        }
+      },
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": ""
+      },
+      "engine_status": "missing"
+    },
+    {
+      "id": "CUT-003",
+      "title": "Stock length formula",
+      "statement": "New stock length = MAX(INT((used + cuts·kerf + step − overuse)/step)·step, min).",
+      "category": "fabrication",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\새공사-설치용\\BOM자재산출서.xlsm",
+          "locator": "VBA 형강커팅플랜.bas 커팅플랜계산: FormulaR1C1 \"=MAX(INT((RC5+(RC6*CutThk)+AddLen-AddUse)/AddLen)*AddLen,ShpMin)\"",
+          "note": ""
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "cut-plan",
+        "stock",
+        "formula"
+      ],
+      "trust": "stated",
+      "formula": {
+        "expr": "max(floor((used + cuts*kerf + step - overuse)/step)*step, min_len)"
+      },
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": ""
+      },
+      "engine_status": "missing"
+    },
+    {
+      "id": "CUT-004",
+      "title": "Cutting-plan loss thresholds",
+      "statement": "Allowed residual before trying another combination: 150 mm on 1st-preference stock, 100 mm on 2nd, 50 mm otherwise (허용로스 50 ×3/×2/×1); max scrap 999 mm; initial squaring loss 0.",
+      "category": "fabrication",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\새공사-설치용\\BOM자재산출서.xlsm",
+          "locator": "사용자!N18,N21:N24,N17,N19",
+          "note": "50; =N18*3, =N18*2, =N18, =N18; 999; 0"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "cut-plan",
+        "loss",
+        "scrap"
+      ],
+      "trust": "stated",
+      "formula": {
+        "params": {
+          "loss": [
+            150,
+            100,
+            50,
+            50
+          ],
+          "max_scrap": 999,
+          "initial_loss": 0
+        }
+      },
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": ""
+      },
+      "engine_status": "missing"
+    },
+    {
+      "id": "NUM-001",
+      "title": "Legacy assembly mark heads (Numbering.dat)",
+      "statement": "Column/SubColumn/Post C001; Rafter/Truss/CraneGirder/Girder G001; Beam B001; Arc A001; Brace/HBrace/VBrace R001; Purlin PU001; Girth GT001; Stair S001; HandRail H001; Joist J001; Gita Z001; sub-shape PS001.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\새공사-설치용\\attributes\\Numbering.dat",
+          "locator": "keys M83-*-HD-BOX",
+          "note": ""
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:AssemblyTypes"
+      ],
+      "tags": [
+        "mark",
+        "numbering",
+        "prefix"
+      ],
+      "trust": "stated",
+      "formula": {
+        "table": {
+          "head": {
+            "Column": "C001",
+            "SubColumn": "C001",
+            "Post": "C001",
+            "Rafter": "G001",
+            "Truss": "G001",
+            "CraneGirder": "G001",
+            "Girder": "G001",
+            "Beam": "B001",
+            "Brace": "R001",
+            "Purlin": "PU001",
+            "Girth": "GT001",
+            "Stair": "S001",
+            "HandRail": "H001"
+          }
+        }
+      },
+      "verification": {
+        "method": "cross-source",
+        "result": "fail",
+        "detail": "Engine AssemblyTypes agrees for C/G/B/PU/GT only; SC, PT, RF, TR, CG, BR, ST, HR differ."
+      },
+      "engine_status": "differs",
+      "engine_note": "Decide whether to keep engine prefixes or honour Numbering.dat heads (make them configurable).",
+      "governs": [
+        "project_default:HSSTEEL/새공사-설치용/attributes/Numbering.dat"
+      ]
+    },
+    {
+      "id": "NUM-002",
+      "title": "Section spec key = 구분 + A*B*C*D",
+      "statement": "Section keys are built as kind letters followed by '*'-joined dimensions (e.g. BH300*300*15*20).",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HS03\\Excel\\XLSTART\\단중.xlsx",
+          "locator": "HLCCT!A2",
+          "note": "=B2&C2&\"*\"&D2&\"*\"&E2&\"*\"&F2"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Knowledge/SpecAliases.cs"
+      ],
+      "tags": [
+        "spec",
+        "naming"
+      ],
+      "trust": "stated",
+      "formula": {
+        "expr": "kind + '*'.join(dims)"
+      },
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": ""
+      },
+      "engine_status": "implemented"
+    },
+    {
+      "id": "NUM-003",
+      "title": "Numbering minimum assembly length / layers",
+      "statement": "Assembly auto-numbering ignores members shorter than 1999 mm and filters layers '5,6,기존'.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\새공사-설치용\\attributes\\Numbering.dat",
+          "locator": "key=M84-ASY-MIN-LENGTH-BOX",
+          "note": "1999"
+        },
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\새공사-설치용\\attributes\\Numbering.dat",
+          "locator": "key=M84-LAYER-FILTER-BOX",
+          "note": "5,6,기존"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "numbering",
+        "filter"
+      ],
+      "trust": "inferred",
+      "rationale": "Meaning taken from key names (ASY-MIN-LENGTH, LAYER-FILTER); no dialog/manual text ingested.",
+      "inferred_by": "claude-opus-5-5",
+      "verification": {
+        "method": "none",
+        "result": "unverified",
+        "detail": ""
+      },
+      "engine_status": "missing"
+    },
+    {
+      "id": "DFT-001",
+      "title": "Template dimension style DIM-100",
+      "statement": "새공사-2019.dwg defines DIM-100 with text 3.4, arrow 3, DIMSCALE 50, 1 decimal, gap 1, baseline increment 5, closed arrows.",
+      "category": "drafting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\새공사-설치용\\새공사-2019.dwg",
+          "locator": "dimstyle DIM-100",
+          "note": "text_height 3.4; arrow_size 3; scale_factor 50; decimal_places 1; dimension_line_gap 1; dimension_line_increment 5"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:DetailRules"
+      ],
+      "tags": [
+        "dimstyle",
+        "dim-100",
+        "drafting"
+      ],
+      "trust": "stated",
+      "formula": {
+        "params": {
+          "text_height": 3.4,
+          "arrow": 3,
+          "dimscale": 50,
+          "dec": 1,
+          "gap": 1,
+          "dli": 5
+        }
+      },
+      "verification": {
+        "method": "cross-source",
+        "result": "fail",
+        "detail": "Project.dat m32-dim-txt-box = 3 and engine DR-007 text 2.5 disagree with DIM-100 text 3.4; name says 1:100 but DIMSCALE is 50."
+      },
+      "engine_status": "differs"
     }
   ]
 }
