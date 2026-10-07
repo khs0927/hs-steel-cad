@@ -211,3 +211,58 @@ dotnet test … --filter FullyQualifiedName~BulkCreate
 ### 한줄 요약 (재실행)
 
 **FEATURE_EXPLORATION §5 재실행 전부 녹색 (119 + K3 + graph + D2 + BulkCreate 15). 풀 M/force-push 없음. AutoCAD 다음 라이브 스모크 때만.**
+
+---
+
+## K3 weak-query fix — 2026-10-08 ~02:10 KST (Asia/Seoul)
+
+**Change**: `QueryExpand` — Hangul compound split, detailing synonyms (엔드플레이트/스캘럽/전단접합/거셋/고장력볼트), FTS body enrichment at DB build (no embedding rebuild), semantic query rewrite.
+
+**Rebuild**: `dotnet run --project src/HsSteel.Knowledge -- build-db` (reused existing `out/knowledge/embeddings*.` / model).
+
+### Before → After
+
+| Query | Mode | Before | After |
+|---|---|---|---|
+| `엔드플레이트` | lexical | **0 hits** | **fts-any** hits (형판/3PLT palette + enriched FTS) |
+| `엔드플레이트` | semantic | vector ~0.83 PLATE | vector **~0.88** PLATE블럭/도움말 |
+| `엔드플레이트` | auto | RRF ~0.02 vector-only | **fts-any+vector** fused top (도움말 p.7 / PLATE) |
+| `전단접합 스캘럽` | lexical | effectively empty / no FTS | **fts-any** doc_chunk + palette (PLATE/3PLT path) |
+| `전단접합 스캘럽` | semantic | ~0.85 (labels noisy in RRF view) | **~0.90** PLATE블럭이름정리 / 3PLT |
+| `전단접합 스캘럽` | auto | RRF ~0.02 vector-only | **fts-any+vector** (pdf p.7, 3PLT sheets) |
+| Hit@5 eval | auto | ≥0.8 | **still ≥0.8** (eval set 40→43 with weak queries added) |
+
+Raw probe: `out/explore_results/k3_after_weak_queries_20261008.txt` (gitignored under `out/`).
+
+### Tests
+
+- New: `QueryExpand_*`, `Real_Lexical_EndPlate_HasHits`, `Real_Auto_ShearScallop_NotOnlyNoise`
+- Eval additions: `엔드플레이트`, `전단접합 스캘럽`, `end plate gusset`
+
+---
+
+## D3 Modeling slice — 2026-10-08
+
+Landed in code (not stubs):
+
+1. **`EndPlateDef`** connection (`kind: end_plate`) → END-PLATE parts, web bolt holes, cuts; `FrameSpec.BeamConnection = EndPlate|ShearTab`
+2. **Flange cope / scallop** on `ShapePart` when shear-tab beam is deeper than girder; radius from `DetailRules.Scallop`; included in part `Signature` for mark consolidation
+3. Tests: `ModelingD3Tests` (3) — end-plate frame, cope generation, mark sharing
+
+Still left for later / when CAD live: drafting draw of cope outlines on shop views; richer grid-rule MCP (beyond `hs_project_frame`); live `cad_create_many` with XData (payload prepared below).
+
+---
+
+## Live create_many payload (ready; MCP not connected here)
+
+Grok Bot box has **no** power-cad `cad_*` tools. Mus has AutoCAD + power-cad MCP on their side.
+
+Prepared under `out/explore_results/` (gitignored):
+
+| File | dry_run | entities | Use |
+|---|---|---:|---|
+| `cad_create_many_LIVE_tiny.json` | **false** | 2 | smoke |
+| `cad_create_many_LIVE_sample.json` | **false** | 50 | cautious live |
+| `hs_drawings_to_powercad_payload0_LIVE.json` | **false** | 2996 | full SAMPLE-FRAME sheet payload0 |
+
+Pass file contents as `cad_create_many` arguments when MCP is available. Do not force-push; no full M merge.
