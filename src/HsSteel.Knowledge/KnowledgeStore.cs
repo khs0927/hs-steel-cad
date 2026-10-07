@@ -195,10 +195,11 @@ public sealed class KnowledgeStore : IDisposable
         }
 
         rank = 0;
-        foreach (var (id, _) in vec)
+        foreach (var (id, sim) in vec)
         {
             rank++;
-            Add("doc_chunk", id, vecLabels[id], 1.0 / (RrfK + rank), "vector");
+            // Blend cosine into RRF so auto-mode scores stay interpretable (pure RRF ~0.03 for strong hits).
+            Add("doc_chunk", id, vecLabels[id], (1.0 / (RrfK + rank)) + (0.5 * sim), "vector");
         }
 
         var exactKeys = exact.Select(h => (h.Kind, h.Key)).ToHashSet();
