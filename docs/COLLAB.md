@@ -152,3 +152,16 @@ Sibling may extend; prefer additive edits over rewrite fights.
 | HL-001 hole d+2/d+3, NUM-001 mark heads, WT-002 fallback root fillet, DFT-001 dim text 3.4 | **Grok Bot executor** | `src/HsSteel.Domain/{Connections,Model,Profile}.cs`, `src/HsSteel.Modeling/ModelBuilder.cs`, `src/HsSteel.Drafting/{Layout,DxfExporter}.cs`, `src/HsSteel.Mcp/Workspace.cs` (Numbering.dat load), `tests/HsSteel.Tests/EngineRulesV2FixTests.cs` (new) |
 
 Not touching: `src/HsSteel.Knowledge/Rules/` / `docs/RULES_CATALOG.md` (Claude), bolt add-length (waiting on Mus).
+
+### Engine fixes result (Grok Bot executor, 2026-10-08 KST)
+
+| 규칙 | 커밋 | 변경 |
+|---|---|---|
+| HL-001 | `4c67e6e` | `BoltPattern.HoleDia` → `Bolts.HoleFor` (M22 이하 d+2, M24 이상 d+3). M24 구멍 26→27 |
+| WT-002 | `41e8341` | `Profile.HUnitWeight` = 단중.xlsx HLCCT!I2 식 (4−π)r², 소수 1자리. BH/LH/PH r=tw; 압연 H/I는 `SectionCatalog.Resolve`가 가장 가까운 표 행의 r 사용(카탈로그 없으면 0.059·√(H·B)); ㄷ형강(필렛 2, 기본 r=tf)·L형강(필렛 1, 기본 r=t)은 외곽선에 r 포함 |
+| NUM-001 | `1eac553` | `AssemblyTypes.Prefix` = Numbering.dat 머리글 (SubColumn/Post C, Rafter/Truss/CraneGirder G, Brace R, Stair S, HandRail H). `HeadsFrom`/`DetailRules.MarkHeads`/Workspace가 attributes/Numbering.dat 로드. 접두사별 일련번호(충돌 방지). Embed는 머리글 없음 → EM 유지 |
+| DFT-001 | `1eac553` | 치수 문자 3.4 (새공사-2019.dwg DIM-100·Standard). `DetailRules.DimTextHeight`/`TemplateDimText`, `AnnotationBoxes.DimTextPaper` 2.2→3.4, DXF 치수 문자 |
+| 테스트 | `efe8869` | `EngineRulesV2FixTests` 22개. 전체 HsSteel.Tests 129→151, Knowledge.Tests 66→66, 모두 통과 |
+
+- Claude께: `rules.json`/`RULES_CATALOG.md`는 건드리지 않았습니다. HL-001/SP-003, NUM-001, WT-002, DFT-001/DR-007의 `engine_status`를 implemented로 바꿔도 됩니다.
+- 남은 일: power-cad `cad_create_many`는 dim_styles에 {name, based_on, text_style}만, dimension에 text_height 없음 → AutoCAD 실제 치수 높이는 아직 도면 스타일을 따름(power-cad 쪽 변경 필요). 마크 번호 형식(C001 3자리 vs 엔진 C1)은 Mus 결정 대기. 볼트 추가 길이는 그대로(결정 대기).
