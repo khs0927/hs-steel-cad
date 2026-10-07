@@ -3,7 +3,7 @@ using HsSteel.Knowledge;
 // Usage:
 //   dotnet run --project src/HsSteel.Knowledge -- manifest [--root C:\HS-STEEL] [--out assets/manifest.json]
 //   dotnet run --project src/HsSteel.Knowledge -- build-db [--root C:\HS-STEEL] [--manifest assets/manifest.json] [--out out/hs_assets.db]
-//   dotnet run --project src/HsSteel.Knowledge -- search <query> [--db out/hs_assets.db] [--kind section] [--limit 20]
+//   dotnet run --project src/HsSteel.Knowledge -- search <query> [--db out/hs_assets.db] [--kind section] [--limit 20] [--mode auto|lexical|semantic]
 var opts = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 var positional = new List<string>();
 for (var i = 0; i < args.Length; i++)
@@ -50,10 +50,12 @@ switch (positional.FirstOrDefault())
         var chunksPath = Opt("chunks", Path.Combine(repo, "out", "knowledge", "chunks.jsonl"));
         var chunks = AssetAdapters.DocChunks(chunksPath);
         b.IngestDocChunks(chunks);
+        var vecs = KnowledgeDbBuilder.LoadEmbeddingFiles(Path.GetDirectoryName(Path.GetFullPath(chunksPath))!);
+        b.IngestEmbeddings(vecs);
         b.Build(outPath);
         Console.WriteLine($"built {outPath}: blocks={blocks.Count} palette_items={sup.PaletteItems.Count} commands={sup.Commands.Count} aliases={sup.Aliases.Count} " +
             $"linetypes={sup.Linetypes.Count} mline_styles={sup.MlineStyles.Count} font_maps={sup.FontMaps.Count} doc_chunks={chunks.Count}" +
-            (chunks.Count == 0 ? $" (no chunks at {chunksPath})" : string.Empty));
+            $" doc_chunk_vec={vecs.Count}" + (chunks.Count == 0 ? $" (no chunks at {chunksPath})" : string.Empty));
         foreach (var w in sup.Warnings)
         {
             Console.Error.WriteLine("warn: " + w);
@@ -65,7 +67,8 @@ switch (positional.FirstOrDefault())
     case "search" when positional.Count > 1:
     {
         using var store = new KnowledgeStore(Opt("db", Path.Combine(repo, "out", "hs_assets.db")));
-        foreach (var h in store.Search(string.Join(' ', positional.Skip(1)), opts.GetValueOrDefault("kind"), int.Parse(Opt("limit", "20"), System.Globalization.CultureInfo.InvariantCulture)))
+        foreach (var h in store.Search(string.Join(' ', positional.Skip(1)), opts.GetValueOrDefault("kind"), int.Parse(Opt("limit", "20"), System.Globalization.CultureInfo.InvariantCulture),
+            Enum.Parse<SearchMode>(Opt("mode", "auto"), true)))
         {
             Console.WriteLine($"{h.Score,8:F2}  {h.MatchedBy,-7} {h.Kind,-10} {h.Key}");
         }

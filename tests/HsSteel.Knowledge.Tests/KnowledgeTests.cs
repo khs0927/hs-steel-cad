@@ -37,14 +37,16 @@ public sealed class KnowledgeFixture : IDisposable
         RealAvailable = true;
         var blocks = AssetAdapters.Blocks(Root, blockDir);
         var sup = AssetAdapters.Support(supportDir, "HSSTEEL/support");
-        var chunks = new List<DocChunkRecord>(AssetAdapters.DocChunks(Path.Combine(FindRepo(), "out", "knowledge", "chunks.jsonl")));
+        var knowledgeDir = Path.Combine(FindRepo(), "out", "knowledge");
+        var chunks = new List<DocChunkRecord>(AssetAdapters.DocChunks(Path.Combine(knowledgeDir, "chunks.jsonl")));
         DocChunkCount = chunks.Count;
+        var embeddings = KnowledgeDbBuilder.LoadEmbeddingFiles(knowledgeDir);
         foreach (var path in new[] { RealA, RealB })
         {
             new KnowledgeDbBuilder(Manifest)
                 .IngestSections(Root).IngestBlocks(blocks).IngestPaletteItems(sup.PaletteItems).IngestCommands(sup.Commands)
                 .IngestCommandAliases(sup.Aliases).IngestLinetypes(sup.Linetypes).IngestMlineStyles(sup.MlineStyles).IngestFontMaps(sup.FontMaps)
-                .IngestDocChunks(chunks).Build(path);
+                .IngestDocChunks(chunks).IngestEmbeddings(embeddings).Build(path);
         }
     }
 

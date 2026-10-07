@@ -1,3 +1,4 @@
+using System.Text;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -38,6 +39,7 @@ public sealed class KnowledgeDbBuilder
         CREATE TABLE font_map(id INTEGER PRIMARY KEY, from_font TEXT NOT NULL, to_font TEXT NOT NULL, source_file_id INTEGER REFERENCES source_file(id));
         CREATE TABLE doc_chunk(id TEXT PRIMARY KEY, source_file_id INTEGER REFERENCES source_file(id), page INTEGER NOT NULL, text TEXT NOT NULL,
             page_or_sheet TEXT, kind TEXT, sha256 TEXT);
+        CREATE TABLE doc_chunk_vec(chunk_id TEXT PRIMARY KEY REFERENCES doc_chunk(id), dim INTEGER NOT NULL, vec BLOB NOT NULL);
         CREATE TABLE node(id INTEGER PRIMARY KEY, kind TEXT NOT NULL, key TEXT NOT NULL, label TEXT NOT NULL, props_json TEXT NOT NULL, UNIQUE(kind, key));
         CREATE TABLE edge(src INTEGER NOT NULL REFERENCES node(id), rel TEXT NOT NULL, dst INTEGER NOT NULL REFERENCES node(id),
             evidence_source_file TEXT, evidence_note TEXT);
@@ -62,6 +64,7 @@ public sealed class KnowledgeDbBuilder
     private readonly List<MlineStyleRecord> mlineStyles = [];
     private readonly List<FontMapRecord> fontMaps = [];
     private readonly List<DocChunkRecord> docChunks = [];
+    private readonly Dictionary<string, float[]> chunkVectors = new(StringComparer.Ordinal);
 
     public KnowledgeDbBuilder(Manifest manifest) => this.manifest = manifest;
 
@@ -131,6 +134,73 @@ public sealed class KnowledgeDbBuilder
     public KnowledgeDbBuilder IngestFontMaps(IEnumerable<FontMapRecord> items) { fontMaps.AddRange(items); return this; }
 
     public KnowledgeDbBuilder IngestDocChunks(IEnumerable<DocChunkRecord> items) { docChunks.AddRange(items); return this; }
+
+    /// <summary>Chunk embeddings (float32, L2-normalized passage vectors); only ids that exist as doc chunks are stored.</summary>
+    public KnowledgeDbBuilder IngestEmbeddings(IEnumerable<(string Id, float[] Vec)> items)
+    {
+        foreach (var (id, vec) in items)
+        {
+            chunkVectors[id] = vec;
+        }
+
+        return this;
+    }
+
+    /// <summary>Loads out/knowledge/embeddings.npy + embeddings_ids.json when both exist and were produced by the real e5 model.</summary>
+    public static IReadOnlyList<(string Id, float[] Vec)> LoadEmbeddingFiles(string knowledgeDir)
+    {
+        var npy = Path.Combine(knowledgeDir, "embeddings.npy");
+        var idsPath = Path.Combine(knowledgeDir, "embeddings_ids.json");
+        if (!File.Exists(npy) || !File.Exists(idsPath))
+        {
+            return [];
+        }
+
+        using var doc = JsonDocument.Parse(File.ReadAllText(idsPath));
+        var model = doc.RootElement.TryGetProperty("model", out var m) ? m.GetString() ?? "" : "";
+        if (model.StartsWith("fallback", StringComparison.OrdinalIgnoreCase))
+        {
+            return [];
+        }
+
+        var ids = doc.RootElement.GetProperty("ids").EnumerateArray().Select(e => e.GetString()!).ToList();
+        var bytes = File.ReadAllBytes(npy);
+        if (bytes.Length < 10 || bytes[0] != 0x93 || bytes[1] != (byte)'N')
+        {
+            return [];
+        }
+
+        var hdrLen = bytes[6] == 1 ? BitConverter.ToUInt16(bytes, 8) : (int)BitConverter.ToUInt32(bytes, 8);
+        var dataStart = (bytes[6] == 1 ? 10 : 12) + hdrLen;
+        var header = Encoding.ASCII.GetString(bytes, bytes[6] == 1 ? 10 : 12, hdrLen);
+        if (!header.Contains("'<f4'", StringComparison.Ordinal) || header.Contains("True", StringComparison.Ordinal))
+        {
+            return [];
+        }
+
+        var shape = Regex.Match(header, @"\((\d+),\s*(\d+)\)");
+        if (!shape.Success)
+        {
+            return [];
+        }
+
+        var rows = int.Parse(shape.Groups[1].Value, CultureInfo.InvariantCulture);
+        var dim = int.Parse(shape.Groups[2].Value, CultureInfo.InvariantCulture);
+        if (rows != ids.Count || bytes.Length - dataStart < (long)rows * dim * 4)
+        {
+            return [];
+        }
+
+        var list = new List<(string, float[])>(rows);
+        for (var i = 0; i < rows; i++)
+        {
+            var v = new float[dim];
+            Buffer.BlockCopy(bytes, dataStart + i * dim * 4, v, 0, dim * 4);
+            list.Add((ids[i], v));
+        }
+
+        return list;
+    }
 
     public static string ConnectionString(string path, SqliteOpenMode mode) =>
         new SqliteConnectionStringBuilder { DataSource = path, Mode = mode, Pooling = false }.ToString();
@@ -373,6 +443,8 @@ public sealed class KnowledgeDbBuilder
         var docs = docChunks.OrderBy(d => d.Id, o).DistinctBy(d => d.Id).ToList();
         Insert(cn, tx, "INSERT INTO doc_chunk VALUES($a,$b,$c,$d,$e,$f,$g)",
             docs.Select(d => new object?[] { d.Id, Fid(d.SourceRelPath), d.Page, d.Text, d.PageOrSheet ?? d.Page.ToString(CultureInfo.InvariantCulture), d.Kind, d.Sha256 }));
+        Insert(cn, tx, "INSERT INTO doc_chunk_vec VALUES($a,$b,$c)",
+            docs.Where(d => chunkVectors.ContainsKey(d.Id)).Select(d => new object?[] { d.Id, chunkVectors[d.Id].Length, VecBytes(chunkVectors[d.Id]) }));
         foreach (var d in docs)
         {
             fts.Add(("doc_chunk", d.Id, $"{d.SourceRelPath} p.{d.PageOrSheet ?? d.Page.ToString(CultureInfo.InvariantCulture)}", d.Text));
@@ -449,6 +521,13 @@ public sealed class KnowledgeDbBuilder
     }
 
     private static bool IsIdentChar(char c) => char.IsLetterOrDigit(c) || c is '_' or '-' or '$';
+
+    private static byte[] VecBytes(float[] v)
+    {
+        var b = new byte[v.Length * 4];
+        Buffer.BlockCopy(v, 0, b, 0, b.Length);
+        return b;
+    }
 
     private static string Json(object v) => JsonSerializer.Serialize(v, CompactJson);
 

@@ -125,16 +125,22 @@ public sealed class AssetTools(Workspace ws, AssetOptions opt)
     private string AbsPath(string rel) => Path.GetFullPath(Path.Combine(opt.LegacyRoot, rel.Replace('/', Path.DirectorySeparatorChar)));
 
     [McpServerTool(Name = "hs_asset_search", ReadOnly = true, Idempotent = true)]
-    [Description("Search the HS-STEEL asset knowledge base: exact spec/alias matches first, then full-text. Kinds: section, bolt, block, command, command_alias, doc_chunk, ... "
-        + "Each hit has kind, key, label, score, matched_by and the legacy source file (relative path).")]
+    [Description("Search the HS-STEEL asset knowledge base: exact spec/alias matches first, then hybrid full-text + vector (when ONNX model and chunk embeddings are present). Kinds: section, bolt, block, command, command_alias, doc_chunk, ... "
+        + "Each hit has kind, key, label, score, matched_by and the legacy source file (relative path). mode: auto (default hybrid), lexical, semantic.")]
     public string AssetSearch(
         [Description("Spec, alias or free text, e.g. 'H-400x200', 'HTB M20'")] string query,
         [Description("Restrict to a kind, e.g. 'section' or 'block'")] string? kind = null,
-        int limit = 10)
+        int limit = 10,
+        [Description("auto | lexical | semantic")] string mode = "auto")
     {
         using var store = new KnowledgeStore(opt.DbPath);
         using var cn = AssetDb.Open(opt);
-        var hits = store.Search(query, kind, Math.Clamp(limit, 1, 100));
+        if (!Enum.TryParse<SearchMode>(mode, true, out var searchMode))
+        {
+            throw new McpException($"Unknown search mode '{mode}'; use auto, lexical, or semantic.");
+        }
+
+        var hits = store.Search(query, kind, Math.Clamp(limit, 1, 100), searchMode);
         return Json(new JsonArray([.. hits.Select(h => (JsonNode)new JsonObject
         {
             ["kind"] = h.Kind, ["key"] = h.Key, ["label"] = h.Label, ["score"] = Math.Round(h.Score, 4), ["matched_by"] = h.MatchedBy,
