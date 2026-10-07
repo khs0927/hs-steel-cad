@@ -331,8 +331,7 @@ public sealed class AssetTools(Workspace ws, AssetOptions opt)
             if (i == 0)
             {
                 pl["layers"] = layerDefs.DeepClone();
-                // The drawing must have these before the entities (they reference style HS-KOR). power-cad's cad_create_many
-                // currently only checks that a style exists; creating text_styles/dim_styles is a power-cad addition (COLLAB #4).
+                // cad_create_many creates these when missing (entities reference style HS-KOR). Existing styles are never changed.
                 pl["text_styles"] = TextStyles.TextStyleDefs();
                 pl["dim_styles"] = TextStyles.DimStyleDefs();
             }
