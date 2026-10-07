@@ -18,4 +18,9 @@
     <ProjectReference Include="..\HsSteel.Assets\HsSteel.Assets.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Rules\rules.json" LogicalName="HsSteel.Knowledge.Rules.rules.json" />
+    <None Include="Rules\rules.json" CopyToOutputDirectory="PreserveNewest" Link="Rules\rules.json" />
+  </ItemGroup>
+
 </Project>

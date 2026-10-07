@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -214,6 +214,69 @@ public sealed class AssetTools(Workspace ws, AssetOptions opt)
                 ["rel"] = h.Edge.Rel, ["evidence_source_file"] = h.Edge.EvidenceSourceFile, ["evidence_note"] = h.Edge.EvidenceNote,
             })]),
         });
+    }
+
+
+    [McpServerTool(Name = "hs_graph_rag", ReadOnly = true, Idempotent = true)]
+    [Description("Graph RAG: hybrid asset search, expand neighbors on the knowledge graph, and attach evidence-backed detailing rules. Returns a context pack for grounded answers.")]
+    public string GraphRagQuery(
+        [Description("Natural-language or keyword query (KO/EN)")] string query,
+        [Description("Optional node kind filter for search (section, bolt, block, command, doc_chunk, …)")] string? kind = null,
+        [Description("Search hit limit (default 8)")] int search_limit = 8,
+        [Description("Graph expansion depth 0-3 (default 1)")] int expand_depth = 1,
+        [Description("auto | lexical | semantic")] string mode = "auto")
+    {
+        using var store = new KnowledgeStore(opt.DbPath);
+        var m = mode.Trim().ToLowerInvariant() switch
+        {
+            "lexical" or "lex" => SearchMode.Lexical,
+            "semantic" or "vec" or "vector" => SearchMode.Semantic,
+            _ => SearchMode.Auto,
+        };
+        var result = GraphRag.Query(store, query, kind, Math.Clamp(search_limit, 1, 40), Math.Clamp(expand_depth, 0, 3), mode: m);
+        return GraphRag.ToJson(result).ToJsonString();
+    }
+
+    [McpServerTool(Name = "hs_explain", ReadOnly = true, Idempotent = true)]
+    [Description("Explain a knowledge-graph node: props, multi-hop neighbors by relation, and related RULES_CATALOG entries with engine_refs.")]
+    public string ExplainNode(
+        [Description("Node kind (section, bolt, block, command, family, …)")] string kind,
+        [Description("Node key (e.g. H-BEAM/H400x200x8x13)")] string key,
+        [Description("Neighbor depth 1-4 (default 2)")] int depth = 2)
+    {
+        using var store = new KnowledgeStore(opt.DbPath);
+        try
+        {
+            return HsExplain.Explain(store, kind, key, depth).Json.ToJsonString();
+        }
+        catch (ArgumentException ex)
+        {
+            throw new McpException(ex.Message);
+        }
+    }
+
+    [McpServerTool(Name = "hs_rules_search", ReadOnly = true, Idempotent = true)]
+    [Description("Search the evidence-backed RULES_CATALOG (Project.dat, weld/bolt gauges, shear-tab, SCSS, assembly marks, REBORN specs).")]
+    public string RulesSearch(
+        [Description("Query text")] string query,
+        [Description("Max rules (default 15)")] int limit = 15)
+    {
+        var hits = HsSteel.Knowledge.Rules.RulesCatalog.Instance.Search(query, Math.Clamp(limit, 1, 50));
+        return new JsonObject
+        {
+            ["count"] = hits.Count,
+            ["catalog_size"] = HsSteel.Knowledge.Rules.RulesCatalog.Instance.Count,
+            ["rules"] = new JsonArray([.. hits.Select(r => (JsonNode)new JsonObject
+            {
+                ["id"] = r.Id,
+                ["title"] = r.Title,
+                ["statement"] = r.Statement,
+                ["category"] = r.Category,
+                ["tags"] = new JsonArray([.. r.Tags]),
+                ["engine_refs"] = new JsonArray([.. r.EngineRefs]),
+                ["evidence"] = new JsonArray([.. r.Evidence.Select(e => (JsonNode)new JsonObject { ["source"] = e.Source, ["note"] = e.Note })]),
+            })]),
+        }.ToJsonString();
     }
 
     [McpServerTool(Name = "hs_block_insert_plan", ReadOnly = true, Idempotent = true)]

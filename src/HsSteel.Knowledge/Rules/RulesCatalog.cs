@@ -1,0 +1,163 @@
+﻿using System.Collections.ObjectModel;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace HsSteel.Knowledge.Rules;
+
+public sealed record RuleEvidence(string Source, string Note);
+
+public sealed record SteelRule(
+    string Id,
+    string Title,
+    string Statement,
+    string Category,
+    IReadOnlyList<RuleEvidence> Evidence,
+    IReadOnlyList<string> EngineRefs,
+    IReadOnlyList<string> Tags,
+    JsonElement? Value = null);
+
+public sealed class RulesCatalog
+{
+    private static readonly Lazy<RulesCatalog> Lazy = new(LoadEmbeddedOrDisk);
+    private readonly Dictionary<string, SteelRule> byId;
+    private readonly IReadOnlyList<SteelRule> all;
+
+    public RulesCatalog(IReadOnlyList<SteelRule> rules)
+    {
+        all = rules;
+        byId = rules.ToDictionary(r => r.Id, StringComparer.OrdinalIgnoreCase);
+    }
+
+    public static RulesCatalog Instance => Lazy.Value;
+
+    public int Count => all.Count;
+
+    public IReadOnlyList<SteelRule> All => all;
+
+    public SteelRule? Get(string id) => byId.TryGetValue(id, out var r) ? r : null;
+
+    /// <summary>Match rules whose id/title/statement/tags/category contain any query token (case-insensitive).</summary>
+    public IReadOnlyList<SteelRule> Search(string query, int limit = 20)
+    {
+        if (string.IsNullOrWhiteSpace(query) || limit <= 0)
+        {
+            return [];
+        }
+
+        var tokens = query.Split([' ', '\t', '\r', '\n', ',', '/', '|'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(t => t.ToLowerInvariant()).Where(t => t.Length >= 2).Distinct().ToList();
+        if (tokens.Count == 0)
+        {
+            tokens = [query.Trim().ToLowerInvariant()];
+        }
+
+        return all
+            .Select(r => (Rule: r, Score: Score(r, tokens)))
+            .Where(x => x.Score > 0)
+            .OrderByDescending(x => x.Score).ThenBy(x => x.Rule.Id, StringComparer.Ordinal)
+            .Take(limit)
+            .Select(x => x.Rule)
+            .ToList();
+    }
+
+    public IReadOnlyList<SteelRule> ByCategory(string category) =>
+        all.Where(r => r.Category.Equals(category, StringComparison.OrdinalIgnoreCase)).ToList();
+
+    public IReadOnlyList<SteelRule> ByTag(string tag) =>
+        all.Where(r => r.Tags.Any(t => t.Equals(tag, StringComparison.OrdinalIgnoreCase))).ToList();
+
+    public IReadOnlyList<SteelRule> CrossCheckEngine(string pathFragment) =>
+        all.Where(r => r.EngineRefs.Any(e => e.Contains(pathFragment, StringComparison.OrdinalIgnoreCase))).ToList();
+
+    private static int Score(SteelRule r, List<string> tokens)
+    {
+        var hay = string.Join('\n', [r.Id, r.Title, r.Statement, r.Category, .. r.Tags, .. r.EngineRefs]).ToLowerInvariant();
+        var s = 0;
+        foreach (var t in tokens)
+        {
+            if (r.Id.Equals(t, StringComparison.OrdinalIgnoreCase))
+            {
+                s += 10;
+            }
+            else if (r.Tags.Any(x => x.Equals(t, StringComparison.OrdinalIgnoreCase)))
+            {
+                s += 5;
+            }
+            else if (hay.Contains(t, StringComparison.Ordinal))
+            {
+                s += 1;
+            }
+        }
+
+        return s;
+    }
+
+    private static RulesCatalog LoadEmbeddedOrDisk()
+    {
+        var json = TryReadEmbedded() ?? TryReadBesideAssembly() ?? TryReadRepo()
+            ?? throw new InvalidOperationException("rules.json not found (embed, beside assembly, or src/HsSteel.Knowledge/Rules/).");
+        return FromJson(json);
+    }
+
+    public static RulesCatalog FromJson(string json)
+    {
+        using var doc = JsonDocument.Parse(json);
+        var arr = doc.RootElement.GetProperty("rules");
+        var list = new List<SteelRule>();
+        foreach (var el in arr.EnumerateArray())
+        {
+            var evidence = el.GetProperty("evidence").EnumerateArray()
+                .Select(e => new RuleEvidence(e.GetProperty("source").GetString()!, e.GetProperty("note").GetString() ?? ""))
+                .ToList();
+            var engine = el.TryGetProperty("engine_refs", out var er)
+                ? er.EnumerateArray().Select(x => x.GetString()!).ToList()
+                : [];
+            var tags = el.TryGetProperty("tags", out var tg)
+                ? tg.EnumerateArray().Select(x => x.GetString()!).ToList()
+                : [];
+            JsonElement? value = el.TryGetProperty("value", out var v) ? v.Clone() : null;
+            list.Add(new SteelRule(
+                el.GetProperty("id").GetString()!,
+                el.GetProperty("title").GetString()!,
+                el.GetProperty("statement").GetString()!,
+                el.GetProperty("category").GetString()!,
+                evidence, engine, tags, value));
+        }
+
+        return new RulesCatalog(new ReadOnlyCollection<SteelRule>(list));
+    }
+
+    private static string? TryReadEmbedded()
+    {
+        var asm = typeof(RulesCatalog).Assembly;
+        var name = asm.GetManifestResourceNames().FirstOrDefault(n => n.EndsWith("rules.json", StringComparison.OrdinalIgnoreCase));
+        if (name is null)
+        {
+            return null;
+        }
+
+        using var s = asm.GetManifestResourceStream(name)!;
+        using var r = new StreamReader(s);
+        return r.ReadToEnd();
+    }
+
+    private static string? TryReadBesideAssembly()
+    {
+        var p = Path.Combine(AppContext.BaseDirectory, "Rules", "rules.json");
+        return File.Exists(p) ? File.ReadAllText(p) : null;
+    }
+
+    private static string? TryReadRepo()
+    {
+        for (var d = new DirectoryInfo(Directory.GetCurrentDirectory()); d is not null; d = d.Parent)
+        {
+            var p = Path.Combine(d.FullName, "src", "HsSteel.Knowledge", "Rules", "rules.json");
+            if (File.Exists(p))
+            {
+                return File.ReadAllText(p);
+            }
+        }
+
+        return null;
+    }
+}

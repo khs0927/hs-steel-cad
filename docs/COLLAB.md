@@ -42,7 +42,7 @@ Grok봇은 이 기간 `KnowledgeDbBuilder.cs`/`Program.cs` 편집을 피해 주�
 ### Claude-sonnet 결과 (2026-10-08)
 
 - **#4 한글 문자 스타일**: `TextStyles.Korean="HS-KOR"` (원본 템플릿 Standard 스타일과 같은 `txt.shx` + 한글 빅폰트 `whgtxt.shx`). `DrawPlan.Text`/`Dim`이 `style:"HS-KOR"`를 내고, `hs_drawings_to_powercad` 첫 페이로드에 `text_styles`/`dim_styles` 정의를 싣는다.
-  **power-cad 추가 필요**: `cad_create_many`는 `style`이 도면에 *이미 있는지*만 검사(없으면 묶음 전체 거부)하고 문자/치수 스타일을 만들지 못한다. `text_styles[{name,font,big_font,width_factor}]`, `dim_styles[{name,based_on,text_style}]`를 레이어처럼 선(先)생성하는 기능 추가 전까지는 AutoCAD에서 HS-KOR 문자/치수 스타일을 수동 생성하거나 템플릿에 포함해야 한다.
+  **power-cad PR #41** (`feat/create-many-styles` @ 01f31ac): `cad_create_many` creates `text_styles`/`dim_styles` when missing (never mutates). Live AutoCAD smoke still pending.
 - **#3 짧은 인출선**: 8fe3884(`LeaderIfLongEnough`, 최소 3mm×축척)로 해결 확인. 페이로드 회귀 테스트 `PowerCadPayloadRegressionTests`(빈 text 없음, 인출선 구간 ≥ 2.5×축척, 레이어/문자·치수 스타일 모두 정의됨) 추가.
 - `dotnet test`: 128개 전부 통과 (DraftingD4Tests 포함).
 
@@ -74,3 +74,17 @@ Started: 2026-10-08 03:16 Asia/Seoul
 - Landed: https://github.com/khs0927/power-cad-mcp/pull/41 (`01f31ac`) — `cad_create_many` creates `text_styles`/`dim_styles` when missing (never mutates existing). HS-KOR need not be pre-created.
 - hs-steel payload: `TextStyles` width_factor **0.85** (`934e536`).
 - Live AutoCAD verify: **skipped** overnight (preferred).
+
+## Overnight progress (Grok Bot, 2026-10-08 03:27 Asia/Seoul)
+
+| Item | Status |
+|---|---|
+| power-cad `feat/create-many-styles` | **PR #41** https://github.com/khs0927/power-cad-mcp/pull/41 — SHA `01f31ac`. create_many creates text_styles/dim_styles when missing. BulkCreateTests 17 pass. |
+| HS-KOR width_factor | Set to **0.85** in `TextStyles.TextStyleDefs` (aligned with Claude-sonnet / COLLAB). |
+| GAP_AUDIT.md | Content-level gaps documented (VBA/formulas, VLX/DLL, image/PDF, proprietary DWG). |
+| RULES_CATALOG | **100** evidence-backed rules (`rules.json` + `RulesCatalog.cs` + docs). 64 with engine_refs. |
+| Graph RAG | `GraphRag` + `HsExplain` + MCP `hs_graph_rag` / `hs_explain` / `hs_rules_search`. Eval 32q; GraphRagTests 4 pass. |
+| GOLD_SUMMARIES | Numeric/redacted only (no proprietary DWG in repo). |
+| hs-steel tests | HsSteel.Tests **128** pass; Knowledge GraphRag **4** pass. |
+
+**Still open:** Merge/review PR #41 on power-cad; live AutoCAD HS-KOR smoke when Mus awake; deepen GAP items (VBA extract, PDF OCR) later; Claude WIP untouched.

@@ -1,0 +1,43 @@
+﻿# -*- coding: utf-8 -*-
+import json
+from pathlib import Path
+
+# ~30 Graph-RAG eval questions: expect rule ids and/or graph kinds/keys substrings
+evals = [
+  {"id": "q01", "q": "scallop radius default", "expect_rules": ["PD-006", "DR-001"], "expect_kinds": [], "notes": "SCALLOP 30"},
+  {"id": "q02", "q": "용접 갭 WDGAP", "expect_rules": ["PD-001", "DR-004"], "expect_kinds": [], "notes": "weld gap 5"},
+  {"id": "q03", "q": "default hole diameter SHOLE", "expect_rules": ["PD-004", "DR-003", "BT-001"], "expect_kinds": [], "notes": "22mm"},
+  {"id": "q04", "q": "ENDGAGE end distance", "expect_rules": ["PD-005", "DR-002"], "expect_kinds": [], "notes": "40mm"},
+  {"id": "q05", "q": "minimum fillet weld KDS", "expect_rules": ["WL-6", "WL-12", "WL-20", "WL-999", "WL-CAP"], "expect_any_rules": True, "expect_kinds": [], "notes": "fillet table"},
+  {"id": "q06", "q": "bolt hole M20 standard", "expect_rules": ["BT-001", "DR-003"], "expect_kinds": [], "notes": "bolt+2"},
+  {"id": "q07", "q": "HTB F10T grade", "expect_rules": ["BT-004"], "expect_kinds": ["bolt"], "notes": "grade map"},
+  {"id": "q08", "q": "TS S10T torque shear", "expect_rules": ["BT-003"], "expect_kinds": [], "notes": ""},
+  {"id": "q09", "q": "shear tab clear web", "expect_rules": ["ST-001", "ST-005"], "expect_kinds": [], "notes": ""},
+  {"id": "q10", "q": "shear tab edge distance M20", "expect_rules": ["ST-002", "ST-004"], "expect_kinds": [], "notes": ""},
+  {"id": "q11", "q": "shear tab pitch 70", "expect_rules": ["ST-003"], "expect_kinds": [], "notes": ""},
+  {"id": "q12", "q": "SCSS splice gap", "expect_rules": ["SP-006", "PD-021"], "expect_kinds": [], "notes": ""},
+  {"id": "q13", "q": "bolt pattern 9TX40 notation", "expect_rules": ["SP-001", "SP-002"], "expect_kinds": [], "notes": ""},
+  {"id": "q14", "q": "assembly mark prefix column", "expect_rules": ["AS-C"], "expect_kinds": [], "notes": ""},
+  {"id": "q15", "q": "girder mark prefix G", "expect_rules": ["AS-G"], "expect_kinds": [], "notes": ""},
+  {"id": "q16", "q": "purlin girth mark", "expect_rules": ["AS-PU", "AS-GT"], "expect_any_rules": True, "expect_kinds": [], "notes": ""},
+  {"id": "q17", "q": "angle gauge AIJ", "expect_rules": ["GG-001"], "expect_kinds": [], "notes": ""},
+  {"id": "q18", "q": "flange gauge H beam", "expect_rules": ["GG-002"], "expect_kinds": ["section", "family"], "notes": ""},
+  {"id": "q19", "q": "H400x200x8x13", "expect_rules": ["SEC-001"], "expect_kinds": ["section"], "expect_keys": ["H400"], "notes": "section search+graph"},
+  {"id": "q20", "q": "weld leader minimum length", "expect_rules": ["DRF-001"], "expect_kinds": [], "notes": ""},
+  {"id": "q21", "q": "한글 문자 스타일 HS-KOR", "expect_rules": ["DRF-002"], "expect_kinds": [], "notes": ""},
+  {"id": "q22", "q": "BOM 9 sheet workbook", "expect_rules": ["RB-001"], "expect_kinds": ["bom_sheet", "derived_spec"], "notes": ""},
+  {"id": "q23", "q": "VLX clean room no decompile", "expect_rules": ["RB-006", "ARCH-001"], "expect_any_rules": True, "expect_kinds": [], "notes": ""},
+  {"id": "q24", "q": "dongle rockey excluded", "expect_rules": ["RB-007"], "expect_kinds": [], "notes": ""},
+  {"id": "q25", "q": "model-first architecture", "expect_rules": ["ARCH-001"], "expect_kinds": [], "notes": ""},
+  {"id": "q26", "q": "SS400 vs SS275 material default", "expect_rules": ["PD-010", "DR-005"], "expect_kinds": [], "notes": ""},
+  {"id": "q27", "q": "splice flange lines S23", "expect_rules": ["SP-007"], "expect_kinds": [], "notes": ""},
+  {"id": "q28", "q": "connection gap beam end", "expect_rules": ["DR-006", "PD-022", "PD-023"], "expect_any_rules": True, "expect_kinds": [], "notes": ""},
+  {"id": "q29", "q": "default bolt size by section family", "expect_rules": ["GG-004"], "expect_kinds": [], "notes": ""},
+  {"id": "q30", "q": "weight table density 7.85 trust", "expect_rules": ["RB-002"], "expect_kinds": ["derived_spec"], "notes": ""},
+  {"id": "q31", "q": "empty text power-cad payload", "expect_rules": ["DRF-003"], "expect_kinds": [], "notes": ""},
+  {"id": "q32", "q": "CL-3D-FAFTER rafter", "expect_rules": ["AS-LYR", "AS-RF"], "expect_any_rules": True, "expect_kinds": [], "notes": ""},
+]
+
+out = Path(r"C:\code\hs-steel-cad\tests\HsSteel.Knowledge.Tests\Data\graph_rag_eval.json")
+out.write_text(json.dumps({"schema": "hs-graph-rag-eval/1", "count": len(evals), "questions": evals}, ensure_ascii=False, indent=2), encoding="utf-8")
+print(f"Wrote {len(evals)} evals -> {out}")

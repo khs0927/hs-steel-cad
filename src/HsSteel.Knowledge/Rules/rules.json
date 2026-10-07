@@ -1,0 +1,1979 @@
+{
+  "schema": "hs-steel-rules/1",
+  "count": 100,
+  "rules": [
+    {
+      "id": "PD-001",
+      "title": "Project.dat WDGAP",
+      "statement": "Default project setting WDGAP = 5: Weld fit-up gap (mm).",
+      "category": "detailing",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"WDGAP\" 5)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:DetailRules.From"
+      ],
+      "tags": [
+        "project.dat",
+        "wdgap"
+      ],
+      "value": 5
+    },
+    {
+      "id": "PD-002",
+      "title": "Project.dat SCALLOP",
+      "statement": "Default project setting SCALLOP = 30: Flange scallop/cope radius (mm).",
+      "category": "fabrication",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"SCALLOP\" 30)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:DetailRules.From"
+      ],
+      "tags": [
+        "project.dat",
+        "scallop"
+      ],
+      "value": 30
+    },
+    {
+      "id": "PD-003",
+      "title": "Project.dat RCCR",
+      "statement": "Default project setting RCCR = 30: Column corner radius / related clearance (mm).",
+      "category": "fabrication",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"RCCR\" 30)"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "rccr"
+      ],
+      "value": 30
+    },
+    {
+      "id": "PD-004",
+      "title": "Project.dat SHOLE",
+      "statement": "Default project setting SHOLE = 22: Default bolt hole diameter (mm).",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"SHOLE\" 22)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:DetailRules.From"
+      ],
+      "tags": [
+        "project.dat",
+        "shole"
+      ],
+      "value": 22
+    },
+    {
+      "id": "PD-005",
+      "title": "Project.dat ENDGAGE",
+      "statement": "Default project setting ENDGAGE = 40: End distance to first bolt row (mm).",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"ENDGAGE\" 40)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:DetailRules.From"
+      ],
+      "tags": [
+        "project.dat",
+        "endgage"
+      ],
+      "value": 40
+    },
+    {
+      "id": "PD-006",
+      "title": "Project.dat HOLELEN",
+      "statement": "Default project setting HOLELEN = 60: Default slotted/long hole length related (mm).",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"HOLELEN\" 60)"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "holelen"
+      ],
+      "value": 60
+    },
+    {
+      "id": "PD-007",
+      "title": "Project.dat stffsqgage",
+      "statement": "Default project setting stffsqgage = 60: Stiffener square gauge (mm).",
+      "category": "fabrication",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"stffsqgage\" \"60\")"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "stffsqgage"
+      ],
+      "value": "60"
+    },
+    {
+      "id": "PD-008",
+      "title": "Project.dat STFFGAP",
+      "statement": "Default project setting STFFGAP = 0: Stiffener gap toggle/value.",
+      "category": "fabrication",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"STFFGAP\" 0)"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "stffgap"
+      ],
+      "value": 0
+    },
+    {
+      "id": "PD-009",
+      "title": "Project.dat STFFIN",
+      "statement": "Default project setting STFFIN = 0: Stiffener inset toggle/value.",
+      "category": "fabrication",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"STFFIN\" 0)"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "stffin"
+      ],
+      "value": 0
+    },
+    {
+      "id": "PD-010",
+      "title": "Project.dat SWS",
+      "statement": "Default project setting SWS = SS400: Default steel grade (legacy SS400; engine maps toward SS275).",
+      "category": "materials",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"SWS\" \"SS400\")"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:DetailRules.From"
+      ],
+      "tags": [
+        "project.dat",
+        "sws"
+      ],
+      "value": "SS400"
+    },
+    {
+      "id": "PD-011",
+      "title": "Project.dat WELDTIP",
+      "statement": "Default project setting WELDTIP = AWS_EXXXX_GRADE: Weld tip/electrode grade placeholder.",
+      "category": "welding",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"WELDTIP\" \"AWS_EXXXX_GRADE\")"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "weldtip"
+      ],
+      "value": "AWS_EXXXX_GRADE"
+    },
+    {
+      "id": "PD-012",
+      "title": "Project.dat PAINT",
+      "statement": "Default project setting PAINT = SEE_PAINT_SPEC.: Paint specification note.",
+      "category": "finishing",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"PAINT\" \"SEE_PAINT_SPEC.\")"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "paint"
+      ],
+      "value": "SEE_PAINT_SPEC."
+    },
+    {
+      "id": "PD-013",
+      "title": "Project.dat SET_COL_STFF_JBX",
+      "statement": "Default project setting SET_COL_STFF_JBX = 75: Column stiffener J-box related size.",
+      "category": "fabrication",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"SET_COL_STFF_JBX\" 75)"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "set_col_stff_jbx"
+      ],
+      "value": 75
+    },
+    {
+      "id": "PD-014",
+      "title": "Project.dat SET_ASY_BOMLEN",
+      "statement": "Default project setting SET_ASY_BOMLEN = 73: Assembly BOM length field width/setting.",
+      "category": "bom",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"SET_ASY_BOMLEN\" 73)"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "set_asy_bomlen"
+      ],
+      "value": 73
+    },
+    {
+      "id": "PD-015",
+      "title": "Project.dat hs-dimrnd-box",
+      "statement": "Default project setting hs-dimrnd-box = 0.5: Dimension round-off (mm).",
+      "category": "drafting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"hs-dimrnd-box\" \"0.5\")"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "hs-dimrnd-box"
+      ],
+      "value": "0.5"
+    },
+    {
+      "id": "PD-016",
+      "title": "Project.dat m32-dim-txt-box",
+      "statement": "Default project setting m32-dim-txt-box = 3: Dimension text height (paper mm).",
+      "category": "drafting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"m32-dim-txt-box\" 3)"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "m32-dim-txt-box"
+      ],
+      "value": 3
+    },
+    {
+      "id": "PD-017",
+      "title": "Project.dat m32-marktxt-box",
+      "statement": "Default project setting m32-marktxt-box = 1.6: Mark text height (paper mm).",
+      "category": "drafting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"m32-marktxt-box\" 1.6)"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "m32-marktxt-box"
+      ],
+      "value": 1.6
+    },
+    {
+      "id": "PD-018",
+      "title": "Project.dat m32-gridasy-box",
+      "statement": "Default project setting m32-gridasy-box = 5: Assembly grid text size.",
+      "category": "drafting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"m32-gridasy-box\" 5)"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "m32-gridasy-box"
+      ],
+      "value": 5
+    },
+    {
+      "id": "PD-019",
+      "title": "Project.dat m32-griddan-box",
+      "statement": "Default project setting m32-griddan-box = 4: Part grid text size.",
+      "category": "drafting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"m32-griddan-box\" 4)"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "m32-griddan-box"
+      ],
+      "value": 4
+    },
+    {
+      "id": "PD-020",
+      "title": "Project.dat m32-bom-txt-box",
+      "statement": "Default project setting m32-bom-txt-box = 1.5: BOM table text height.",
+      "category": "drafting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"m32-bom-txt-box\" 1.5)"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "m32-bom-txt-box"
+      ],
+      "value": 1.5
+    },
+    {
+      "id": "PD-021",
+      "title": "Project.dat m32-splise-gap-box",
+      "statement": "Default project setting m32-splise-gap-box = 5: Splice gap (mm).",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"m32-splise-gap-box\" \"5\")"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "m32-splise-gap-box"
+      ],
+      "value": "5"
+    },
+    {
+      "id": "PD-022",
+      "title": "Project.dat m32-share1-gap-box",
+      "statement": "Default project setting m32-share1-gap-box = 5: Shear connection gap setting 1 (mm).",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"m32-share1-gap-box\" \"5\")"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "m32-share1-gap-box"
+      ],
+      "value": "5"
+    },
+    {
+      "id": "PD-023",
+      "title": "Project.dat m32-share2-gap-box",
+      "statement": "Default project setting m32-share2-gap-box = 5: Shear connection gap setting 2 (mm).",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"m32-share2-gap-box\" \"5\")"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "m32-share2-gap-box"
+      ],
+      "value": "5"
+    },
+    {
+      "id": "PD-024",
+      "title": "Project.dat m32-pipejun-ang-box",
+      "statement": "Default project setting m32-pipejun-ang-box = 3: Pipe junction angle tolerance.",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"m32-pipejun-ang-box\" \"3\")"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "m32-pipejun-ang-box"
+      ],
+      "value": "3"
+    },
+    {
+      "id": "PD-025",
+      "title": "Project.dat m32-pipejun-las-123",
+      "statement": "Default project setting m32-pipejun-las-123 = 3: Pipe junction LAS setting.",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"m32-pipejun-las-123\" \"3\")"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "m32-pipejun-las-123"
+      ],
+      "value": "3"
+    },
+    {
+      "id": "PD-026",
+      "title": "Project.dat m32-dimtad-pop",
+      "statement": "Default project setting m32-dimtad-pop = 2: DIMTAD dimension text above-line pop index.",
+      "category": "drafting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"m32-dimtad-pop\" \"2\")"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "m32-dimtad-pop"
+      ],
+      "value": "2"
+    },
+    {
+      "id": "PD-027",
+      "title": "Project.dat m32-dimdec-pop",
+      "statement": "Default project setting m32-dimdec-pop = 1: DIMDEC decimal places pop index.",
+      "category": "drafting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"m32-dimdec-pop\" \"1\")"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "m32-dimdec-pop"
+      ],
+      "value": "1"
+    },
+    {
+      "id": "PD-028",
+      "title": "Project.dat m32-dimlunit-pop",
+      "statement": "Default project setting m32-dimlunit-pop = 1: DIMLUNIT linear units pop index.",
+      "category": "drafting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"m32-dimlunit-pop\" \"1\")"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "m32-dimlunit-pop"
+      ],
+      "value": "1"
+    },
+    {
+      "id": "PD-029",
+      "title": "Project.dat m32-gitabolt-pop",
+      "statement": "Default project setting m32-gitabolt-pop = 3: Gita/secondary bolt pop index.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"m32-gitabolt-pop\" \"3\")"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "m32-gitabolt-pop"
+      ],
+      "value": "3"
+    },
+    {
+      "id": "PD-030",
+      "title": "Project.dat m32-spgpbolt-pop",
+      "statement": "Default project setting m32-spgpbolt-pop = 0: Splice group bolt pop index.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"m32-spgpbolt-pop\" \"0\")"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "m32-spgpbolt-pop"
+      ],
+      "value": "0"
+    },
+    {
+      "id": "PD-031",
+      "title": "Project.dat set-bom-matl-elss-tog",
+      "statement": "Default project setting set-bom-matl-elss-tog = 1: BOM material ELSS toggle on.",
+      "category": "bom",
+      "evidence": [
+        {
+          "source": "C:\\HS-STEEL\\HSSTEEL\\attributes\\Project.dat",
+          "note": "(\"set-bom-matl-elss-tog\" \"1\")"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "project.dat",
+        "set-bom-matl-elss-tog"
+      ],
+      "value": "1"
+    },
+    {
+      "id": "DR-001",
+      "title": "DetailRules scallop default 30",
+      "statement": "When Project.dat is missing SCALLOP, DetailRules.Scallop defaults to 30 mm.",
+      "category": "fabrication",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "DetailRules record default Scallop=30"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs"
+      ],
+      "tags": [
+        "detailrules"
+      ],
+      "value": 30
+    },
+    {
+      "id": "DR-002",
+      "title": "DetailRules end gauge default 40",
+      "statement": "EndGauge defaults to 40 mm (ENDGAGE).",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "EndGauge=40"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs"
+      ],
+      "tags": [
+        "detailrules"
+      ],
+      "value": 40
+    },
+    {
+      "id": "DR-003",
+      "title": "DetailRules hole dia default 22",
+      "statement": "HoleDia defaults to 22 mm (SHOLE) matching M20 + 2.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "HoleDia=22"
+        },
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "note": "Bolts.HoleFor: bolt+2 up to M22"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs",
+        "src/HsSteel.Domain/Fabrication.cs"
+      ],
+      "tags": [
+        "detailrules"
+      ],
+      "value": 22
+    },
+    {
+      "id": "DR-004",
+      "title": "DetailRules weld gap default 5",
+      "statement": "WeldGap defaults to 5 mm (WDGAP).",
+      "category": "welding",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "WeldGap=5"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs"
+      ],
+      "tags": [
+        "detailrules"
+      ],
+      "value": 5
+    },
+    {
+      "id": "DR-005",
+      "title": "DetailRules material default SS275",
+      "statement": "Engine default Material is SS275 when SWS missing (legacy Project.dat often SS400).",
+      "category": "materials",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "Material default SS275; Project.dat SWS=SS400"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs"
+      ],
+      "tags": [
+        "detailrules",
+        "grade"
+      ],
+      "value": "SS275"
+    },
+    {
+      "id": "DR-006",
+      "title": "DetailRules connection gap default 10",
+      "statement": "ConnectionGap (beam end to supporting web clearance) defaults to 10 mm.",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "ConnectionGap=10"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs"
+      ],
+      "tags": [
+        "detailrules"
+      ],
+      "value": 10
+    },
+    {
+      "id": "DR-007",
+      "title": "DetailRules text height 2.5 / dim gap 7",
+      "statement": "Paper text height 2.5 mm and dimension row gap 7 mm are drafting defaults.",
+      "category": "drafting",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "TextHeight=2.5 DimGap=7"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs"
+      ],
+      "tags": [
+        "detailrules"
+      ],
+      "value": {
+        "text": 2.5,
+        "dim_gap": 7
+      }
+    },
+    {
+      "id": "WL-6",
+      "title": "Min fillet leg for t≤6",
+      "statement": "Minimum fillet weld leg is 3 mm when thicker part thickness ≤ 6 mm (capped by thinner part).",
+      "category": "welding",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "note": "WeldRules.MinFillet KDS 14 31 25 / AWS D1.1 Table 5.7"
+        },
+        {
+          "source": "KDS 14 31 25",
+          "note": "min fillet by thicker part"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Fabrication.cs:WeldRules"
+      ],
+      "tags": [
+        "fillet",
+        "kds"
+      ],
+      "value": {
+        "upto": 6,
+        "min_leg": 3
+      }
+    },
+    {
+      "id": "WL-12",
+      "title": "Min fillet leg for t≤12",
+      "statement": "Minimum fillet weld leg is 5 mm when thicker part thickness ≤ 12 mm (capped by thinner part).",
+      "category": "welding",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "note": "WeldRules.MinFillet KDS 14 31 25 / AWS D1.1 Table 5.7"
+        },
+        {
+          "source": "KDS 14 31 25",
+          "note": "min fillet by thicker part"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Fabrication.cs:WeldRules"
+      ],
+      "tags": [
+        "fillet",
+        "kds"
+      ],
+      "value": {
+        "upto": 12,
+        "min_leg": 5
+      }
+    },
+    {
+      "id": "WL-20",
+      "title": "Min fillet leg for t≤20",
+      "statement": "Minimum fillet weld leg is 6 mm when thicker part thickness ≤ 20 mm (capped by thinner part).",
+      "category": "welding",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "note": "WeldRules.MinFillet KDS 14 31 25 / AWS D1.1 Table 5.7"
+        },
+        {
+          "source": "KDS 14 31 25",
+          "note": "min fillet by thicker part"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Fabrication.cs:WeldRules"
+      ],
+      "tags": [
+        "fillet",
+        "kds"
+      ],
+      "value": {
+        "upto": 20,
+        "min_leg": 6
+      }
+    },
+    {
+      "id": "WL-999",
+      "title": "Min fillet leg for t≤>20",
+      "statement": "Minimum fillet weld leg is 8 mm when thicker part thickness ≤ ∞ mm (capped by thinner part).",
+      "category": "welding",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "note": "WeldRules.MinFillet KDS 14 31 25 / AWS D1.1 Table 5.7"
+        },
+        {
+          "source": "KDS 14 31 25",
+          "note": "min fillet by thicker part"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Fabrication.cs:WeldRules"
+      ],
+      "tags": [
+        "fillet",
+        "kds"
+      ],
+      "value": {
+        "upto": 999,
+        "min_leg": 8
+      }
+    },
+    {
+      "id": "WL-CAP",
+      "title": "Fillet leg capped by thinner part",
+      "statement": "FilletLeg(t1,t2) = min(table_min(max(t1,t2)), min(t1,t2)).",
+      "category": "welding",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "note": "WeldRules.FilletLeg"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Fabrication.cs"
+      ],
+      "tags": [
+        "fillet"
+      ],
+      "value": null
+    },
+    {
+      "id": "BT-001",
+      "title": "Standard hole bolt+2 (≤M22)",
+      "statement": "Standard hole diameter = bolt diameter + 2 mm for bolts up to M22.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "note": "Bolts.HoleFor"
+        },
+        {
+          "source": "Project.dat SHOLE",
+          "note": "22 for M20"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Fabrication.cs:Bolts.HoleFor"
+      ],
+      "tags": [
+        "hole"
+      ],
+      "value": null
+    },
+    {
+      "id": "BT-002",
+      "title": "Standard hole bolt+3 (≥M24)",
+      "statement": "Standard hole diameter = bolt diameter + 3 mm for bolts M24 and larger.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "note": "Bolts.HoleFor boltDia>=24"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Fabrication.cs"
+      ],
+      "tags": [
+        "hole"
+      ],
+      "value": null
+    },
+    {
+      "id": "BT-003",
+      "title": "TS / S10T grade mapping",
+      "statement": "Bolt names starting with TS or containing S10T map to grade S10T (KS B 2819).",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "note": "Bolts.GradeOf"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Fabrication.cs"
+      ],
+      "tags": [
+        "grade",
+        "s10t"
+      ],
+      "value": null
+    },
+    {
+      "id": "BT-004",
+      "title": "HTB / F10T grade mapping",
+      "statement": "HTB / F10T names map to F10T (KS B 1010); F8T preserved as F8T.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "note": "Bolts.GradeOf"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Fabrication.cs"
+      ],
+      "tags": [
+        "grade",
+        "f10t"
+      ],
+      "value": null
+    },
+    {
+      "id": "BT-005",
+      "title": "Ordinary M-BOLT grade",
+      "statement": "Names starting with M / SB or containing 4.6 map to M-BOLT.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "note": "Bolts.GradeOf"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Fabrication.cs"
+      ],
+      "tags": [
+        "grade"
+      ],
+      "value": null
+    },
+    {
+      "id": "BT-006",
+      "title": "Unknown bolt name defaults F10T",
+      "statement": "Unrecognized bolt names default to F10T.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "note": "GradeOf return F10T"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Fabrication.cs"
+      ],
+      "tags": [
+        "grade"
+      ],
+      "value": null
+    },
+    {
+      "id": "GG-001",
+      "title": "Angle gauge AIJ/KS table",
+      "statement": "Angle leg gauges follow AIJ/KS table (e.g. L90→g1=50 max M24; L150→g1=55 g2=55).",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "note": "BoltGauges.Angle"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Fabrication.cs:BoltGauges"
+      ],
+      "tags": [
+        "gauge",
+        "angle"
+      ],
+      "value": null
+    },
+    {
+      "id": "GG-002",
+      "title": "H/T flange gauge table",
+      "statement": "Flange gauge between bolt lines: W200→120, W250→150, W300→150, W350→140.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "note": "BoltGauges.Flange"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Fabrication.cs"
+      ],
+      "tags": [
+        "gauge",
+        "flange"
+      ],
+      "value": null
+    },
+    {
+      "id": "GG-003",
+      "title": "Minimum edge distance practice 1.5d / 20",
+      "statement": "BoltGauges.For uses e = max(1.5*bolt, 20) mm as minimum edge distance practice.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "note": "BoltGauges.For e=max(1.5*bolt,20)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Fabrication.cs"
+      ],
+      "tags": [
+        "edge"
+      ],
+      "value": null
+    },
+    {
+      "id": "GG-004",
+      "title": "Default bolt by profile family",
+      "statement": "DefaultBolt: L by angle max; lip/Z 12 or 16; flat by depth; box/pipe by size; channel/H by depth bands.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "note": "BoltGauges.DefaultBolt"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Fabrication.cs"
+      ],
+      "tags": [
+        "default-bolt"
+      ],
+      "value": null
+    },
+    {
+      "id": "GG-005",
+      "title": "I/Channel web pitch 3d to 10mm",
+      "statement": "For I/Channel end connections, web pitch = ceil(3d/10)*10, rows capped at 6.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Fabrication.cs",
+          "note": "BoltGauges.For ShapeKind.I/Channel"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Fabrication.cs"
+      ],
+      "tags": [
+        "pitch",
+        "web"
+      ],
+      "value": null
+    },
+    {
+      "id": "ST-001",
+      "title": "Clear web T=D-2(tf+r)",
+      "statement": "Shear-tab plate must fit clear web depth T = D − 2(tf + r).",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "docs/SHEAR-TAB-ROWS.md",
+          "note": "clear web rule"
+        },
+        {
+          "source": "src/HsSteel.Modeling/ShearTabLayout.cs",
+          "note": "ClearWebDepth"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Modeling/ShearTabLayout.cs"
+      ],
+      "tags": [
+        "shear-tab"
+      ],
+      "value": null
+    },
+    {
+      "id": "ST-002",
+      "title": "Shop edge distance 40 mm",
+      "statement": "Vertical edge distance e ≥ max(40, MinEdgeSheared(d)).",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "docs/SHEAR-TAB-ROWS.md",
+          "note": "ShopEdge=40"
+        },
+        {
+          "source": "KDS 14 31 25",
+          "note": "sheared edge table"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Modeling/ShearTabLayout.cs"
+      ],
+      "tags": [
+        "shear-tab",
+        "edge"
+      ],
+      "value": 40
+    },
+    {
+      "id": "ST-003",
+      "title": "Shop pitch 70 mm / 3d",
+      "statement": "Pitch p ≥ max(70, ceil(3d/5)*5).",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "docs/SHEAR-TAB-ROWS.md",
+          "note": "ShopPitch=70 preferred 3d"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Modeling/ShearTabLayout.cs"
+      ],
+      "tags": [
+        "shear-tab",
+        "pitch"
+      ],
+      "value": 70
+    },
+    {
+      "id": "ST-004",
+      "title": "Sheared edge M20 = 34 mm",
+      "statement": "MinEdgeSheared(M20)=34, M16=28, M22=38, M24=42, M27=48, M30=52; >M30 → 1.75d.",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Modeling/ShearTabLayout.cs",
+          "note": "MinEdgeSheared"
+        },
+        {
+          "source": "AISC 360-05 Table J3.4M",
+          "note": "same as KDS"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Modeling/ShearTabLayout.cs"
+      ],
+      "tags": [
+        "edge",
+        "kds"
+      ],
+      "value": null
+    },
+    {
+      "id": "ST-005",
+      "title": "Rows n=floor((T-2e)/p)+1",
+      "statement": "Bolt rows n = ⌊(T−2e)/p⌋+1; plate height 2e+(n−1)p ≤ T, centred.",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "docs/SHEAR-TAB-ROWS.md",
+          "note": "row formula"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Modeling/ShearTabLayout.cs"
+      ],
+      "tags": [
+        "shear-tab"
+      ],
+      "value": null
+    },
+    {
+      "id": "ST-006",
+      "title": "n<2 flagged",
+      "statement": "Fewer than 2 rows flags warning (AISC Manual Part 10 conventional 2–12).",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "docs/SHEAR-TAB-ROWS.md",
+          "note": "n<2 warning"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Modeling/ShearTabLayout.cs"
+      ],
+      "tags": [
+        "shear-tab",
+        "warning"
+      ],
+      "value": null
+    },
+    {
+      "id": "ST-007",
+      "title": "Prefer splice-standard WebY rows",
+      "statement": "ModelBuilder.ShearTab prefers SpliceStandards.WebY when present; else ShearTabLayout.Default.",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "docs/SHEAR-TAB-ROWS.md",
+          "note": "splice override"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Modeling/ModelBuilder.cs",
+        "src/HsSteel.Modeling/ShearTabLayout.cs"
+      ],
+      "tags": [
+        "shear-tab",
+        "scss"
+      ],
+      "value": null
+    },
+    {
+      "id": "SP-001",
+      "title": "BoltPattern grammar",
+      "statement": "Plate/bolt string: thicknesses (*T)*, then X<axis>, Y<axis>, D<dia> in any order.",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Connections.cs",
+          "note": "BoltPattern.Parse"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Connections.cs"
+      ],
+      "tags": [
+        "bolt-pattern"
+      ],
+      "value": null
+    },
+    {
+      "id": "SP-002",
+      "title": "BoltAxis nAp group",
+      "statement": "Axis term nAp means n intervals of pitch p → n+1 holes; plain terms are edges/gaps.",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Connections.cs",
+          "note": "BoltAxis.Parse"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Connections.cs"
+      ],
+      "tags": [
+        "bolt-axis"
+      ],
+      "value": null
+    },
+    {
+      "id": "SP-003",
+      "title": "HoleDia = BoltDia+2 in pattern",
+      "statement": "BoltPattern.HoleDia returns BoltDia+2 when BoltDia>0.",
+      "category": "bolting",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Connections.cs",
+          "note": "BoltPattern.HoleDia"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Connections.cs"
+      ],
+      "tags": [
+        "hole"
+      ],
+      "value": null
+    },
+    {
+      "id": "SP-004",
+      "title": "SCSS S1–S10 web plate fields",
+      "statement": "SCSS row: S1 web t; S2–S5 web X; S6–S9 web Y; S10 web bolt dia.",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Connections.cs",
+          "note": "SpliceSpec remarks"
+        },
+        {
+          "source": "HSSTEEL/attributes/SCSS-*.dat",
+          "note": "6 tables 175 rows"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Connections.cs:SpliceSpec"
+      ],
+      "tags": [
+        "scss"
+      ],
+      "value": null
+    },
+    {
+      "id": "SP-005",
+      "title": "SCSS S11–S21 flange fields",
+      "statement": "S11/S12 flange plate t; S13 flange bolt dia; S14–S17 flange X; S18 gauge; S19 second gauge; S20–S21 edges.",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Connections.cs",
+          "note": "SpliceSpec"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Connections.cs"
+      ],
+      "tags": [
+        "scss"
+      ],
+      "value": null
+    },
+    {
+      "id": "SP-006",
+      "title": "SCSS S22 splice gap",
+      "statement": "S22 is splice gap (typically 5 mm; Project.dat m32-splise-gap-box).",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Connections.cs",
+          "note": "Gap => N(22)"
+        },
+        {
+          "source": "Project.dat",
+          "note": "m32-splise-gap-box 5"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Connections.cs"
+      ],
+      "tags": [
+        "scss",
+        "gap"
+      ],
+      "value": 5
+    },
+    {
+      "id": "SP-007",
+      "title": "Flange lines from S23",
+      "statement": "FlangeLines = max(2, FlangeBoltTotal/(4*FlangeX.Count)); 2 or 4 lines across flange.",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Connections.cs",
+          "note": "FlangeLines"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Connections.cs"
+      ],
+      "tags": [
+        "scss"
+      ],
+      "value": null
+    },
+    {
+      "id": "SP-008",
+      "title": "Web bolt count 2×rows×cols",
+      "statement": "WebBoltCount = 2 * WebX.Count * WebY.Count (both sides).",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Connections.cs",
+          "note": "WebBoltCount"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Connections.cs"
+      ],
+      "tags": [
+        "scss"
+      ],
+      "value": null
+    },
+    {
+      "id": "SP-009",
+      "title": "Splice Find prefers bolt size then 22/20/16",
+      "statement": "SpliceStandards.Find tries requested size then 22, 20, 16 for C or G tables.",
+      "category": "connections",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Connections.cs",
+          "note": "Find"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Connections.cs"
+      ],
+      "tags": [
+        "scss"
+      ],
+      "value": null
+    },
+    {
+      "id": "AS-C",
+      "title": "Assembly mark prefix Column→C",
+      "statement": "AssemblyType.Column uses mark prefix 'C' and centre-line layer CL-3D-* convention.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "AssemblyTypes.Prefix(Column)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:AssemblyTypes"
+      ],
+      "tags": [
+        "mark",
+        "assembly"
+      ],
+      "value": null
+    },
+    {
+      "id": "AS-SC",
+      "title": "Assembly mark prefix SubColumn→SC",
+      "statement": "AssemblyType.SubColumn uses mark prefix 'SC' and centre-line layer CL-3D-* convention.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "AssemblyTypes.Prefix(SubColumn)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:AssemblyTypes"
+      ],
+      "tags": [
+        "mark",
+        "assembly"
+      ],
+      "value": null
+    },
+    {
+      "id": "AS-PT",
+      "title": "Assembly mark prefix Post→PT",
+      "statement": "AssemblyType.Post uses mark prefix 'PT' and centre-line layer CL-3D-* convention.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "AssemblyTypes.Prefix(Post)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:AssemblyTypes"
+      ],
+      "tags": [
+        "mark",
+        "assembly"
+      ],
+      "value": null
+    },
+    {
+      "id": "AS-G",
+      "title": "Assembly mark prefix Girder→G",
+      "statement": "AssemblyType.Girder uses mark prefix 'G' and centre-line layer CL-3D-* convention.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "AssemblyTypes.Prefix(Girder)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:AssemblyTypes"
+      ],
+      "tags": [
+        "mark",
+        "assembly"
+      ],
+      "value": null
+    },
+    {
+      "id": "AS-B",
+      "title": "Assembly mark prefix Beam→B",
+      "statement": "AssemblyType.Beam uses mark prefix 'B' and centre-line layer CL-3D-* convention.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "AssemblyTypes.Prefix(Beam)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:AssemblyTypes"
+      ],
+      "tags": [
+        "mark",
+        "assembly"
+      ],
+      "value": null
+    },
+    {
+      "id": "AS-CG",
+      "title": "Assembly mark prefix CraneGirder→CG",
+      "statement": "AssemblyType.CraneGirder uses mark prefix 'CG' and centre-line layer CL-3D-* convention.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "AssemblyTypes.Prefix(CraneGirder)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:AssemblyTypes"
+      ],
+      "tags": [
+        "mark",
+        "assembly"
+      ],
+      "value": null
+    },
+    {
+      "id": "AS-BR",
+      "title": "Assembly mark prefix Brace→BR",
+      "statement": "AssemblyType.Brace uses mark prefix 'BR' and centre-line layer CL-3D-* convention.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "AssemblyTypes.Prefix(Brace)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:AssemblyTypes"
+      ],
+      "tags": [
+        "mark",
+        "assembly"
+      ],
+      "value": null
+    },
+    {
+      "id": "AS-PU",
+      "title": "Assembly mark prefix Purlin→PU",
+      "statement": "AssemblyType.Purlin uses mark prefix 'PU' and centre-line layer CL-3D-* convention.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "AssemblyTypes.Prefix(Purlin)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:AssemblyTypes"
+      ],
+      "tags": [
+        "mark",
+        "assembly"
+      ],
+      "value": null
+    },
+    {
+      "id": "AS-GT",
+      "title": "Assembly mark prefix Girth→GT",
+      "statement": "AssemblyType.Girth uses mark prefix 'GT' and centre-line layer CL-3D-* convention.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "AssemblyTypes.Prefix(Girth)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:AssemblyTypes"
+      ],
+      "tags": [
+        "mark",
+        "assembly"
+      ],
+      "value": null
+    },
+    {
+      "id": "AS-RF",
+      "title": "Assembly mark prefix Rafter→RF",
+      "statement": "AssemblyType.Rafter uses mark prefix 'RF' and centre-line layer CL-3D-* convention.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "AssemblyTypes.Prefix(Rafter)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:AssemblyTypes"
+      ],
+      "tags": [
+        "mark",
+        "assembly"
+      ],
+      "value": null
+    },
+    {
+      "id": "AS-TR",
+      "title": "Assembly mark prefix Truss→TR",
+      "statement": "AssemblyType.Truss uses mark prefix 'TR' and centre-line layer CL-3D-* convention.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "AssemblyTypes.Prefix(Truss)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:AssemblyTypes"
+      ],
+      "tags": [
+        "mark",
+        "assembly"
+      ],
+      "value": null
+    },
+    {
+      "id": "AS-ST",
+      "title": "Assembly mark prefix Stair→ST",
+      "statement": "AssemblyType.Stair uses mark prefix 'ST' and centre-line layer CL-3D-* convention.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "AssemblyTypes.Prefix(Stair)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:AssemblyTypes"
+      ],
+      "tags": [
+        "mark",
+        "assembly"
+      ],
+      "value": null
+    },
+    {
+      "id": "AS-HR",
+      "title": "Assembly mark prefix HandRail→HR",
+      "statement": "AssemblyType.HandRail uses mark prefix 'HR' and centre-line layer CL-3D-* convention.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "AssemblyTypes.Prefix(HandRail)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:AssemblyTypes"
+      ],
+      "tags": [
+        "mark",
+        "assembly"
+      ],
+      "value": null
+    },
+    {
+      "id": "AS-EM",
+      "title": "Assembly mark prefix Embed→EM",
+      "statement": "AssemblyType.Embed uses mark prefix 'EM' and centre-line layer CL-3D-* convention.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "AssemblyTypes.Prefix(Embed)"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs:AssemblyTypes"
+      ],
+      "tags": [
+        "mark",
+        "assembly"
+      ],
+      "value": null
+    },
+    {
+      "id": "AS-LYR",
+      "title": "RAFTER layer alias FAFTER",
+      "statement": "Layer CL-3D-FAFTER maps to AssemblyType.Rafter.",
+      "category": "numbering",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "FromLayer FAFTER"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs"
+      ],
+      "tags": [
+        "layer"
+      ],
+      "value": null
+    },
+    {
+      "id": "DRF-001",
+      "title": "Weld leader min 3 paper mm",
+      "statement": "Callouts.LeaderIfLongEnough omits leaders shorter than 3 paper mm × scale (COLLAB #3).",
+      "category": "drafting",
+      "evidence": [
+        {
+          "source": "docs/COLLAB.md",
+          "note": "issue #3"
+        },
+        {
+          "source": "docs/D4_RESULTS.md",
+          "note": "LeaderIfLongEnough"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Drafting"
+      ],
+      "tags": [
+        "leader",
+        "weld"
+      ],
+      "value": null
+    },
+    {
+      "id": "DRF-002",
+      "title": "HS-KOR text style txt+whgtxt",
+      "statement": "Korean text style HS-KOR uses txt.shx + bigfont whgtxt.shx (power-cad must create styles).",
+      "category": "drafting",
+      "evidence": [
+        {
+          "source": "docs/COLLAB.md",
+          "note": "Claude-sonnet #4"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Drafting"
+      ],
+      "tags": [
+        "text-style",
+        "hangul"
+      ],
+      "value": null
+    },
+    {
+      "id": "DRF-003",
+      "title": "Empty text excluded from power-cad payload",
+      "statement": "DrawingsToPowerCad drops text/mtext with empty string to avoid cad_create_many rejection.",
+      "category": "drafting",
+      "evidence": [
+        {
+          "source": "docs/COLLAB.md",
+          "note": "live verify #1"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Mcp/AssetTools.cs"
+      ],
+      "tags": [
+        "power-cad"
+      ],
+      "value": null
+    },
+    {
+      "id": "RB-001",
+      "title": "BOM workbook 9 sheets",
+      "statement": "Legacy BOM workbook schema targets 9 sheets (BomList, AssyList, cover, by-spec totals, …).",
+      "category": "bom",
+      "evidence": [
+        {
+          "source": "HS-STEEL_REBORN/orch/bom_schema.json",
+          "note": "derived_spec trust unverified"
+        },
+        {
+          "source": "docs/REBORN_LEDGER.md",
+          "note": "ingest"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "bom",
+        "reborn"
+      ],
+      "value": null
+    },
+    {
+      "id": "RB-002",
+      "title": "Weight table density 7.85 unverified",
+      "statement": "REBORN weight_table agrees 775/775 vs section kg/m ±0.5%, but density 7.85 assumption remains unverified trust.",
+      "category": "materials",
+      "evidence": [
+        {
+          "source": "docs/REBORN_LEDGER.md",
+          "note": "reborn_weight_crosscheck"
+        },
+        {
+          "source": "meta.reborn_weight_crosscheck",
+          "note": "DB meta"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "weight",
+        "trust"
+      ],
+      "value": null
+    },
+    {
+      "id": "RB-003",
+      "title": "Cut plan loss spec exists",
+      "statement": "형강커팅플랜 cut_plan_spec defines cutting loss rules (derived, unverified).",
+      "category": "fabrication",
+      "evidence": [
+        {
+          "source": "HS-STEEL_REBORN/orch/cut_plan_spec.json",
+          "note": "derived_spec"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "cut-plan",
+        "reborn"
+      ],
+      "value": null
+    },
+    {
+      "id": "RB-004",
+      "title": "Command catalog 302",
+      "statement": "REBORN command_triage_v2 lists 302 commands; 232 linked to our command nodes.",
+      "category": "commands",
+      "evidence": [
+        {
+          "source": "docs/REBORN_LEDGER.md",
+          "note": "232/302 described_by"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "commands",
+        "reborn"
+      ],
+      "value": null
+    },
+    {
+      "id": "RB-005",
+      "title": "dwg_blocks_v2 verified",
+      "statement": "Only derived_spec with trust=verified is dwg_blocks_v2 (113 basenames match block table).",
+      "category": "assets",
+      "evidence": [
+        {
+          "source": "docs/REBORN_LEDGER.md",
+          "note": "verified 1"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "blocks",
+        "trust"
+      ],
+      "value": null
+    },
+    {
+      "id": "RB-006",
+      "title": "VLX not decompiled into engine",
+      "statement": "hs02.VLX / HS-DETAIL.VLX are reference-only; behaviour reconstructed from FAS symbols and dialogs, not bytecode port.",
+      "category": "architecture",
+      "evidence": [
+        {
+          "source": "docs/ARCHITECTURE.md",
+          "note": "clean-room"
+        },
+        {
+          "source": "docs/ASSET_LEDGER.md",
+          "note": "VLX reference"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "vlx"
+      ],
+      "value": null
+    },
+    {
+      "id": "RB-007",
+      "title": "Dongle DLLs excluded",
+      "statement": "CSROCKEY2013 / r4nd_class / HsRockey are excluded (license dongle), never redistributed.",
+      "category": "architecture",
+      "evidence": [
+        {
+          "source": "docs/ASSET_LEDGER.md",
+          "note": "excluded license"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "license"
+      ],
+      "value": null
+    },
+    {
+      "id": "SEC-001",
+      "title": "14 steel families in D2",
+      "statement": "Engine covers 14 families: H/BH/LH/PEB/I/T/ANGLE/CHANNEL/C-CHANNEL/Z/SQ-PIPE/STEEL-PIPE/ROUND-BAR/FLAT-BAR (+ plate).",
+      "category": "sections",
+      "evidence": [
+        {
+          "source": "docs/FEATURE_EXPLORATION.md",
+          "note": "D2 list"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Profile.cs"
+      ],
+      "tags": [
+        "family"
+      ],
+      "value": null
+    },
+    {
+      "id": "SEC-002",
+      "title": "Section catalog skips Project and SCSS",
+      "statement": "SectionCatalog.Load skips Project.dat and SCSS-*.dat when scanning attributes.",
+      "category": "sections",
+      "evidence": [
+        {
+          "source": "src/HsSteel.Domain/Model.cs",
+          "note": "SectionCatalog.Load"
+        }
+      ],
+      "engine_refs": [
+        "src/HsSteel.Domain/Model.cs"
+      ],
+      "tags": [
+        "catalog"
+      ],
+      "value": null
+    },
+    {
+      "id": "ARCH-001",
+      "title": "Model-first input",
+      "statement": "Primary input is the 3D/project model; drawings are projections (ARCHITECTURE §1).",
+      "category": "architecture",
+      "evidence": [
+        {
+          "source": "docs/ARCHITECTURE.md",
+          "note": "model-first"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "architecture"
+      ],
+      "value": null
+    },
+    {
+      "id": "ARCH-002",
+      "title": "No AutoCAD.NET in Drafting",
+      "statement": "Drafting emits DrawPlan/DXF only; AutoCAD execution via power-cad, not AutoCAD.NET in Drafting.",
+      "category": "architecture",
+      "evidence": [
+        {
+          "source": "docs/ARCHITECTURE.md",
+          "note": "Drafting rule"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "architecture"
+      ],
+      "value": null
+    },
+    {
+      "id": "ARCH-003",
+      "title": "Deterministic rules",
+      "statement": "Same input → same DrawPlan; tests lock behaviour.",
+      "category": "architecture",
+      "evidence": [
+        {
+          "source": "docs/ARCHITECTURE.md",
+          "note": "design principles"
+        }
+      ],
+      "engine_refs": [],
+      "tags": [
+        "architecture"
+      ],
+      "value": null
+    }
+  ]
+}
