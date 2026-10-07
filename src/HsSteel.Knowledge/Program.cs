@@ -53,6 +53,9 @@ switch (positional.FirstOrDefault())
         var vecs = KnowledgeDbBuilder.LoadEmbeddingFiles(Path.GetDirectoryName(Path.GetFullPath(chunksPath))!);
         b.IngestEmbeddings(vecs);
         b.Build(outPath);
+        var rebornRoot = Opt("reborn", HsSteel.Knowledge.Reborn.RebornManifest.DefaultRoot);
+        if (Directory.Exists(rebornRoot)) Console.WriteLine(HsSteel.Knowledge.Reborn.RebornIngest.Apply(outPath, rebornRoot).Summary);
+        Console.WriteLine(HsSteel.Knowledge.Ingest.AssetIngest.Apply(outPath, m, root, Path.Combine(repo, "out", "knowledge", "coverage.json")).Summary);
         Console.WriteLine($"built {outPath}: blocks={blocks.Count} palette_items={sup.PaletteItems.Count} commands={sup.Commands.Count} aliases={sup.Aliases.Count} " +
             $"linetypes={sup.Linetypes.Count} mline_styles={sup.MlineStyles.Count} font_maps={sup.FontMaps.Count} doc_chunks={chunks.Count}" +
             $" doc_chunk_vec={vecs.Count}" + (chunks.Count == 0 ? $" (no chunks at {chunksPath})" : string.Empty));
@@ -61,6 +64,14 @@ switch (positional.FirstOrDefault())
             Console.Error.WriteLine("warn: " + w);
         }
 
+        return 0;
+    }
+
+    case "reborn-manifest":
+    {
+        var rm = HsSteel.Knowledge.Reborn.RebornManifest.Scan(Opt("reborn", HsSteel.Knowledge.Reborn.RebornManifest.DefaultRoot));
+        rm.Save(Opt("out", Path.Combine(repo, "assets", "reborn_manifest.json")));
+        Console.WriteLine($"{rm.FileCount} files ({string.Join(", ", rm.Counts.Select(c => $"{c.Key}={c.Value}"))})");
         return 0;
     }
 
