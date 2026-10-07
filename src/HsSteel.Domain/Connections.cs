@@ -66,7 +66,8 @@ public sealed record BoltPattern(IReadOnlyList<double> Thicknesses, BoltAxis? X,
     private static readonly Regex Thk = new(@"^(\d+(?:\.\d+)?)T", RegexOptions.Compiled);
     private static readonly Regex Part = new(@"([XYD])([0-9.A+\-]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    public double HoleDia => BoltDia > 0 ? BoltDia + 2 : 0;
+    /// <summary>Standard hole for the pattern's bolt (HL-001: same rule as <see cref="Bolts.HoleFor"/>, d+2 up to M22, d+3 from M24).</summary>
+    public double HoleDia => BoltDia > 0 ? Bolts.HoleFor(BoltDia) : 0;
 
     public static BoltPattern Parse(string s)
     {
