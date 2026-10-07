@@ -27,40 +27,78 @@ public static class PartDetail
 
         var webHoles = part.Holes.Where(h => h.Face == HoleFace.Web).ToList();
         var flgHoles = part.Holes.Where(h => h.Face != HoleFace.Web).ToList();
-        var topY = P(14) + (flgHoles.Count > 0 ? P(Paper.DimRow) : 0);
-        var frontY = topY + p.Width + P(16);
+        var flgStations = Stations(map, part.Length, flgHoles.Select(h => h.X));
+        var flgDepth = flgHoles.Count > 0 ? Annotate.ChainDepth(flgStations, true, -1, s) : 0;
+        var topY = flgHoles.Count > 0 ? Math.Max(P(21), P(11) + flgDepth + P(Paper.DimRow)) : P(14);
+        var frontY = topY + p.Width + P(18);
         MemberViews.Top(d, p, map, 0, topY, part.Holes);
         MemberViews.Front(d, p, map, 0, frontY, part.Holes);
 
         var above = frontY + p.Depth;
-        var row = 1;
+        var line = above + P(Paper.DimRow);
         if (webHoles.Count > 0)
         {
-            Annotate.Chain(d, Stations(map, part.Length, webHoles.Select(h => h.X)), true, above, above + P(Paper.DimRow * row++));
+            var used = Annotate.Chain(d, Stations(map, part.Length, webHoles.Select(h => h.X)), true, above, line);
+            line += Annotate.NextRow(used, s);
         }
 
-        Annotate.Dim(d, 0, map.DrawnLength, true, above, above + P(Paper.DimRow * row), Annotate.F(part.Length));
+        Annotate.Dim(d, 0, map.DrawnLength, true, above, line, Annotate.F(part.Length));
+        var right = map.DrawnLength + P(Paper.DimRow);
         if (webHoles.Count > 0)
         {
-            Annotate.Chain(d, webHoles.Select(h => h.Across).Distinct().Prepend(0).Append(p.Depth).Select(v => new Station(frontY + v, v)).ToList(), false, map.DrawnLength, map.DrawnLength + P(Paper.DimRow));
+            Annotate.Chain(d, webHoles.Select(h => h.Across).Distinct().Prepend(0).Append(p.Depth).Select(v => new Station(frontY + v, v)).ToList(), false, map.DrawnLength, right);
         }
 
         if (flgHoles.Count > 0)
         {
-            Annotate.Chain(d, Stations(map, part.Length, flgHoles.Select(h => h.X)), true, topY, topY - P(Paper.DimRow));
-            Annotate.Chain(d, flgHoles.Select(h => h.Across).Distinct().Prepend(0).Append(p.Width).Select(v => new Station(topY + v, v)).ToList(), false, map.DrawnLength, map.DrawnLength + P(Paper.DimRow));
+            Annotate.Chain(d, flgStations, true, topY, topY - P(Paper.DimRow));
+            Annotate.Chain(d, flgHoles.Select(h => h.Across).Distinct().Prepend(0).Append(p.Width).Select(v => new Station(topY + v, v)).ToList(), false, map.DrawnLength, right);
         }
 
-        var secX = map.DrawnLength + P(webHoles.Count > 0 || flgHoles.Count > 0 ? 26 : 16) + (p.Width / 2);
-        MemberViews.Section(d, p, secX, frontY + (p.Depth / 2));
-        d.Text(Layers.Text, "SECTION", secX, frontY - P(4), th * 0.8);
+        // Callouts live in the band between the plan (top) view and the elevation (front) view.
+        var placer = new Placer(d, P(0.8));
+        placer.Block(new Box(-P(1), frontY - (p.Depth * 0.12), map.DrawnLength + P(1), frontY + (p.Depth * 1.12)));
+        placer.Block(new Box(-P(1), topY - (p.Width * 0.12), map.DrawnLength + P(1), topY + (p.Width * 1.12)));
+        double bandLo = topY + (p.Width * 1.12) + P(1), bandHi = frontY - (p.Depth * 0.12) - P(1);
+        IEnumerable<Box> InBand(double x, double w, double h) => Placer.Band(x, w, h, bandLo, bandHi, P(2), 0, map.DrawnLength);
+        var markX = map.Map(Math.Min(part.Length * 0.15, 400));
+        Callouts.Balloon(d, placer, part.Mark, th, (markX, frontY), (w, h) => InBand(markX, w, h));
+        BoltNotes(d, placer, map, webHoles, flgHoles, frontY, topY, th, InBand);
 
+        Callouts.Section(d, p, 0, -P(2));
         d.Text(Layers.Text, $"{part.Mark}", 0, P(6), th * 1.6, "middle_left");
         d.Text(Layers.Text, $"{p.Spec}  L={Annotate.F(part.Length)}  {part.Material}  {part.Quantity} EA  {part.Weight:0.0} kg/EA", DrawPlan.TextWidth(part.Mark, th * 1.6) + P(4), P(6), th, "middle_left");
         d.Meta["kind"] = "part";
         d.Meta["mark"] = part.Mark;
         d.Meta["broken"] = map.Broken;
         return d;
+    }
+
+    /// <summary>"n-Mxx HTB (Øhole)" notes for every hole cluster, leaders from the cluster's hole nearest to the band.</summary>
+    internal static void BoltNotes(DrawPlan d, Placer placer, LengthMap map, List<Hole> webHoles, List<Hole> flgHoles, double frontY, double topY, double th, Func<double, double, double, IEnumerable<Box>> band, double ox = 0)
+    {
+        foreach (var c in Callouts.Clusters(webHoles))
+        {
+            foreach (var g in c.GroupBy(h => h.Dia).OrderBy(g => g.Key))
+            {
+                var low = g.OrderBy(h => h.Across).ThenBy(h => h.X).First();
+                var anchor = (ox + map.Map(low.X), frontY + low.Across - (low.Dia / 2));
+                Callouts.Note(d, placer, Callouts.BoltNote(g.Count(), g.Key), th * 0.9, anchor, (w, h) => band(anchor.Item1, w, h));
+            }
+        }
+
+        foreach (var c in Callouts.Clusters(flgHoles))
+        {
+            foreach (var g in c.GroupBy(h => h.Dia).OrderBy(g => g.Key))
+            {
+                var perFlange = g.GroupBy(h => h.Face).Max(f => f.Count());
+                var faces = g.Select(h => h.Face).Distinct().Count();
+                var hi = g.OrderByDescending(h => h.Across).ThenBy(h => h.X).First();
+                var anchor = (ox + map.Map(hi.X), topY + hi.Across + (hi.Dia / 2));
+                var text = Callouts.BoltNote(perFlange, g.Key) + (faces > 1 ? " EA FLG" : "");
+                Callouts.Note(d, placer, text, th * 0.9, anchor, (w, h) => band(anchor.Item1, w, h));
+            }
+        }
     }
 
     internal static List<Station> Stations(LengthMap map, double length, IEnumerable<double> xs) =>
@@ -91,28 +129,28 @@ public static class PlateDetail
             d.Line(Layers.Center, ox + h.U, oy + h.V - c, ox + h.U, oy + h.V + c);
         }
 
-        var row = 1;
+        var line = oy - P(Paper.DimRow);
         if (holesU.Count > 0)
         {
-            Annotate.Chain(d, holesU.Prepend(0).Append(part.SizeU).Select(u => new Station(ox + u, u)).ToList(), true, oy, oy - P(Paper.DimRow * row++));
+            line -= Annotate.NextRow(Annotate.Chain(d, holesU.Prepend(0).Append(part.SizeU).Select(u => new Station(ox + u, u)).ToList(), true, oy, line), s);
         }
 
-        Annotate.Dim(d, ox, ox + part.SizeU, true, oy, oy - P(Paper.DimRow * row), Annotate.F(part.SizeU));
-        row = 1;
+        Annotate.Dim(d, ox, ox + part.SizeU, true, oy, line, Annotate.F(part.SizeU));
+        line = ox - P(Paper.DimRow);
         if (holesV.Count > 0)
         {
-            Annotate.Chain(d, holesV.Prepend(0).Append(part.SizeV).Select(v => new Station(oy + v, v)).ToList(), false, ox, ox - P(Paper.DimRow * row++));
+            line -= Annotate.NextRow(Annotate.Chain(d, holesV.Prepend(0).Append(part.SizeV).Select(v => new Station(oy + v, v)).ToList(), false, ox, line), s);
         }
 
-        Annotate.Dim(d, oy, oy + part.SizeV, false, ox, ox - P(Paper.DimRow * row), Annotate.F(part.SizeV));
-        var holeNote = part.Holes.GroupBy(h => h.Dia).Select(g => $"{g.Count()}-Ø{Annotate.F(g.Key)}");
+        Annotate.Dim(d, oy, oy + part.SizeV, false, ox, line, Annotate.F(part.SizeV));
+        var holeNote = part.Holes.GroupBy(h => h.Dia).OrderBy(g => g.Key).Select(g => Callouts.BoltNote(g.Count(), g.Key));
         var label = $"{part.Name}  {part.Material}  {part.Quantity} EA  {part.Weight:0.0} kg/EA";
         var ly = oy + part.SizeV + P(6);
         d.Text(Layers.Text, part.Mark, ox, ly + P(5), th * 1.6, "middle_left");
         d.Text(Layers.Text, label, ox, ly, th, "middle_left");
         if (part.Holes.Count > 0)
         {
-            d.Text(Layers.Text, "HOLE " + string.Join(", ", holeNote), ox, ly - P(4), th * 0.85, "middle_left");
+            d.Text(Layers.Text, string.Join(", ", holeNote), ox, ly - P(4), th * 0.85, "middle_left");
         }
 
         d.Meta["kind"] = "plate";
@@ -162,8 +200,13 @@ public static class AssemblyDetail
         var minX = a.Attachments.Select(at => XRange(at).A).Append(0).Min();
         var ox = Math.Max(0, -map.Map(minX)) + P(Paper.DimRow);
         var markRow = P(12);
-        var topY = markRow + P(Paper.DimRow * 2) + MaxBelow(a, p);
-        var frontY = topY + p.Width + MaxAbove(a, p, top: true) + MaxBelow(a, p) + P(18);
+        var flg = main.Holes.Where(h => h.Face != HoleFace.Web).Select(h => h.X).ToList();
+        var flgStations = PartDetail.Stations(map, main.Length, flg).Select(v => v with { Drawn = v.Drawn + ox }).ToList();
+        var flgDepth = flg.Count > 0 ? Annotate.ChainDepth(flgStations, true, -1, s) : 0;
+        var below = MaxBelow(a, p);
+        var topY = Math.Max(markRow + P(Paper.DimRow * 2), markRow + P(6) + flgDepth + P(Paper.DimRow)) + below;
+        var topAbove = MaxAbove(a, p, top: true);
+        var frontY = topY + p.Width + topAbove + below + P(24);
 
         MemberViews.Top(d, p, map, ox, topY, main.Holes);
         MemberViews.Front(d, p, map, ox, frontY, main.Holes);
@@ -177,42 +220,51 @@ public static class AssemblyDetail
         var stations = main.Holes.Where(h => h.Face == HoleFace.Web).Select(h => h.X)
             .Concat(a.Attachments.Where(at => at.Welded).SelectMany(at => new[] { XRange(at).A, XRange(at).B }))
             .Where(x => x >= 0 && x <= main.Length).ToList();
-        var row = 1;
+        var line = above + P(Paper.DimRow);
         if (stations.Count > 0)
         {
-            Annotate.Chain(d, PartDetail.Stations(map, main.Length, stations).Select(v => v with { Drawn = v.Drawn + ox }).ToList(), true, above, above + P(Paper.DimRow * row++));
+            var used = Annotate.Chain(d, PartDetail.Stations(map, main.Length, stations).Select(v => v with { Drawn = v.Drawn + ox }).ToList(), true, above, line);
+            line += Annotate.NextRow(used, s);
         }
 
-        Annotate.Dim(d, ox, ox + map.DrawnLength, true, above, above + P(Paper.DimRow * row), Annotate.F(main.Length));
-        var flg = main.Holes.Where(h => h.Face != HoleFace.Web).Select(h => h.X).ToList();
+        Annotate.Dim(d, ox, ox + map.DrawnLength, true, above, line, Annotate.F(main.Length));
         if (flg.Count > 0)
         {
-            Annotate.Chain(d, PartDetail.Stations(map, main.Length, flg).Select(v => v with { Drawn = v.Drawn + ox }).ToList(), true, topY - MaxBelow(a, p), topY - MaxBelow(a, p) - P(Paper.DimRow));
+            Annotate.Chain(d, flgStations, true, topY - below, topY - below - P(Paper.DimRow));
         }
 
-        // Part marks: main part on the front view, plates on the top view, labels in one row under the drawing.
+        // Callouts: bolt notes, weld symbols and the main mark in the band between the views; plate marks in one row below.
+        var placer = new Placer(d, P(0.8));
+        var right = ox + map.DrawnLength;
+        var frontBox = new Box(0, frontY - below - (p.Depth * 0.12), right + P(1), above + (p.Depth * 0.12));
+        var topBox = new Box(0, topY - below - (p.Width * 0.12), right + P(1), topY + p.Width + topAbove + (p.Width * 0.12));
+        placer.Block(frontBox);
+        placer.Block(topBox);
+        double bandLo = topBox.Y1 + P(1), bandHi = frontBox.Y0 - P(1);
+        var xMax = Math.Max(right, P(150));
+        IEnumerable<Box> InBand(double x, double w, double h) => Placer.Band(x, w, h, bandLo, bandHi, P(2), 0, xMax);
+
         var mainX = ox + map.Map(Math.Min(main.Length * 0.15, 400));
-        Annotate.Mark(d, main.Mark, (mainX, frontY + (p.Depth * 0.5)), (mainX - P(8), frontY + (p.Depth * 0.5) + P(10)), th);
-        var used = new List<double>();
-        foreach (var g in a.Attachments.GroupBy(at => at.Part.Mark))
+        Callouts.Balloon(d, placer, main.Mark, th, (mainX, frontY - below), (w, h) => InBand(mainX, w, h));
+        foreach (var g in a.Attachments.Where(at => at.Welded).GroupBy(at => at.Part.Mark).OrderBy(g => g.Key, StringComparer.Ordinal))
+        {
+            var at = g.First();
+            var kind = at.At.Orientation == PlateOrientation.End && at.Part.Thickness >= 12 ? WeldKind.Groove : WeldKind.Fillet;
+            var size = kind == WeldKind.Fillet ? Callouts.FilletSize(at.Part.Thickness) : at.Part.Thickness;
+            var anchor = Callouts.FrontAnchor(at, x => ox + map.Map(x), frontY);
+            Callouts.Weld(d, placer, kind, size, anchor, (w, h) => InBand(anchor.X, w, h), g.Key);
+        }
+
+        PartDetail.BoltNotes(d, placer, map, main.Holes.Where(h => h.Face == HoleFace.Web).ToList(), main.Holes.Where(h => h.Face != HoleFace.Web).ToList(), frontY, topY, th, InBand, ox);
+
+        foreach (var g in a.Attachments.GroupBy(at => at.Part.Mark).OrderBy(g => g.Key, StringComparer.Ordinal))
         {
             var at = g.First();
             var (x0, x1) = XRange(at);
             var cx = ox + map.Map((x0 + x1) / 2);
             var cy = TopCenterY(at, topY);
-            var lx = cx;
-            while (used.Any(u => Math.Abs(u - lx) < P(9)))
-            {
-                lx += P(9);
-            }
-
-            used.Add(lx);
-            Annotate.Mark(d, g.Key, (cx, cy), (lx, markRow), th);
+            Callouts.Balloon(d, placer, g.Key, th, (cx, cy), (w, h) => Placer.Band(cx, w, h, markRow - (h / 2), markRow + (h / 2), P(1), 0, xMax).Where(b => b.X0 >= 0));
         }
-
-        var secX = ox + map.DrawnLength + P(26) + (p.Width / 2);
-        MemberViews.Section(d, p, secX, frontY + (p.Depth / 2));
-        d.Text(Layers.Text, "SECTION", secX, frontY - P(4), th * 0.8);
 
         // Part list.
         var rows = new List<string[]> { new[] { main.Mark, p.Spec, Annotate.F(main.Length), "1", $"{main.Weight:0.0}", $"{main.Weight:0.0}" } };
@@ -229,9 +281,14 @@ public static class AssemblyDetail
 
         rows.Add(["", "TOTAL", "", "", "", $"{a.Weight:0.0}", ""]);
         (string, double)[] cols = [("MARK", P(14)), ("DESCRIPTION", P(38)), ("LENGTH", P(16)), ("Q'TY", P(10)), ("UNIT(kg)", P(16)), ("TOTAL(kg)", P(18)), ("REMARK", P(15))];
-        d.Text(Layers.Text, $"{a.Mark}  ({a.Quantity} EA)", ox, markRow - P(10), th * 2, "middle_left");
-        d.Text(Layers.Text, $"{a.Type.ToString().ToUpperInvariant()}   W = {a.Weight:0.0} kg/EA   ({string.Join(",", a.Members.Take(12))}{(a.Members.Count > 12 ? ",..." : "")})", ox + P(36), markRow - P(10), th * 0.9, "middle_left");
-        Annotate.Table(d, ox, markRow - P(20), cols, rows, th * 0.9, $"{a.Mark}  PART LIST");
+        var head = $"{a.Mark}  ({a.Quantity} EA)";
+        d.Text(Layers.Text, head, ox, markRow - P(10), th * 2, "middle_left");
+        d.Text(Layers.Text, $"{a.Type.ToString().ToUpperInvariant()}   W = {a.Weight:0.0} kg/EA   ({string.Join(",", a.Members.Take(12))}{(a.Members.Count > 12 ? ",..." : "")})", ox + DrawPlan.TextWidth(head, th * 2) + P(4), markRow - P(10), th * 0.9, "middle_left");
+        var tableTop = markRow - P(20);
+        Annotate.Table(d, ox, tableTop, cols, rows, th * 0.9, $"{a.Mark}  PART LIST");
+
+        // Enlarged section in the bottom band, right of the part list.
+        Callouts.Section(d, p, ox + cols.Sum(c => c.Item2) + P(8), tableTop + P(4));
         d.Meta["kind"] = "assembly";
         d.Meta["mark"] = a.Mark;
         d.Meta["broken"] = map.Broken;
