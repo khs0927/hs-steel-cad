@@ -56,6 +56,7 @@ switch (positional.FirstOrDefault())
         var rebornRoot = Opt("reborn", HsSteel.Knowledge.Reborn.RebornManifest.DefaultRoot);
         if (Directory.Exists(rebornRoot)) Console.WriteLine(HsSteel.Knowledge.Reborn.RebornIngest.Apply(outPath, rebornRoot).Summary);
         Console.WriteLine(HsSteel.Knowledge.Ingest.AssetIngest.Apply(outPath, m, root, Path.Combine(repo, "out", "knowledge", "coverage.json")).Summary);
+        Console.WriteLine(HsSteel.Knowledge.Rules.RulesIngest.Apply(outPath).Summary);
         Console.WriteLine($"built {outPath}: blocks={blocks.Count} palette_items={sup.PaletteItems.Count} commands={sup.Commands.Count} aliases={sup.Aliases.Count} " +
             $"linetypes={sup.Linetypes.Count} mline_styles={sup.MlineStyles.Count} font_maps={sup.FontMaps.Count} doc_chunks={chunks.Count}" +
             $" doc_chunk_vec={vecs.Count}" + (chunks.Count == 0 ? $" (no chunks at {chunksPath})" : string.Empty));
