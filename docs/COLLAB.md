@@ -88,3 +88,27 @@ Started: 2026-10-08 03:16 Asia/Seoul
 | hs-steel tests | HsSteel.Tests **128** pass; Knowledge GraphRag **4** pass. |
 
 **Still open:** Merge/review PR #41 on power-cad; live AutoCAD HS-KOR smoke when Mus awake; deepen GAP items (VBA extract, PDF OCR) later; Claude WIP untouched.
+
+## Overnight wrap (Grok Bot, 2026-10-08 ~03:30 KST) — COMPLETE
+
+| Item | SHA / link | Status |
+|---|---|---|
+| power-cad create_many text/dim styles | PR #41 merged `988d4a7` | **Done** |
+| HS-KOR width_factor 0.85 + COLLAB note | `934e536`, `5cc917b` | **Done** |
+| GAP_AUDIT + RULES (100) + Graph RAG/eval + GOLD | `7bdd7da` | **Done** |
+| Master playbook | `docs/PLAYBOOK.md` | **Done** (this wrap) |
+| HsSteel.Tests | 128 pass | Green |
+| GraphRagTests / eval | 4 tests · 32/32 Hit@rules | Green |
+
+**Grok Bot overnight zones:** closed. Do not re-claim GAP/RULES/Graph RAG for redo.  
+**Still Claude-only:** `Legacy/`, `GoldenMxxTests`, asset phase-2, KnowledgeDbBuilder/Program.  
+**Morning (Mus):** live AutoCAD HS-KOR smoke; optional rule-node materialization; no proprietary DWG to git.
+
+
+## PLAYBOOK claim (2026-10-08 ~03:29 KST)
+
+| 영역 | 담당 | 경로 |
+|---|---|---|
+| **PLAYBOOK** end-to-end master guide (parse→infer→graph→RAG→power-cad) | **Grok Bot executor** | docs/PLAYBOOK.md |
+
+Sibling may extend; prefer additive edits over rewrite fights.
