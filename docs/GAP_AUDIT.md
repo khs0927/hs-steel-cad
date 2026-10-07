@@ -105,3 +105,11 @@ Manifest coverage for ingestable HS-STEEL rows is already ~100% at the *file* la
 | RULES_CATALOG | **100** evidence-backed |
 | xlsm with VBA | 8 workbooks |
 | VLX+DLL listed | 13 binaries |
+
+---
+
+## 10. Resolved (2026-10-08, Claude Opus; append-only)
+
+- **§1 VBA/formulas**: `tools/docs_chunker/content_gaps.py` extracts VBA module source (oletools, read-only) from all 8 xlsm into `doc_chunk kind='vba'` (identical modules across the BOM copies stored once) plus table `vba_procedure(workbook, module, name, signature, line_count)`; formula text (R1C1-normalised, grouped per column pattern, example cell) and named ranges into `kind='xlsx_formula'`. Counts: see `out/knowledge/content_gaps_report.json`. Decision in §1 ("do not port VBA") still holds for the engine; this is reference content only.
+- **§4 PDF pages**: Windows.Media.Ocr (ko) works offline. 9 low-text pages OCR'd; Hssteel2020 p.21,28,29,33,34,35 are genuinely blank (rendered image shows only a rule) and are recorded as `blank_page`; pages 4 (both manuals) yielded `kind='pdf_ocr'` text.
+- **§8 items 1-2** done; vectors regenerated with the e5 pipeline (`embed.py`), DB rebuilt (build-db).

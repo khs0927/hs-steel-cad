@@ -48,11 +48,12 @@ public static class AssetIngest
             name TEXT NOT NULL, state TEXT NOT NULL, dimension TEXT, header_row INTEGER NOT NULL, headers_json TEXT NOT NULL, row_count INTEGER NOT NULL, col_count INTEGER NOT NULL, formula_count INTEGER NOT NULL);
         CREATE TABLE palette_catalog(id INTEGER PRIMARY KEY, source_file_id INTEGER NOT NULL REFERENCES source_file(id), ord INTEGER NOT NULL, palette_id TEXT NOT NULL, name TEXT, href TEXT);
         CREATE TABLE ingest_failure(id INTEGER PRIMARY KEY, source_file_id INTEGER REFERENCES source_file(id), stage TEXT NOT NULL, message TEXT NOT NULL);
+        CREATE TABLE vba_procedure(id INTEGER PRIMARY KEY, workbook TEXT NOT NULL, source_file_id INTEGER REFERENCES source_file(id), module TEXT NOT NULL, name TEXT NOT NULL, signature TEXT NOT NULL, line_count INTEGER NOT NULL);
         """;
 
     // children before parents (foreign keys are enforced on drop)
     private static readonly string[] OwnTables =
-        ["ingest_failure", "palette_catalog", "workbook_sheet", "workbook", "drafting_style", "template_dat_row", "project_default", "dialog_field", "dialog", "icon", "slide"];
+        ["vba_procedure", "ingest_failure", "palette_catalog", "workbook_sheet", "workbook", "drafting_style", "template_dat_row", "project_default", "dialog_field", "dialog", "icon", "slide"];
 
     private static readonly string[] OwnNodeKinds = ["slide", "icon", "dialog"];
     private static readonly string[] OwnEdgeRels = ["illustrates", "has_icon", "dialog_for"];
@@ -253,6 +254,25 @@ public static class AssetIngest
             }));
             var newEdges = new List<(string SK, string SKey, string Rel, string DK, string DKey, string? Ev, string? Note)>();
             var fts = new List<(string Kind, string Key, string Label, string Body)>();
+
+            // VBA procedures (tools/docs_chunker/content_gaps.py -> vba_procedures.jsonl beside coverage.json)
+            var vbaPath = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(coveragePath)) ?? ".", "vba_procedures.jsonl");
+            if (File.Exists(vbaPath))
+            {
+                var vrows = new List<(string Wb, string Mod, string Name, string Sig, int Lines)>();
+                foreach (var line in File.ReadLines(vbaPath))
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    using var jd = JsonDocument.Parse(line);
+                    var e = jd.RootElement;
+                    vrows.Add((e.GetProperty("workbook").GetString()!, e.GetProperty("module").GetString()!, e.GetProperty("name").GetString()!,
+                        e.GetProperty("signature").GetString()!, e.GetProperty("line_count").GetInt32()));
+                }
+
+                vrows = vrows.OrderBy(v => v.Wb, O).ThenBy(v => v.Mod, O).ThenBy(v => v.Name, O).ThenBy(v => v.Sig, O).ToList();
+                Insert(cn, tx, "INSERT INTO vba_procedure VALUES($a,$b,$c,$d,$e,$f,$g)",
+                    vrows.Select((v, i) => new object?[] { i + 1, v.Wb, Fid(v.Wb), v.Mod, v.Name, v.Sig, v.Lines }));
+            }
 
             // slides
             var slideRows = slides.OrderBy(s => s.Name, O).ThenBy(s => s.Rel, O).ToList();
