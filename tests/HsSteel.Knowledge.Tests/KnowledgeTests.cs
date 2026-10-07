@@ -271,4 +271,75 @@ public sealed class KnowledgeTests(KnowledgeFixture fx) : IClassFixture<Knowledg
     [InlineData("%%C190.7*5", "Φ190.7X5")]
     [InlineData("ts m20*60", "TSM20X60")]
     public void Normalize(string input, string expected) => Assert.Equal(expected, SpecAliases.Normalize(input));
+
+    [Fact]
+    public void QueryExpand_SplitsEndPlateCompound()
+    {
+        var parts = QueryExpand.SplitHangulCompound("엔드플레이트");
+        Assert.Contains("엔드", parts);
+        Assert.Contains("플레이트", parts);
+        var fts = QueryExpand.ForFts("엔드플레이트");
+        Assert.Contains("플레이트", fts, StringComparison.Ordinal);
+        Assert.Contains("3PLT", fts, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("GUSSET", fts, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void QueryExpand_ShearScallopExpandsToGussetTerms()
+    {
+        var fts = QueryExpand.ForFts("전단접합 스캘럽");
+        Assert.Contains("GUSSET", fts, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("scallop", fts, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("3PLT", fts, StringComparison.OrdinalIgnoreCase);
+        var sem = QueryExpand.ForSemantic("전단접합 스캘럽");
+        Assert.Contains("GUSSET", sem, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void QueryExpand_EnrichmentAppendsForGussetCorpus()
+    {
+        var bag = QueryExpand.EnrichmentFor("FRG <- BEAM 접합 GUSSET 블럭");
+        Assert.Contains("엔드플레이트", bag, StringComparison.Ordinal);
+        Assert.Contains("스캘럽", bag, StringComparison.Ordinal);
+        Assert.Equal(string.Empty, QueryExpand.EnrichmentFor("축척조정 SCL only"));
+    }
+
+    [Fact]
+    public void Real_Lexical_EndPlate_HasHits()
+    {
+        if (!fx.RealAvailable) return;
+        using var s = new KnowledgeStore(fx.RealA);
+        var hits = s.Search("엔드플레이트", limit: 10, mode: SearchMode.Lexical);
+        Assert.NotEmpty(hits);
+        Assert.Contains(hits, h => h.MatchedBy.StartsWith("fts", StringComparison.Ordinal)
+            && (h.Label.Contains("PLATE", StringComparison.OrdinalIgnoreCase)
+                || h.Label.Contains("3PLT", StringComparison.OrdinalIgnoreCase)
+                || h.Key.Contains("GUSSET", StringComparison.OrdinalIgnoreCase)
+                || h.Label.Contains("형판", StringComparison.Ordinal)
+                || h.Kind is "doc_chunk" or "command" or "palette_item" or "block"));
+    }
+
+    [Fact]
+    public void Real_Auto_ShearScallop_NotOnlyNoise()
+    {
+        if (!fx.RealAvailable || !File.Exists(Path.Combine(FindRepoStatic(), "out", "knowledge", "model", QueryEmbedder.ModelFile))) return;
+        using var s = new KnowledgeStore(fx.RealA);
+        var hits = s.Search("전단접합 스캘럽", limit: 5, mode: SearchMode.Auto);
+        Assert.NotEmpty(hits);
+        Assert.Contains(hits, h =>
+            h.Label.Contains("PLATE", StringComparison.OrdinalIgnoreCase)
+            || h.Label.Contains("GUSSET", StringComparison.OrdinalIgnoreCase)
+            || h.Label.Contains("3PLT", StringComparison.OrdinalIgnoreCase)
+            || h.Label.Contains("형판", StringComparison.Ordinal)
+            || h.MatchedBy.Contains("fts", StringComparison.Ordinal));
+    }
+
+    private static string FindRepoStatic()
+    {
+        for (var d = new DirectoryInfo(AppContext.BaseDirectory); d != null; d = d.Parent)
+        {
+            if (File.Exists(Path.Combine(d.FullName, "HsSteel.sln"))) return d.FullName;
+        }
+        return Directory.GetCurrentDirectory();
+    }
 }

@@ -120,7 +120,7 @@ public sealed class KnowledgeStore : IDisposable
         float[] q;
         try
         {
-            q = Embedder()!.Embed(query);
+            q = Embedder()!.Embed(QueryExpand.ForSemantic(query));
         }
         catch (Exception)
         {
@@ -254,7 +254,7 @@ public sealed class KnowledgeStore : IDisposable
                 break;
             }
 
-            var match = FtsExpression(query, op);
+            var match = FtsExpression(QueryExpand.ForFts(query), op);
             if (match.Length == 0)
             {
                 break;
@@ -282,14 +282,36 @@ public sealed class KnowledgeStore : IDisposable
         return hits.Take(limit).ToList();
     }
 
-    /// <summary>Quoted prefix terms; spec-like tokens are also tried in normalized form (e.g. "H-400" -> "H400").</summary>
+    /// <summary>Quoted prefix terms from an (optionally expanded) query; Hangul letters kept; ASCII specs keep digits/dots.</summary>
     internal static string FtsExpression(string query, string op)
     {
-        var terms = query.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)
-            .Select(t => new string(t.Where(ch => char.IsLetterOrDigit(ch) || ch == '.').ToArray()))
-            .Where(t => t.Length > 0)
-            .Select(t => "\"" + t + "\"*")
-            .ToList();
+        var terms = new List<string>();
+        foreach (var raw in query.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))
+        {
+            var t = new string(raw.Where(ch => char.IsLetterOrDigit(ch) || ch == '.').ToArray());
+            if (t.Length == 0)
+            {
+                continue;
+            }
+
+            var quoted = "\"" + t + "\"*";
+            if (!terms.Contains(quoted, StringComparer.Ordinal))
+            {
+                terms.Add(quoted);
+            }
+
+            // Spec-like tokens: also try normalized form (H-400 → H400) when it differs.
+            var norm = SpecAliases.Normalize(raw);
+            if (norm.Length > 0 && !norm.Equals(t, StringComparison.OrdinalIgnoreCase))
+            {
+                var nq = "\"" + norm + "\"*";
+                if (!terms.Contains(nq, StringComparer.OrdinalIgnoreCase))
+                {
+                    terms.Add(nq);
+                }
+            }
+        }
+
         return string.Join(op, terms);
     }
 

@@ -375,7 +375,7 @@ public sealed class KnowledgeDbBuilder
             palSeen[baseKey] = n;
             var key = n == 1 ? baseKey : baseKey + "#" + n.ToString(CultureInfo.InvariantCulture);
             nodes[("palette_item", key)] = (p.Name, Json(new SortedDictionary<string, object?> { ["palette"] = p.Palette, ["target_kind"] = p.TargetKind, ["target"] = p.Target }));
-            fts.Add(("palette_item", key, p.Name, p.Palette + " " + p.Target));
+            fts.Add(("palette_item", key, p.Name, p.Palette + " " + p.Target + QueryExpand.EnrichmentFor(p.Palette + " " + p.Name + " " + (p.Target ?? ""))));
             if (string.IsNullOrEmpty(p.Target))
             {
                 continue;
@@ -423,7 +423,7 @@ public sealed class KnowledgeDbBuilder
 
         foreach (var c in cmds)
         {
-            fts.Add(("command", c.Name, c.Name, $"{c.Description} {c.Macro}"));
+            fts.Add(("command", c.Name, c.Name, $"{c.Description} {c.Macro}" + QueryExpand.EnrichmentFor($"{c.Name} {c.Description} {c.Macro}")));
         }
 
         // linetypes
@@ -447,7 +447,7 @@ public sealed class KnowledgeDbBuilder
             docs.Where(d => chunkVectors.ContainsKey(d.Id)).Select(d => new object?[] { d.Id, chunkVectors[d.Id].Length, VecBytes(chunkVectors[d.Id]) }));
         foreach (var d in docs)
         {
-            fts.Add(("doc_chunk", d.Id, $"{d.SourceRelPath} p.{d.PageOrSheet ?? d.Page.ToString(CultureInfo.InvariantCulture)}", d.Text));
+            fts.Add(("doc_chunk", d.Id, $"{d.SourceRelPath} p.{d.PageOrSheet ?? d.Page.ToString(CultureInfo.InvariantCulture)}", d.Text + QueryExpand.EnrichmentFor(d.Text)));
         }
 
         // graph
