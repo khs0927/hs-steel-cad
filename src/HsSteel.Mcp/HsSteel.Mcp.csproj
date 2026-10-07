@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HsSteel.Drafting\HsSteel.Drafting.csproj" />
+    <ProjectReference Include="..\HsSteel.Knowledge\HsSteel.Knowledge.csproj" />
   </ItemGroup>
 
   <ItemGroup>

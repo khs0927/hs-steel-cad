@@ -14,5 +14,6 @@ if (args.Length > 0 && args[0] == "--demo")
 var builder = Host.CreateApplicationBuilder(args);
 builder.Logging.AddConsole(o => o.LogToStandardErrorThreshold = LogLevel.Trace);
 builder.Services.AddSingleton(Workspace.FromEnvironment());
-builder.Services.AddMcpServer().WithStdioServerTransport().WithTools<HsTools>();
+builder.Services.AddSingleton(AssetOptions.FromEnvironment());
+builder.Services.AddMcpServer().WithStdioServerTransport().WithTools<HsTools>().WithTools<AssetTools>().WithResources<AssetResources>();
 await builder.Build().RunAsync();
