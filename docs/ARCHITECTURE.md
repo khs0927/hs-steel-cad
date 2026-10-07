@@ -33,7 +33,7 @@ HsSteel.Domain      단면·부재·볼트그룹·접합부·Project, 상세 규
 HsSteel.Modeling    [진행] 그리드·축선·접합부 규칙 → 부재 형상(길이·구멍·스캘럽/cope·엔드플레이트) 확정, 마크 부여
 HsSteel.Drafting    Project → DrawPlan (power-cad cad_create JSON과 동일 스키마)
    ├ MemberDetailGenerator  (구현됨: H형강 단품 — 입면·평면·단면·구멍·스캘럽·끊김표시·실치수)
-   ├ AssemblyDetail / Layout / BomTable / Marking  [다음]
+   ├ AssemblyDetail / LayoutPlan / LayoutElevation / BomTable / Marking  [D4 완료]
    ├ SheetFrame (회사 도곽 영역에 배치·축척 결정)
    └ DxfExporter (ACadSharp, AutoCAD 없이 DXF)
 HsSteel.Mcp         MCP 툴 (hs_section_search, hs_draw_member_detail)  ← 병합 시 power-cad-server로 이동
@@ -78,7 +78,7 @@ native/HsSteel.Arx  C++ ObjectARX 커스텀 엔티티 HsMember (P5)
 | D1 | 단품 상세도 품질: 치수 배치 엔진(겹침 회피), 볼트·용접 주기, 단면 확대, 회사 도곽 실측 적용 |
 | D2 | 형강 확장: ㄱ형강·채널·각관·파이프·판재 상세도 (자산의 25개 규격표 전부) |
 | D3 | Modeling: 그리드 프레임 + EndPlate/ShearTab + flange cope/scallop + 마크 통합 (**부분 완료** 2026-10-08); 상세도 cope 작도·대화형 그리드 규칙 MCP는 잔여 |
-| D4 | 조립도(부재+판+볼트), 배치/입면 자동작도, 도면 내 BOM/볼트표 |
+| D4 | 조립도(부재+판+볼트), 배치/입면 자동작도, 도면 내 BOM/볼트표 | **완료** 2026-10-08: BomTable CSV/JSON, 입면(V-), 볼트집계표, cope 작도, weld leader min |
 | D5 | 원본 블록 114개 라이브러리화(ACadSharp 읽기), 원본 `.Mxx` 가져오기 |
 | M | power-cad 병합 (XData, create_many 추가 후) |
 | P5 | C++ HsMember 커스텀 엔티티 |

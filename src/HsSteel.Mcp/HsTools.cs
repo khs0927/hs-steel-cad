@@ -292,18 +292,44 @@ public sealed class HsTools(Workspace ws)
     }
 
     [McpServerTool(Name = "hs_bom", ReadOnly = true)]
-    [Description("Bill of materials: assemblies (qty, weight), parts (shape/plate with qty, length/size, weight), bolts, totals by spec.")]
-    public string Bom(string name)
+    [Description("Bill of materials (물량): assemblies, parts, bolts, totals. Optional csv_path/json_path writes 조립목록·자재집계표·볼트집계표 export files.")]
+    public string Bom(string name, string? csv_path = null, string? json_path = null)
     {
         var r = ws.Build(ws.Load(name));
+        var bom = BomTable.From(r);
+        if (!string.IsNullOrWhiteSpace(csv_path))
+        {
+            var csvFull = Path.GetFullPath(csv_path);
+            var csvDir = Path.GetDirectoryName(csvFull);
+            if (!string.IsNullOrEmpty(csvDir))
+            {
+                Directory.CreateDirectory(csvDir);
+            }
+
+            File.WriteAllText(csvFull, bom.ToCsv(), new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+        }
+
+        if (!string.IsNullOrWhiteSpace(json_path))
+        {
+            var jsonFull = Path.GetFullPath(json_path);
+            var jsonDir = Path.GetDirectoryName(jsonFull);
+            if (!string.IsNullOrEmpty(jsonDir))
+            {
+                Directory.CreateDirectory(jsonDir);
+            }
+
+            File.WriteAllText(jsonFull, bom.ToJson(), new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        }
+
         return Json(new
         {
-            assemblies = r.Assemblies.Select(a => new { mark = a.Mark, type = a.Type.ToString(), main = a.Main.Mark, qty = a.Quantity, unit_kg = a.Weight, members = a.Members }),
+            assemblies = bom.Assemblies.Select(a => new { mark = a.Mark, type = a.Type, main_spec = a.MainSpec, length = a.Length, qty = a.Qty, unit_kg = a.UnitKg, total_kg = a.TotalKg, members = a.Members }),
             shape_parts = r.ShapeParts.Select(s => new { mark = s.Mark, spec = s.Profile.Spec, length = s.Length, holes = s.Holes.Count, qty = s.Quantity, unit_kg = s.Weight, paint_m2 = s.PaintArea }),
             plate_parts = r.PlateParts.Select(pp => new { mark = pp.Mark, name = pp.Name, role = pp.Role, holes = pp.Holes.Count, qty = pp.Quantity, unit_kg = pp.Weight }),
-            bolts = r.Assemblies.SelectMany(a => a.Bolts.Select(b => (b.Name, n: b.Count * a.Quantity))).GroupBy(b => b.Name).Select(g => new { name = g.Key, qty = g.Sum(x => x.n) }),
+            bolts = bom.Bolts.Select(b => new { name = b.Name, qty = b.Qty, assemblies = b.Assemblies }),
             by_spec = r.ShapeParts.GroupBy(s => s.Profile.Spec).Select(g => new { spec = g.Key, length_m = Math.Round(g.Sum(s => s.Length * s.Quantity) / 1000, 2), kg = Math.Round(g.Sum(s => s.Weight * s.Quantity), 1) }),
-            total_kg = Math.Round(r.ShapeParts.Sum(s => s.Weight * s.Quantity) + r.PlateParts.Sum(pp => pp.Weight * pp.Quantity), 1),
+            total_kg = bom.TotalKg,
+            exports = new { csv = csv_path is null ? null : Path.GetFullPath(csv_path), json = json_path is null ? null : Path.GetFullPath(json_path) },
             warnings = r.Warnings,
         });
     }
@@ -322,7 +348,7 @@ public sealed class HsTools(Workspace ws)
 
     [McpServerTool(Name = "hs_drawings_generate")]
     [Description("Generate shop drawings for a project into the company frame and write them as .dwg or .dxf (no AutoCAD needed; open the file in AutoCAD 2027). "
-        + "kinds: any of assembly, part, plate, plan, bom (default all). separate=true writes one file per sheet into the output folder.")]
+        + "kinds: any of assembly, part, plate, plan/elevation, bom (default all). separate=true writes one file per sheet into the output folder.")]
     public string DrawingsGenerate(string name, [Description("Output .dwg/.dxf path (or folder when separate=true)")] string output, string[]? kinds = null, bool separate = false)
     {
         var set = ws.Drawings(ws.Load(name), ParseKinds(kinds));
@@ -402,7 +428,7 @@ public sealed class HsTools(Workspace ws)
                 "assembly" or "assy" => DrawingSet.Kinds.Assembly,
                 "part" or "shape" => DrawingSet.Kinds.Part,
                 "plate" => DrawingSet.Kinds.Plate,
-                "plan" or "layout" or "erection" => DrawingSet.Kinds.Plan,
+                "plan" or "layout" or "erection" or "elevation" or "입면" => DrawingSet.Kinds.Plan,
                 "bom" => DrawingSet.Kinds.Bom,
                 "all" => DrawingSet.Kinds.All,
                 _ => throw new McpException($"Unknown kind '{s}'."),

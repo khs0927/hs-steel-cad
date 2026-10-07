@@ -111,51 +111,166 @@ public static class LayoutPlan
     }
 }
 
-/// <summary>Bill of materials sheets: assembly list and material summary (자재집계표).</summary>
+
+/// <summary>
+/// Erection elevation (입면도): grid-line cuts showing columns and framing members in the YZ or XZ plane.
+/// Generated together with <see cref="LayoutPlan"/> under DrawingSet.Kinds.Plan.
+/// </summary>
+public static class LayoutElevation
+{
+    public static IEnumerable<DrawPlan> Generate(ModelResult model, SheetFrame frame)
+    {
+        var project = model.Project;
+        var built = project.Members.Where(m => model.Profiles.ContainsKey(m.Id)).DistinctBy(m => m.Id).ToList();
+        if (built.Count == 0 || project.Levels.Count == 0)
+        {
+            yield break;
+        }
+
+        foreach (var gx in project.GridX.OrderBy(g => g.Position))
+        {
+            var cols = built.Where(m => IsColumn(m) && Near(m.Start.X, gx.Position) && Near(m.End.X, gx.Position)).ToList();
+            var beams = built.Where(m => !IsColumn(m) && Near((m.Start.X + m.End.X) / 2, gx.Position) && Math.Abs(m.Start.Y - m.End.Y) > 1).ToList();
+            if (cols.Count + beams.Count == 0)
+            {
+                continue;
+            }
+
+            yield return Elevation(model, frame, $"EL. GRID {gx.Name} (Y-Z)", alongY: true, cols, beams, project.GridY.Select(g => (g.Name, g.Position)).ToList());
+        }
+
+        foreach (var gy in project.GridY.OrderBy(g => g.Position))
+        {
+            var cols = built.Where(m => IsColumn(m) && Near(m.Start.Y, gy.Position) && Near(m.End.Y, gy.Position)).ToList();
+            var beams = built.Where(m => !IsColumn(m) && Near((m.Start.Y + m.End.Y) / 2, gy.Position) && Math.Abs(m.Start.X - m.End.X) > 1).ToList();
+            if (cols.Count + beams.Count == 0)
+            {
+                continue;
+            }
+
+            yield return Elevation(model, frame, $"EL. GRID {gy.Name} (X-Z)", alongY: false, cols, beams, project.GridX.Select(g => (g.Name, g.Position)).ToList());
+        }
+    }
+
+    private static bool IsColumn(MemberDef m) => Math.Abs((m.End - m.Start).Unit.Z) >= 0.2;
+
+    private static bool Near(double a, double b, double tol = 50) => Math.Abs(a - b) <= tol;
+
+    private static DrawPlan Elevation(ModelResult model, SheetFrame frame, string title, bool alongY, List<MemberDef> cols, List<MemberDef> beams, List<(string Name, double Position)> grids)
+    {
+        double H(MemberDef m) => alongY ? m.Start.Y : m.Start.X;
+        double H2(MemberDef m) => alongY ? m.End.Y : m.End.X;
+        var hs = cols.Select(H).Concat(beams.SelectMany(m => new[] { H(m), H2(m) })).Concat(grids.Select(g => g.Position)).ToList();
+        var zs = cols.SelectMany(m => new[] { m.Start.Z, m.End.Z }).Concat(beams.Select(m => (m.Start.Z + m.End.Z) / 2)).Concat(model.Project.Levels.Select(l => l.Elevation)).ToList();
+        double minH = hs.DefaultIfEmpty(0).Min(), maxH = hs.DefaultIfEmpty(1000).Max();
+        double minZ = zs.DefaultIfEmpty(0).Min(), maxZ = zs.DefaultIfEmpty(1000).Max();
+        var s = frame.FitScale(Math.Max(maxH - minH, 1000) * 1.35, Math.Max(maxZ - minZ, 1000) * 1.35);
+        double P(double v) => v * s;
+        var th = P(Paper.Text);
+        var d = new DrawPlan { Title = title, Scale = s };
+        var ext = P(14);
+        var r = P(4);
+
+        foreach (var lv in model.Project.Levels.OrderBy(l => l.Elevation))
+        {
+            d.Line(Layers.Grid, minH - ext, lv.Elevation, maxH + ext, lv.Elevation);
+            d.Text(Layers.Text, lv.Name, minH - ext - P(2), lv.Elevation, th * 0.85, "middle_right");
+        }
+
+        foreach (var g in grids.OrderBy(g => g.Position))
+        {
+            d.Line(Layers.Grid, g.Position, minZ - ext, g.Position, maxZ + ext);
+            Annotate.Bubble(d, g.Name, g.Position, maxZ + ext + r, r);
+            Annotate.Bubble(d, g.Name, g.Position, minZ - ext - r, r);
+        }
+
+        if (grids.Count > 1)
+        {
+            var st = grids.Select(g => g.Position).Order().Select(v => new Station(v, v)).ToList();
+            Annotate.Chain(d, st, true, maxZ + ext + (2 * r), maxZ + ext + (2 * r) + P(6));
+            Annotate.Dim(d, st[0].Drawn, st[^1].Drawn, true, maxZ + ext + (2 * r), maxZ + ext + (2 * r) + P(12), Annotate.F(st[^1].True - st[0].True));
+        }
+
+        if (model.Project.Levels.Count > 1)
+        {
+            var st = model.Project.Levels.Select(l => l.Elevation).Order().Select(v => new Station(v, v)).ToList();
+            Annotate.Chain(d, st, false, minH - ext - (2 * r), minH - ext - (2 * r) - P(6));
+        }
+
+        foreach (var c in cols)
+        {
+            var mark = model.MemberMarks.GetValueOrDefault(c.Id, c.Id);
+            d.CurrentTag = new System.Text.Json.Nodes.JsonObject { ["kind"] = "member", ["id"] = c.Id, ["mark"] = mark };
+            var h = H(c);
+            var prof = model.Profiles[c.Id];
+            var half = prof.Depth / 2;
+            d.Polyline(Layers.Member, true, (h - half, c.Start.Z), (h + half, c.Start.Z), (h + half, c.End.Z), (h - half, c.End.Z));
+            d.Text(Layers.Mark, mark, h + half + P(2), (c.Start.Z + c.End.Z) / 2, th, "middle_left");
+        }
+
+        foreach (var m in beams)
+        {
+            var mark = model.MemberMarks.GetValueOrDefault(m.Id, m.Id);
+            d.CurrentTag = new System.Text.Json.Nodes.JsonObject { ["kind"] = "member", ["id"] = m.Id, ["mark"] = mark };
+            var z = (m.Start.Z + m.End.Z) / 2;
+            var prof = model.Profiles[m.Id];
+            var half = prof.Depth / 2;
+            d.Line(Layers.Member, H(m), z, H2(m), z);
+            d.Line(Layers.Member, H(m), z - half, H(m), z + half);
+            d.Line(Layers.Member, H2(m), z - half, H2(m), z + half);
+            var mx = (H(m) + H2(m)) / 2;
+            d.Text(Layers.Mark, mark, mx, z + half + P(2), th, "bottom_center");
+            d.Text(Layers.Text, m.Section, mx, z - half - P(2), th * 0.7, "top_center");
+        }
+
+        d.CurrentTag = null;
+        d.Text(Layers.Text, "ELEVATION  " + title, minH - ext, minZ - ext - (2 * r) - P(12), th * 1.6, "middle_left");
+        d.Meta["kind"] = "elevation";
+        return d;
+    }
+}
+
+/// <summary>Bill of materials sheets: 조립목록, 자재집계표, 볼트집계표 (drawing tables + <see cref="BomTable"/>).</summary>
 public static class BomSheets
 {
     public static IEnumerable<DrawPlan> Generate(ModelResult model, SheetFrame frame)
     {
         const double th = 2.5;
-        var rowH = th * 2;
-        var maxRows = (int)((frame.AreaH - 20) / rowH) - 2;
+        var maxRows = (int)((frame.AreaH - 20) / (th * 2)) - 2;
+        var bom = BomTable.From(model);
 
-        var asm = model.Assemblies.OrderBy(a => a.Type).ThenBy(a => a.Mark, StringComparer.Ordinal)
-            .Select(a => new[] { a.Mark, a.Type.ToString().ToUpperInvariant(), a.Main.Profile.Spec, Annotate.F(a.Main.Length), $"{a.Quantity}", $"{a.Weight:0.0}", $"{a.Weight * a.Quantity:0.0}" })
+        var asm = bom.Assemblies
+            .Select(a => new[] { a.Mark, a.Type, a.MainSpec, Annotate.F(a.Length), $"{a.Qty}", $"{a.UnitKg:0.0}", $"{a.TotalKg:0.0}" })
             .ToList();
-        var total = model.Assemblies.Sum(a => a.Weight * a.Quantity);
-        asm.Add(["", "TOTAL", "", "", $"{model.Assemblies.Sum(a => a.Quantity)}", "", $"{total:0.0}"]);
-        (string, double)[] asmCols = [("ASSY", 20), ("TYPE", 26), ("MAIN MEMBER", 46), ("LENGTH", 20), ("Q'TY", 14), ("UNIT(kg)", 22), ("TOTAL(kg)", 24)];
-        foreach (var d in Tables("ASSEMBLY LIST", asmCols, asm, maxRows, th))
+        asm.Add(["", "합계", "", "", $"{bom.AssemblyQty}", "", $"{bom.TotalKg:0.0}"]);
+        (string, double)[] asmCols = [("마크", 20), ("종류", 26), ("주부재", 46), ("길이", 20), ("수량", 14), ("단중(kg)", 22), ("중량(kg)", 24)];
+        foreach (var d in Tables("조립목록 (ASSEMBLY LIST)", asmCols, asm, maxRows, th))
         {
             yield return d;
         }
 
-        var mat = new List<string[]>();
-        foreach (var g in model.ShapeParts.GroupBy(p => p.Profile.Spec).OrderBy(g => g.Key, StringComparer.Ordinal))
+        var mat = bom.Materials.Where(m => m.Kind != "BOLT")
+            .Select(m => new[] { m.Spec, m.Kind, m.Quantity, m.UnitWeight > 0 ? $"{m.UnitWeight:0.##}" : "", $"{m.WeightKg:0.0}", $"{m.PaintM2:0.00}" })
+            .ToList();
+        mat.Add(["합계", "", "", "", $"{bom.TotalKg:0.0}", ""]);
+        (string, double)[] matCols = [("규격", 50), ("종류", 30), ("수량", 34), ("단중", 18), ("중량(kg)", 26), ("도장(m²)", 24)];
+        foreach (var d in Tables("자재집계표 (MATERIAL SUMMARY)", matCols, mat, maxRows, th))
         {
-            var len = g.Sum(p => p.Length * p.Quantity) / 1000;
-            var wt = g.Sum(p => p.Weight * p.Quantity);
-            var paint = g.Sum(p => p.PaintArea * p.Quantity);
-            mat.Add([g.Key, g.First().Profile.Family, $"{len:0.00}", $"{g.First().Profile.UnitWeight:0.##}", $"{wt:0.0}", $"{paint:0.00}"]);
+            yield return d;
         }
 
-        foreach (var g in model.PlateParts.GroupBy(p => p.Thickness).OrderBy(g => g.Key))
+        var bolts = bom.Bolts.Select(b => new[] { b.Name, $"{b.Qty}", $"{b.Assemblies}", "" }).ToList();
+        if (bolts.Count == 0)
         {
-            var area = g.Sum(p => p.SizeU * p.SizeV * p.Quantity) / 1e6;
-            var wt = g.Sum(p => p.Weight * p.Quantity);
-            mat.Add([$"PL-{Annotate.F(g.Key)}", "PLATE", $"{area:0.00} m²", "", $"{wt:0.0}", $"{area * 2:0.00}"]);
+            bolts.Add(["(없음)", "0", "0", ""]);
+        }
+        else
+        {
+            bolts.Add(["합계", $"{bom.Bolts.Sum(b => b.Qty)}", "", ""]);
         }
 
-        var bolts = model.Assemblies.SelectMany(a => a.Bolts.Select(b => (b.Name, Count: b.Count * a.Quantity))).GroupBy(b => b.Name);
-        foreach (var b in bolts.OrderBy(b => b.Key, StringComparer.Ordinal))
-        {
-            mat.Add([b.Key, "BOLT", $"{b.Sum(x => x.Count)} EA", "", "", ""]);
-        }
-
-        mat.Add(["TOTAL", "", "", "", $"{model.ShapeParts.Sum(p => p.Weight * p.Quantity) + model.PlateParts.Sum(p => p.Weight * p.Quantity):0.0}", ""]);
-        (string, double)[] matCols = [("SPEC", 50), ("KIND", 30), ("LENGTH(m)/AREA", 34), ("kg/m", 18), ("WEIGHT(kg)", 26), ("PAINT(m²)", 24)];
-        foreach (var d in Tables("MATERIAL SUMMARY", matCols, mat, maxRows, th))
+        (string, double)[] boltCols = [("볼트", 60), ("수량", 28), ("조립수", 28), ("비고", 40)];
+        foreach (var d in Tables("볼트집계표 (BOLT SCHEDULE)", boltCols, bolts, maxRows, th))
         {
             yield return d;
         }
@@ -306,6 +421,7 @@ public sealed class DrawingSet
         if (kinds.HasFlag(Kinds.Plan))
         {
             set.Sheets.AddRange(composer.Compose("E", "ERECTION PLAN", LayoutPlan.Generate(model, frame)));
+            set.Sheets.AddRange(composer.Compose("V", "ERECTION ELEVATION", LayoutElevation.Generate(model, frame)));
         }
 
         if (kinds.HasFlag(Kinds.Assembly))
@@ -325,7 +441,7 @@ public sealed class DrawingSet
 
         if (kinds.HasFlag(Kinds.Bom))
         {
-            set.Sheets.AddRange(composer.Compose("M", "BILL OF MATERIALS", BomSheets.Generate(model, frame)));
+            set.Sheets.AddRange(composer.Compose("M", "BOM / 물량표", BomSheets.Generate(model, frame)));
         }
 
         set.Warnings.AddRange(composer.Warnings);

@@ -147,7 +147,7 @@ public sealed class LengthMap
 /// <summary>Draws the standard views of a straight member: front (depth visible), top (width visible), section.</summary>
 public static class MemberViews
 {
-    public static void Front(DrawPlan d, Profile p, LengthMap map, double x, double y, IEnumerable<Hole> holes, string layer = Layers.Outline)
+    public static void Front(DrawPlan d, Profile p, LengthMap map, double x, double y, IEnumerable<Hole> holes, string layer = Layers.Outline, IEnumerable<FlangeCope>? copes = null)
     {
         var (vis, hid) = p.FrontLines();
         Body(d, map, x, y, p.Depth, vis, hid, layer);
@@ -163,9 +163,11 @@ public static class MemberViews
         {
             d.Circle(Layers.Hole, x + map.Map(h.X), y + h.Across, h.Dia / 2);
         }
+
+        DrawCopesFront(d, p, map, x, y, copes);
     }
 
-    public static void Top(DrawPlan d, Profile p, LengthMap map, double x, double y, IEnumerable<Hole> holes, string layer = Layers.Outline)
+    public static void Top(DrawPlan d, Profile p, LengthMap map, double x, double y, IEnumerable<Hole> holes, string layer = Layers.Outline, IEnumerable<FlangeCope>? copes = null)
     {
         var (vis, hid) = p.TopLines();
         Body(d, map, x, y, p.Width, vis, hid, layer);
@@ -173,6 +175,8 @@ public static class MemberViews
         {
             d.Circle(Layers.Hole, x + map.Map(h.X), y + h.Across, h.Dia / 2);
         }
+
+        DrawCopesTop(d, p, map, x, y, copes);
     }
 
     /// <summary>Cross-section with its outline loops, centred at (cx, cy).</summary>
@@ -189,6 +193,58 @@ public static class MemberViews
             {
                 d.Polyline(Layers.Outline, true, [.. loop.Points.Select(pt => (ox + (pt.X * scaleUp), oy + (pt.Y * scaleUp)))]);
             }
+        }
+    }
+
+
+    /// <summary>
+    /// Flange cope / scallop on the front (depth) view: rectangular notch of Length x Depth with a scallop
+    /// radius at the re-entrant corner (전단접합 스캘럽).
+    /// </summary>
+    private static void DrawCopesFront(DrawPlan d, Profile p, LengthMap map, double x, double y, IEnumerable<FlangeCope>? copes)
+    {
+        if (copes is null)
+        {
+            return;
+        }
+
+        foreach (var c in copes)
+        {
+            var start = c.Corner is CopeCorner.TopStart or CopeCorner.BottomStart;
+            var top = c.Corner is CopeCorner.TopStart or CopeCorner.TopEnd;
+            var x0 = start ? 0.0 : Math.Max(0, map.Length - c.Length);
+            var x1 = start ? Math.Min(map.Length, c.Length) : map.Length;
+            var yFlange = top ? y + p.Depth : y;
+            var yCut = top ? y + p.Depth - c.Depth : y + c.Depth;
+            var xa = x + map.Map(x0);
+            var xb = x + map.Map(x1);
+            d.Polyline(Layers.Outline, false, (xa, yFlange), (xa, yCut), (xb, yCut), (xb, yFlange));
+            var sx = start ? xb : xa;
+            d.Circle(Layers.Hidden, sx, yCut, Math.Min(c.Radius, c.Depth));
+            d.Meta["copes"] = (d.Meta["copes"]?.GetValue<int>() ?? 0) + 1;
+        }
+    }
+
+    /// <summary>Flange cope on the top (width) view: shows the cut station across the flange width.</summary>
+    private static void DrawCopesTop(DrawPlan d, Profile p, LengthMap map, double x, double y, IEnumerable<FlangeCope>? copes)
+    {
+        if (copes is null)
+        {
+            return;
+        }
+
+        foreach (var g in copes.GroupBy(c => c.Corner is CopeCorner.TopStart or CopeCorner.BottomStart))
+        {
+            var c = g.OrderByDescending(cc => cc.Length).First();
+            var start = g.Key;
+            var x0 = start ? 0.0 : Math.Max(0, map.Length - c.Length);
+            var x1 = start ? Math.Min(map.Length, c.Length) : map.Length;
+            var xa = x + map.Map(x0);
+            var xb = x + map.Map(x1);
+            d.Line(Layers.Hidden, xa, y, xb, y);
+            d.Line(Layers.Hidden, xa, y + p.Width, xb, y + p.Width);
+            var cutX = start ? xb : xa;
+            d.Line(Layers.Outline, cutX, y, cutX, y + p.Width);
         }
     }
 

@@ -31,8 +31,8 @@ public static class PartDetail
         var flgDepth = flgHoles.Count > 0 ? Annotate.ChainDepth(flgStations, true, -1, s) : 0;
         var topY = flgHoles.Count > 0 ? Math.Max(P(21), P(11) + flgDepth + P(Paper.DimRow)) : P(14);
         var frontY = topY + p.Width + P(18);
-        MemberViews.Top(d, p, map, 0, topY, part.Holes);
-        MemberViews.Front(d, p, map, 0, frontY, part.Holes);
+        MemberViews.Top(d, p, map, 0, topY, part.Holes, copes: part.Copes);
+        MemberViews.Front(d, p, map, 0, frontY, part.Holes, copes: part.Copes);
 
         var above = frontY + p.Depth;
         var line = above + P(Paper.DimRow);
@@ -208,8 +208,8 @@ public static class AssemblyDetail
         var topAbove = MaxAbove(a, p, top: true);
         var frontY = topY + p.Width + topAbove + below + P(24);
 
-        MemberViews.Top(d, p, map, ox, topY, main.Holes);
-        MemberViews.Front(d, p, map, ox, frontY, main.Holes);
+        MemberViews.Top(d, p, map, ox, topY, main.Holes, copes: main.Copes);
+        MemberViews.Front(d, p, map, ox, frontY, main.Holes, copes: main.Copes);
         foreach (var at in a.Attachments)
         {
             DrawAttachment(d, at, map, ox, frontY, topY);

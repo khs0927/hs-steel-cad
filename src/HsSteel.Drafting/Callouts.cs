@@ -17,6 +17,9 @@ public static class Callouts
     public const string FilletBlock = "HS_WELD_FILLET";
     public const string GrooveBlock = "HS_WELD_GROOVE";
 
+    /// <summary>Minimum leader length in paper mm (AutoCAD arrow size). Shorter leaders are omitted (COLLAB #3).</summary>
+    public const double MinLeaderPaper = 3.0;
+
     /// <summary>Bolt size for a hole: hole = bolt + 2 up to M22, bolt + 3 from M24 (hole 27) up (KS / HS-STEEL rule).</summary>
     public static double BoltDia(double holeDia) => holeDia - (holeDia >= 27 ? 3 : 2);
 
@@ -51,7 +54,7 @@ public static class Callouts
         var b = placer.First(candidates(w, h));
         var ex = Math.Clamp(anchor.X, b.X0, b.X1);
         var ey = anchor.Y < b.Y0 ? b.Y0 : anchor.Y > b.Y1 ? b.Y1 : b.Y0;
-        d.Leader(layer, anchor, (ex, ey));
+        LeaderIfLongEnough(d, layer, anchor, (ex, ey));
         d.Text(layer, text, b.X0, (b.Y0 + b.Y1) / 2, h, "middle_left");
         return b;
     }
@@ -89,7 +92,7 @@ public static class Callouts
         var ry = b.Y0 + (3.6 * k);
         var right = anchor.X > (b.X0 + b.X1) / 2;
         var rx = right ? b.X1 : b.X0;
-        d.Leader(Layers.Weld, anchor, (rx, ry));
+        LeaderIfLongEnough(d, Layers.Weld, anchor, (rx, ry));
         d.Line(Layers.Weld, b.X0, ry, b.X1, ry);
         var sx = b.X0 + (6 * k);
         var leg = 2.4 * k;
@@ -139,6 +142,29 @@ public static class Callouts
         var width = Math.Max(dimL + w + P(2), DrawPlan.TextWidth(title, th * 0.9) + dimL);
         d.Meta["section_scale"] = secScale;
         return new Box(x, yb - P(7), x + width, top);
+    }
+
+    /// <summary>Draws a leader, stretching short ones to at least <see cref="MinLeaderPaper"/> × scale (COLLAB #3).</summary>
+    public static void LeaderIfLongEnough(DrawPlan d, string layer, (double X, double Y) from, (double X, double Y) to)
+    {
+        var dx = to.X - from.X;
+        var dy = to.Y - from.Y;
+        var len = Math.Sqrt((dx * dx) + (dy * dy));
+        var min = MinLeaderPaper * Math.Max(d.Scale, 1);
+        if (len < min)
+        {
+            if (len < 1e-9)
+            {
+                to = (from.X, from.Y + min);
+            }
+            else
+            {
+                var s = min / len;
+                to = (from.X + (dx * s), from.Y + (dy * s));
+            }
+        }
+
+        d.Leader(layer, from, to);
     }
 
     /// <summary>Front-view point on an attachment where its weld callout points.</summary>
