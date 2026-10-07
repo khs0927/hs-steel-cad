@@ -2,6 +2,9 @@ using HsSteel.Domain;
 
 namespace HsSteel.Modeling;
 
+/// <summary>How floor beams/girders frame into supports when generated from a grid.</summary>
+public enum BeamConnectionKind { ShearTab, EndPlate }
+
 /// <summary>Parameters for a regular multi-storey steel frame on a rectangular grid.</summary>
 /// <param name="SpansX">Bay widths along X (mm), e.g. [6000, 6000].</param>
 /// <param name="SpansY">Bay widths along Y (mm).</param>
@@ -21,7 +24,8 @@ public sealed record FrameSpec(
     string GirderY = "H400x200x8x13",
     double MaxColumnPiece = 0,
     int SubBeams = 0,
-    string SubBeam = "H300x150x6.5x9");
+    string SubBeam = "H300x150x6.5x9",
+    BeamConnectionKind BeamConnection = BeamConnectionKind.ShearTab);
 
 /// <summary>Generates complete project models (grids, levels, members, connections) from a few parameters.</summary>
 public static class ProjectTemplates
@@ -107,6 +111,20 @@ public static class ProjectTemplates
         string ColumnAt(double cx, double cy, double cz) =>
             p.Members.First(m => m.Type == AssemblyType.Column && Math.Abs(m.Start.X - cx) < 1 && Math.Abs(m.Start.Y - cy) < 1 && m.Start.Z <= cz + 1 && m.End.Z >= cz - 1).Id;
 
+        void FrameEnds(string id, string supportStart, string supportEnd)
+        {
+            if (f.BeamConnection == BeamConnectionKind.EndPlate)
+            {
+                p.Connections.Add(new EndPlateDef($"EP-{id}-S", id, MemberEnd.Start, supportStart));
+                p.Connections.Add(new EndPlateDef($"EP-{id}-E", id, MemberEnd.End, supportEnd));
+            }
+            else
+            {
+                p.Connections.Add(new ShearTabDef($"ST-{id}-S", id, MemberEnd.Start, supportStart));
+                p.Connections.Add(new ShearTabDef($"ST-{id}-E", id, MemberEnd.End, supportEnd));
+            }
+        }
+
         // Girders between columns on every floor above the base, framed with shear tabs.
         foreach (var lv in p.Levels.Skip(1))
         {
@@ -119,8 +137,7 @@ public static class ProjectTemplates
                     var b = new V3(p.GridX[i + 1].Position, gy.Position, gz);
                     var id = Id("G");
                     p.Members.Add(new MemberDef(id, AssemblyType.Girder, f.GirderX, a, b));
-                    p.Connections.Add(new ShearTabDef($"ST-{id}-S", id, MemberEnd.Start, ColumnAt(a.X, a.Y, gz)));
-                    p.Connections.Add(new ShearTabDef($"ST-{id}-E", id, MemberEnd.End, ColumnAt(b.X, b.Y, gz)));
+                    FrameEnds(id, ColumnAt(a.X, a.Y, gz), ColumnAt(b.X, b.Y, gz));
                 }
             }
 
@@ -132,8 +149,7 @@ public static class ProjectTemplates
                     var b = new V3(gx.Position, p.GridY[j + 1].Position, gz);
                     var id = Id("G");
                     p.Members.Add(new MemberDef(id, AssemblyType.Girder, f.GirderY, a, b));
-                    p.Connections.Add(new ShearTabDef($"ST-{id}-S", id, MemberEnd.Start, ColumnAt(a.X, a.Y, gz)));
-                    p.Connections.Add(new ShearTabDef($"ST-{id}-E", id, MemberEnd.End, ColumnAt(b.X, b.Y, gz)));
+                    FrameEnds(id, ColumnAt(a.X, a.Y, gz), ColumnAt(b.X, b.Y, gz));
                 }
             }
 
@@ -155,8 +171,7 @@ public static class ProjectTemplates
                             var gb = p.Members.First(m => m.Type == AssemblyType.Girder && Math.Abs(m.Start.Y - yb) < 1 && Math.Abs(m.End.Y - yb) < 1 && Math.Abs(m.Start.Z - gz) < 1 && Math.Min(m.Start.X, m.End.X) < bx && Math.Max(m.Start.X, m.End.X) > bx).Id;
                             var id = Id("B");
                             p.Members.Add(new MemberDef(id, AssemblyType.Beam, f.SubBeam, new V3(bx, ya, gz), new V3(bx, yb, gz)));
-                            p.Connections.Add(new ShearTabDef($"ST-{id}-S", id, MemberEnd.Start, ga));
-                            p.Connections.Add(new ShearTabDef($"ST-{id}-E", id, MemberEnd.End, gb));
+                            FrameEnds(id, ga, gb);
                         }
                     }
                 }

@@ -6,6 +6,12 @@ namespace HsSteel.Modeling;
 
 public enum HoleFace { Web, TopFlange, BottomFlange }
 
+/// <summary>Which flange corner is coped (beam end / top-or-bottom).</summary>
+public enum CopeCorner { TopStart, BottomStart, TopEnd, BottomEnd }
+
+/// <summary>Flange cope (notch) at a member end: length along the axis, depth from flange tip, scallop radius.</summary>
+public sealed record FlangeCope(CopeCorner Corner, double Length, double Depth, double Radius);
+
 /// <summary>A hole on a shape part. X from the part start; Across from the face edge (web: from the bottom, flange: from the near edge).</summary>
 public sealed record Hole(HoleFace Face, double X, double Across, double Dia);
 
@@ -40,6 +46,9 @@ public sealed class ShapePart : Part
 
     public required IReadOnlyList<Hole> Holes { get; init; }
 
+    /// <summary>Flange copes (scallops) applied for framing into a supporting member.</summary>
+    public IReadOnlyList<FlangeCope> Copes { get; init; } = [];
+
     public override string Name => Profile.Spec;
 
     public override double Weight => Profile.WeightFor(Length);
@@ -54,6 +63,12 @@ public sealed class ShapePart : Part
             foreach (var h in Holes.OrderBy(h => h.Face).ThenBy(h => Math.Round(h.X, 1)).ThenBy(h => Math.Round(h.Across, 1)))
             {
                 sb.Append($"|{h.Face}:{F(h.X)}:{F(h.Across)}:{F(h.Dia)}");
+            }
+
+
+            foreach (var c in Copes.OrderBy(c => c.Corner).ThenBy(c => Math.Round(c.Length, 1)).ThenBy(c => Math.Round(c.Depth, 1)))
+            {
+                sb.Append($"|COPE:{c.Corner}:{F(c.Length)}:{F(c.Depth)}:{F(c.Radius)}");
             }
 
             return sb.ToString();

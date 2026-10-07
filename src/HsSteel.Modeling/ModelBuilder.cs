@@ -78,6 +78,8 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
         /// <summary>Holes measured from a member end (resolved once cuts are known).</summary>
         public List<(MemberEnd End, double FromEnd, HoleFace Face, double Across, double Dia)> EndHoles { get; } = [];
 
+        public List<FlangeCope> Copes { get; } = [];
+
         /// <summary>Plates in local coordinates measured from the axis start (shifted by StartCut later).</summary>
         public List<(PlatePart Plate, Placement At, bool Welded)> Plates { get; } = [];
 
@@ -150,6 +152,7 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
                     case ShearTabDef t: ShearTab(work[t.Beam], t.BeamEnd, work[t.Support], t, rules, result); break;
                     case BasePlateDef b: BasePlate(work[b.Column], b, rules); break;
                     case EndCapDef e: EndCap(work[e.Member], e, rules); break;
+                case EndPlateDef ep: EndPlate(work[ep.Beam], ep.BeamEnd, work[ep.Support], ep, rules, result); break;
                 }
             }
             catch (KeyNotFoundException ex)
@@ -313,9 +316,15 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
             var plate = PlatePart.Rect(plateT, width, height, rowsAxis.Holes.Select(v => new PlateHole(gap + e, v, hole)), "SHEAR-TAB", rules.Material);
             var origin = new V3(local.X - (plateT / 2), (sp.Depth / 2) + local.Y - (height / 2), (sp.Width / 2) + (side * sp.Tw / 2));
             support.Plates.Add((plate, new Placement(PlateOrientation.End, origin, side, 1), true));
-            if (Math.Abs(local.Y) + (bp.Depth / 2) > (sp.Depth / 2) + 1e-6)
+            var topOver = (Math.Abs(local.Y) + (bp.Depth / 2)) - (sp.Depth / 2);
+            if (topOver > 1e-6)
             {
-                result.Warnings.Add($"{t.Id}: beam {beam.Def.Id} is deeper than / offset from girder {support.Def.Id}; cope not generated.");
+                var copeLen = Math.Round((sp.Width / 2) + gap + rules.WeldGap, 1);
+                var copeDepth = Math.Round(Math.Max(bp.Tf + bp.Radius, rules.Scallop), 1);
+                var cornerTop = end == MemberEnd.Start ? CopeCorner.TopStart : CopeCorner.TopEnd;
+                var cornerBot = end == MemberEnd.Start ? CopeCorner.BottomStart : CopeCorner.BottomEnd;
+                beam.Copes.Add(new FlangeCope(cornerTop, copeLen, copeDepth, rules.Scallop));
+                beam.Copes.Add(new FlangeCope(cornerBot, copeLen, copeDepth, rules.Scallop));
             }
         }
         else
@@ -340,6 +349,62 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
 
         Add(beam.Bolts, $"TS M{boltDia:0}", rowsAxis.Count);
         _ = bx;
+    }
+
+    private void EndPlate(Work beam, MemberEnd end, Work support, EndPlateDef t, DetailRules rules, ModelResult result)
+    {
+        var bp = beam.Profile;
+        var sp = support.Profile;
+        var spec = splices.Find(bp.Spec, false, t.BoltSize);
+        var boltDia = spec?.WebBoltDia ?? (t.BoltSize > 0 ? t.BoltSize : 20);
+        BoltAxis rowsAxis;
+        IReadOnlyList<string> rowFlags;
+        if (spec?.WebY is { } standardRows)
+        {
+            rowsAxis = standardRows;
+            rowFlags = ShearTabLayout.Check(bp, rowsAxis);
+        }
+        else
+        {
+            var layout = ShearTabLayout.Default(bp, boltDia);
+            rowsAxis = layout.Rows;
+            rowFlags = layout.Flags;
+        }
+
+        foreach (var flag in rowFlags)
+        {
+            result.Warnings.Add($"{t.Id}: beam {beam.Def.Id} ({bp.Spec}): {flag}");
+        }
+
+        var hole = boltDia + 2;
+        var plateT = t.PlateT > 0 ? t.PlateT : spec?.WebPlateT ?? 12;
+        var ext = Math.Max(0, t.Extension);
+        var e = rules.EndGauge;
+        var gap = rules.ConnectionGap;
+
+        // Cut beam back to the support face + gap; the end plate thickness sits in that gap zone on the beam end.
+        var f = support.Frame;
+        var joint = end == MemberEnd.Start ? beam.Def.Start : beam.Def.End;
+        var local = f.ToLocal(joint);
+        var vertical = Math.Abs(f.X.Z) > 0.7;
+        var face = vertical ? sp.Depth / 2 : sp.Tw / 2;
+        var cut = face + gap;
+        if (end == MemberEnd.Start) { beam.StartCut += cut; } else { beam.EndCut += cut; }
+
+        var y0 = (bp.Depth - rowsAxis.Total) / 2;
+        foreach (var y in rowsAxis.Holes)
+        {
+            beam.EndHoles.Add((end, e, HoleFace.Web, y0 + y, hole));
+        }
+
+        var u = bp.Width + (2 * ext);
+        var v = bp.Depth + (2 * ext);
+        var holes = rowsAxis.Holes.Select(y => new PlateHole(ext + (bp.Width / 2), ext + y0 + y, hole)).ToList();
+        var plate = PlatePart.Rect(plateT, u, v, holes, "END-PLATE", rules.Material);
+        var x = end == MemberEnd.Start ? -plateT : beam.Def.AxisLength;
+        beam.Plates.Add((plate, new Placement(PlateOrientation.End, new V3(x, -ext, -ext), 1, 1), true));
+        Add(beam.Bolts, $"TS M{boltDia:0}", rowsAxis.Count);
+        _ = local;
     }
 
     private static void BasePlate(Work col, BasePlateDef b, DetailRules rules)
@@ -402,7 +467,11 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
                 .Select(h => new Hole(h.Face, Math.Round(h.End == MemberEnd.Start ? h.FromEnd : len - h.FromEnd, 2), Math.Round(h.Across, 2), h.Dia))
                 .OrderBy(h => h.Face).ThenBy(h => h.X).ThenBy(h => h.Across)
                 .ToList();
-            var candidate = new ShapePart { Profile = w.Profile, Length = len, Holes = holes, Material = w.Def.Material ?? result.Rules.Material };
+            var copes = w.Copes
+                .Select(c => c with { Length = Math.Round(c.Length, 1), Depth = Math.Round(c.Depth, 1), Radius = Math.Round(c.Radius, 1) })
+                .OrderBy(c => c.Corner).ThenBy(c => c.Length).ThenBy(c => c.Depth)
+                .ToList();
+            var candidate = new ShapePart { Profile = w.Profile, Length = len, Holes = holes, Copes = copes, Material = w.Def.Material ?? result.Rules.Material };
             if (!shapes.TryGetValue(candidate.Signature, out var shape))
             {
                 shape = candidate;

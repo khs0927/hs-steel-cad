@@ -249,6 +249,7 @@ public sealed class HsTools(Workspace ws)
             ShearTabDef t => t.Beam == id || t.Support == id,
             BasePlateDef b => b.Column == id,
             EndCapDef e => e.Member == id,
+            EndPlateDef ep => ep.Beam == id || ep.Support == id,
             _ => false,
         });
         ws.Save(p);

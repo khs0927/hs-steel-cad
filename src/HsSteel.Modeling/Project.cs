@@ -24,6 +24,7 @@ public enum MemberEnd { Start, End }
 [JsonDerivedType(typeof(ShearTabDef), "shear_tab")]
 [JsonDerivedType(typeof(BasePlateDef), "base_plate")]
 [JsonDerivedType(typeof(EndCapDef), "end_cap")]
+[JsonDerivedType(typeof(EndPlateDef), "end_plate")]
 public abstract record ConnectionDef(string Id);
 
 /// <summary>Bolted H splice: <paramref name="MemberA"/>'s end meets <paramref name="MemberB"/>'s start (SCSS standard).</summary>
@@ -40,6 +41,9 @@ public sealed record BasePlateDef(string Id, string Column, double Thickness = 2
 
 /// <summary>Cap plate welded on a member end.</summary>
 public sealed record EndCapDef(string Id, string Member, MemberEnd End, double Thickness = 12) : ConnectionDef(Id);
+
+/// <summary>Bolted end plate: plate on the beam end, web bolts to the supporting member (alternative to a shear tab).</summary>
+public sealed record EndPlateDef(string Id, string Beam, MemberEnd BeamEnd, string Support, double PlateT = 0, int BoltSize = 0, double Extension = 20) : ConnectionDef(Id);
 
 /// <summary>Model input: everything needed to generate shop drawings.</summary>
 public sealed class Project
