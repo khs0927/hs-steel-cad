@@ -296,6 +296,12 @@ public sealed class AssetTools(Workspace ws, AssetOptions opt)
             foreach (var e in s.Plan.Entities)
             {
                 var o = e.Spec.DeepClone().AsObject();
+                // power-cad rejects empty text (e.g. blank BOM cells); they draw nothing anyway.
+                if (e.Type is "text" or "mtext" && string.IsNullOrWhiteSpace(o["text"]?.GetValue<string>()))
+                {
+                    continue;
+                }
+
                 o["hs"] = enrich.Enrich(e.Tag, s.Number);
                 entities.Add(o);
                 layers.Add(e.Layer);
