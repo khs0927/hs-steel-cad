@@ -118,3 +118,9 @@ Sibling may extend; prefer additive edits over rewrite fights.
 | 영역 | 담당 | 경로 |
 |---|---|---|
 | Rule trust grading / formulas / verification / new rule extraction / rule graph nodes | **Claude Opus 5.5** | src/HsSteel.Knowledge/Rules/, tests/HsSteel.Knowledge.Tests/Rules*Tests.cs, docs/RULES_CATALOG.md, minimal hook in KnowledgeDbBuilder/Program |
+
+## Content-gap closure claim (2026-10-08, Claude Opus)
+
+| 영역 | 담당 | 경로 |
+|---|---|---|
+| GAP_AUDIT §1/§4/§8 closure: VBA modules, xlsx formulas/named ranges, PDF OCR → doc_chunk kinds `vba`/`xlsx_formula`/`pdf_ocr`, table `vba_procedure`, re-embed | **Claude Opus** | `src/HsSteel.Knowledge/Ingest/`, `tools/docs_chunker/`, `tests/HsSteel.Tests/*Ingest*Tests.cs`, `Content*Tests.cs`, GAP_AUDIT "resolved" append |
