@@ -4240,7 +4240,8 @@
         "result": "fail",
         "detail": "Project.dat m32-dim-txt-box = 3 and engine DR-007 text 2.5 disagree with DIM-100 text 3.4; name says 1:100 but DIMSCALE is 50."
       },
-      "engine_status": "differs"
+      "engine_status": "differs",
+      "engine_note": "Engine paper text is 2.5 mm; pick one canonical dimension text height (3 or 3.4) and set DIMSCALE from the view scale."
     }
   ]
 }
