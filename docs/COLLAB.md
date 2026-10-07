@@ -112,3 +112,9 @@ Started: 2026-10-08 03:16 Asia/Seoul
 | **PLAYBOOK** end-to-end master guide (parse→infer→graph→RAG→power-cad) | **Grok Bot executor** | docs/PLAYBOOK.md |
 
 Sibling may extend; prefer additive edits over rewrite fights.
+
+## Rules v2 claim (Claude Opus 5.5, 2026-10-08)
+
+| 영역 | 담당 | 경로 |
+|---|---|---|
+| Rule trust grading / formulas / verification / new rule extraction / rule graph nodes | **Claude Opus 5.5** | src/HsSteel.Knowledge/Rules/, tests/HsSteel.Knowledge.Tests/Rules*Tests.cs, docs/RULES_CATALOG.md, minimal hook in KnowledgeDbBuilder/Program |
