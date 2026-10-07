@@ -1,0 +1,148 @@
+{
+    "mcp_tools":  {
+                      "jev_screen":  {
+                                         "benign":  {
+                                                        "decision":  "allow",
+                                                        "safe_probability":  0.98
+                                                    },
+                                         "danger":  {
+                                                        "decision":  "deny",
+                                                        "safe_probability":  0.01
+                                                    }
+                                     },
+                      "jev_verify":  {
+                                         "ok":  true,
+                                         "expect":  "verified false when evidence thin",
+                                         "verified":  false,
+                                         "probability":  0.01
+                                     },
+                      "jev_rerank":  {
+                                         "ok":  true,
+                                         "top_choice":  "알고리즘 X: O(1)",
+                                         "ranking":  [
+                                                         {
+                                                             "candidate":  "알고리즘 X: O(1)",
+                                                             "score":  0.98
+                                                         },
+                                                         {
+                                                             "candidate":  "알고리즘 Y: O(1)",
+                                                             "score":  0.97
+                                                         },
+                                                         {
+                                                             "candidate":  "알고리즘 Z: O(n)",
+                                                             "score":  0.06
+                                                         }
+                                                     ]
+                                     },
+                      "jev_tool_route":  {
+                                             "ok":  true,
+                                             "selected_strategy":  "병렬 호출",
+                                             "confidence":  0.83
+                                         },
+                      "jev_decide":  {
+                                         "ok":  true,
+                                         "confidence":  0.98,
+                                         "choice":  "allow",
+                                         "note":  "probabilities allow=0.99"
+                                     },
+                      "jev_classify":  {
+                                           "ok":  true,
+                                           "category":  "기능요청",
+                                           "confidence":  0.81
+                                       },
+                      "jev_noul":  {
+                                       "ok":  true,
+                                       "probability":  0.93,
+                                       "statement":  "JEV 4종 도구가 정상 동작한다"
+                                   }
+                  },
+    "machine":  "DESKTOP-KTQHS1I (a0056d74-b107-4102-ac4c-a2c22ebcd7c4)",
+    "model":  "jev-1.13-free",
+    "hs_steel_tip":  "5f51c7d1f6ec2d229be8417f2dd4a0d4d1af6cb1",
+    "cost":  "0",
+    "jevgrep":  "skipped (no egress; jg not installed)",
+    "autocad_required_this_round":  false,
+    "autocad_needed_next":  "only for live create_many/XData smoke",
+    "secondary_path":  "direct SystemOne API via C:\\code\\_ops\\jev-verify-all.mjs (multi-noul)",
+    "primary_path":  "MCP user-jev (cursor connector → SystemOne jev-1.13-free)",
+    "smoke":  {
+                  "note":  "criteria preferred X over Y → Y scores lower than old report near-tie; rank always X\u003eY\u003eZ",
+                  "command":  "node C:\\code\\jev-rerank-smoke.mjs \"\u003ccriteria\u003e\" C:\\code\\jev-rerank-candidates.json 10",
+                  "top_counts":  {
+                                     "알고리즘 X: O(1)":  10
+                                 },
+                  "score_ranges":  {
+                                       "알고리즘 Z: O(n)":  {
+                                                            "jitter":  0.01,
+                                                            "min":  0.05,
+                                                            "max":  0.06
+                                                        },
+                                       "알고리즘 X: O(1)":  {
+                                                            "jitter":  0.01,
+                                                            "min":  0.93,
+                                                            "max":  0.94
+                                                        },
+                                       "알고리즘 Y: O(1)":  {
+                                                            "jitter":  0.07,
+                                                            "min":  0.34,
+                                                            "max":  0.41
+                                                        }
+                                   }
+              },
+    "feature_suite":  {
+                          "k3_searches":  "PASS (H-400x200 auto exact; 고장력볼트 semantic; HTB M20 lexical; 엔드플레이트 lexical empty / semantic 0.83)",
+                          "dotnet_test_hs_steel":  {
+                                                       "detail":  "HsSteel.Tests 88 + Knowledge.Tests 31",
+                                                       "failed":  0,
+                                                       "passed":  119
+                                                   },
+                          "d2":  {
+                                     "Part_and_plate":  "1/1",
+                                     "demo_dxf":  "out/demo_B1_explore.dxf 1695698 bytes",
+                                     "DomainProfile":  "3/3",
+                                     "DraftingLayout":  "8/8"
+                                 },
+                          "bulkcreate":  {
+                                             "tip":  "97d6f0de8949bb922332c1bc681869f9c08c37dc",
+                                             "failed":  0,
+                                             "passed":  15
+                                         },
+                          "graph":  {
+                                        "edges_total":  2143,
+                                        "palette_items":  2246,
+                                        "inserts":  55
+                                    },
+                          "overall":  "PASS"
+                      },
+    "defects":  {
+                    "empty_state":  {
+                                        "error":  "jev_decide requires non-empty string argument \u0027state\u0027",
+                                        "ok":  true
+                                    },
+                    "order_swap_rerank_mcp":  {
+                                                  "ok":  true,
+                                                  "top_choice":  "알고리즘 X: O(1)",
+                                                  "ranking":  [
+                                                                  {
+                                                                      "candidate":  "알고리즘 X: O(1)",
+                                                                      "score":  0.98
+                                                                  },
+                                                                  {
+                                                                      "candidate":  "알고리즘 Y: O(1)",
+                                                                      "score":  0.97
+                                                                  },
+                                                                  {
+                                                                      "candidate":  "알고리즘 Z: O(n)",
+                                                                      "score":  0.05
+                                                                  }
+                                                              ]
+                                              },
+                    "screen_scores":  {
+                                          "ok":  true,
+                                          "danger":  "0.01",
+                                          "benign":  "0.98"
+                                      }
+                },
+    "power_cad_tip":  "97d6f0de8949bb922332c1bc681869f9c08c37dc",
+    "generated_at_kst":  "2026-10-08 01:52:04 +09:00"
+}

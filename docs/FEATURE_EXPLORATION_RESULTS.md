@@ -142,3 +142,72 @@ dotnet test dotnet\PowerCad.Tests\PowerCad.Tests.csproj --filter "FullyQualified
 ## 한줄 요약
 
 **K3/Knowledge/D2/Bridge 탐색 팩 §5 순서 전부 완료. 테스트·데모·dry handoff 전부 녹색. 품질 이슈는 스캘럽/엔드플레이트 lexical 약점과 palette inserts 의도 갭뿐.** 풀 M 머지 없음.
+
+---
+
+## Re-run 2026-10-08 01:49 KST (post-JEV verification)
+
+- **실행 시각**: 2026-10-08 01:52:21 +09:00 (Asia/Seoul)
+- **머신**: DESKTOP-KTQHS1I (`a0056d74-b107-4102-ac4c-a2c22ebcd7c4`)
+- **hs-steel-cad tip**: `5f51c7d1f6ec2d229be8417f2dd4a0d4d1af6cb1`
+- **power-cad-latest tip**: `97d6f0de8949bb922332c1bc681869f9c08c37dc`
+- **환경**: `HS_ASSETS_DB=C:\code\hs-steel-cad\out\hs_assets.db`, `HS_KNOWLEDGE_MODEL_DIR=C:\code\hs-steel-cad\out\knowledge\model`
+- **AutoCAD**: 이번 라운드 미사용 (불필요). 다음 라이브 create_many/XData 스모크 때만 필요.
+- **선행**: JEV 7/7 MCP 검증 + smoke top_counts X 10/10 → `docs/JEV_VERIFICATION_RESULTS.md`
+
+### 1. Full hs-steel test suite — **PASS**
+
+| Assembly | Failed | Passed | Skipped | Total |
+|---|---:|---:|---:|---:|
+| HsSteel.Tests | 0 | 88 | 0 | 88 |
+| HsSteel.Knowledge.Tests | 0 | 31 | 0 | 31 |
+| **합계** | **0** | **119** | **0** | **119** |
+
+로그: `out/explore_results/dotnet_test_20261008.txt`
+
+### 2. K3 sample searches — **PASS**
+
+| Query | Mode | Top | 판정 |
+|---|---|---|---|
+| `H-400x200` | auto | **998 exact** `section H-BEAM/H400x200x8x13` | PASS |
+| `고장력볼트` | semantic | vector ~0.85 doc_chunks | PASS |
+| `HTB M20` | lexical (kind=bolt) | **998 exact** `TS M20*…` | PASS |
+| `엔드플레이트` | auto | hybrid/vector ~0.02 | OK (약함) |
+| `엔드플레이트` | lexical | **0건** | WEAK (기존과 동일) |
+| `엔드플레이트` | semantic | vector ~0.83 | PASS |
+
+### 3. Knowledge graph — **PASS**
+
+| rel | count |
+|---|---:|
+| family | 866 |
+| invokes | 533 |
+| spliced_with | 334 |
+| on_layer | 269 |
+| alias_of | 59 |
+| **inserts** | **55** (≥50) |
+| calls_lisp | 27 |
+
+`Real_PaletteToBlockEdges` — PASS 1/1
+
+### 4. D2 — **PASS**
+
+| Filter | Result |
+|---|---|
+| `DomainProfileTests` | 3/3 (D2 필터 묶음 11건 중) |
+| `DraftingLayoutTests` | 8/8 |
+| `Part_and_plate…` | **1/1 PASS** |
+| demo DXF | `out/demo_B1_explore.dxf` 1,695,698 bytes (mtime 2026-10-08 01:38:41 KST) 존재 확인 |
+
+### 5. Bridge / BulkCreate — **PASS**
+
+`
+dotnet test … --filter FullyQualifiedName~BulkCreate
+`
+
+- **15/15 PASS** (power-cad `97d6f0d`)
+- 로그: `out/explore_results/bulkcreate_20261008.txt`
+
+### 한줄 요약 (재실행)
+
+**FEATURE_EXPLORATION §5 재실행 전부 녹색 (119 + K3 + graph + D2 + BulkCreate 15). 풀 M/force-push 없음. AutoCAD 다음 라이브 스모크 때만.**
