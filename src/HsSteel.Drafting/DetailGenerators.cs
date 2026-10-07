@@ -64,6 +64,7 @@ public static class PartDetail
         var markX = map.Map(Math.Min(part.Length * 0.15, 400));
         Callouts.Balloon(d, placer, part.Mark, th, (markX, frontY), (w, h) => InBand(markX, w, h));
         BoltNotes(d, placer, map, webHoles, flgHoles, frontY, topY, th, InBand);
+        CopeNotes(d, placer, map, part.Copes, frontY, p.Depth, th, InBand);
 
         Callouts.Section(d, p, 0, -P(2));
         d.Text(Layers.Text, $"{part.Mark}", 0, P(6), th * 1.6, "middle_left");
@@ -99,6 +100,27 @@ public static class PartDetail
                 Callouts.Note(d, placer, text, th * 0.9, anchor, (w, h) => band(anchor.Item1, w, h));
             }
         }
+    }
+
+
+    /// <summary>One cope note per end (top+bottom share the station), leaders into the view band.</summary>
+    internal static void CopeNotes(DrawPlan d, Placer placer, LengthMap map, IReadOnlyList<FlangeCope> copes, double frontY, double depth, double th, Func<double, double, double, IEnumerable<Box>> band, double ox = 0)
+    {
+        if (copes is null || copes.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var g in copes.GroupBy(c => c.Corner is CopeCorner.TopStart or CopeCorner.BottomStart))
+        {
+            var c = g.OrderByDescending(x => x.Length).First();
+            var start = g.Key;
+            var xTrue = start ? Math.Min(c.Length, map.Length) : Math.Max(0, map.Length - c.Length);
+            var anchor = (ox + map.Map(xTrue), frontY + depth - (c.Depth / 2));
+            Callouts.Note(d, placer, Callouts.CopeNote(c), th * 0.85, anchor, (w, h) => band(anchor.Item1, w, h));
+        }
+
+        d.Meta["cope_notes"] = (d.Meta["cope_notes"]?.GetValue<int>() ?? 0) + 1;
     }
 
     internal static List<Station> Stations(LengthMap map, double length, IEnumerable<double> xs) =>
@@ -256,6 +278,7 @@ public static class AssemblyDetail
         }
 
         PartDetail.BoltNotes(d, placer, map, main.Holes.Where(h => h.Face == HoleFace.Web).ToList(), main.Holes.Where(h => h.Face != HoleFace.Web).ToList(), frontY, topY, th, InBand, ox);
+        PartDetail.CopeNotes(d, placer, map, main.Copes, frontY, p.Depth, th, InBand, ox);
 
         foreach (var g in a.Attachments.GroupBy(at => at.Part.Mark).OrderBy(g => g.Key, StringComparer.Ordinal))
         {

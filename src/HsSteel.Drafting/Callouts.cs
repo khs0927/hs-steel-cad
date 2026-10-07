@@ -27,6 +27,10 @@ public static class Callouts
     public static string BoltNote(int count, double holeDia, string type = "HTB") =>
         $"{count}-M{Annotate.F(BoltDia(holeDia))} {type} (Ø{Annotate.F(holeDia)})";
 
+    /// <summary>"COPE L=180 D=40 R=35" (flange cope / scallop shop note).</summary>
+    public static string CopeNote(FlangeCope c) =>
+        $"COPE L={Annotate.F(c.Length)} D={Annotate.F(c.Depth)} R={Annotate.F(c.Radius)}";
+
     /// <summary>Groups holes into clusters along the member (gap larger than <paramref name="split"/> starts a new one).</summary>
     public static List<List<Hole>> Clusters(IEnumerable<Hole> holes, double split = 300)
     {

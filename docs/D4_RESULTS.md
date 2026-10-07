@@ -23,7 +23,7 @@
 ## Next (sequential)
 
 1. K3 weak queries (`전단접합 스캘럽`, lexical `엔드플레이트`) — QueryExpand/FTS
-2. D3 residual: interactive grid MCP / more shop-detail polish
+2. D3 residual: interactive grid MCP / cope notes — **done** (see D3_RESIDUAL_RESULTS.md)
 3. Optional later: SAMPLE-FRAME live create_many (not required for D4)
 4. Skip: full M merge; leave Claude WIP (`Legacy/`, `GoldenMxxTests`, asset phase-2 dirs)
 ## Follow-on: K3 auto display scores

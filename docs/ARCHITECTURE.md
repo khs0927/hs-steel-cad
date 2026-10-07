@@ -30,7 +30,7 @@ Tekla·Advance Steel이 같은 방식이며, 이렇게 해야 다음이 자동�
 ```
 HsSteel.Assets      원본 자산 읽기(CP949 .dat, Project.dat 규칙, 블록 DWG)      ← CAD 의존 0
 HsSteel.Domain      단면·부재·볼트그룹·접합부·Project, 상세 규칙(DetailRules)
-HsSteel.Modeling    [진행] 그리드·축선·접합부 규칙 → 부재 형상(길이·구멍·스캘럽/cope·엔드플레이트) 확정, 마크 부여
+HsSteel.Modeling    [D3] 그리드·축선·접합부 규칙 → 부재 형상(길이·구멍·스캘럽/cope·엔드플레이트) 확정, 마크 부여
 HsSteel.Drafting    Project → DrawPlan (power-cad cad_create JSON과 동일 스키마)
    ├ MemberDetailGenerator  (구현됨: H형강 단품 — 입면·평면·단면·구멍·스캘럽·끊김표시·실치수)
    ├ AssemblyDetail / LayoutPlan / LayoutElevation / BomTable / Marking  [D4 완료]
@@ -77,7 +77,7 @@ native/HsSteel.Arx  C++ ObjectARX 커스텀 엔티티 HsMember (P5)
 |---|---|
 | D1 | 단품 상세도 품질: 치수 배치 엔진(겹침 회피), 볼트·용접 주기, 단면 확대, 회사 도곽 실측 적용 |
 | D2 | 형강 확장: ㄱ형강·채널·각관·파이프·판재 상세도 (자산의 25개 규격표 전부) |
-| D3 | Modeling: 그리드 프레임 + EndPlate/ShearTab + flange cope/scallop + 마크 통합 (**부분 완료** 2026-10-08); 상세도 cope 작도·대화형 그리드 규칙 MCP는 잔여 |
+| D3 | Modeling: 그리드 프레임 + EndPlate/ShearTab + flange cope/scallop + 마크 통합 | **완료** 2026-10-08: cope 작도(D4), 대화형 MCP hs_project_frame beam_connection/rules, hs_grid_from_bays, hs_project_rules, cope 주기 |
 | D4 | 조립도(부재+판+볼트), 배치/입면 자동작도, 도면 내 BOM/볼트표 | **완료** 2026-10-08: BomTable CSV/JSON, 입면(V-), 볼트집계표, cope 작도, weld leader min |
 | D5 | 원본 블록 114개 라이브러리화(ACadSharp 읽기), 원본 `.Mxx` 가져오기 |
 | M | power-cad 병합 (XData, create_many 추가 후) |

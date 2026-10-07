@@ -133,8 +133,9 @@ public sealed class HsTools(Workspace ws)
     }
 
     [McpServerTool(Name = "hs_project_frame")]
-    [Description("Create a complete steel frame project from bay sizes: grids, levels, columns (base plates, caps, optional SCSS splices), "
-        + "girders on every floor framed to columns with shear tabs, optional secondary beams framed to girders.")]
+    [Description("Create a complete steel frame from bay sizes: grids, levels, columns (base/caps/optional splices), "
+        + "floor girders framed with shear tabs or end plates, optional secondary beams. "
+        + "beam_connection: shear_tab|end_plate (전단접합|엔드플레이트). Optional detail rules: scallop/connection_gap/weld_gap/material.")]
     public string ProjectFrame(
         string name,
         [Description("Bay widths along X in mm, e.g. [6000,6000]")] double[] spansX,
@@ -146,6 +147,11 @@ public sealed class HsTools(Workspace ws)
         [Description("Secondary beams per X bay (0 = none)")] int subBeams = 0,
         string subBeam = "H300x150x6.5x9",
         [Description("Split columns longer than this (mm) with splices 1 m above a floor; 0 = no splices")] double maxColumnPiece = 0,
+        [Description("shear_tab | end_plate | 전단 | 엔드플레이트")] string beamConnection = "shear_tab",
+        [Description("Flange scallop radius mm (0 = default 30)")] double scallop = 0,
+        [Description("Beam-end clearance to support web mm (0 = default 10)")] double connectionGap = 0,
+        [Description("Weld gap mm (0 = default 5)")] double weldGap = 0,
+        [Description("Default material, e.g. SS275")] string material = "",
         string date = "",
         bool overwrite = false)
     {
@@ -157,7 +163,9 @@ public sealed class HsTools(Workspace ws)
         RequireLengths(nameof(spansX), spansX, allowEmpty: true);
         RequireLengths(nameof(spansY), spansY, allowEmpty: true);
         RequireLengths(nameof(storeys), storeys, allowEmpty: false);
-        var p = ProjectTemplates.Frame(name, new FrameSpec(spansX, spansY, storeys, column, girderX, girderY, maxColumnPiece, subBeams, subBeam));
+        var conn = ParseBeamConnection(beamConnection);
+        var rules = BuildRules(scallop, connectionGap, weldGap, material);
+        var p = ProjectTemplates.Frame(name, new FrameSpec(spansX, spansY, storeys, column, girderX, girderY, maxColumnPiece, subBeams, subBeam, conn), rules);
         p.Date = date;
         ws.Save(p);
         return Summary(p, ws.Build(p));
@@ -195,6 +203,99 @@ public sealed class HsTools(Workspace ws)
 
         ws.Save(p);
         return Json(new { grid_x = p.GridX.Count, grid_y = p.GridY.Count, levels = p.Levels.Count });
+    }
+
+    [McpServerTool(Name = "hs_grid_from_bays")]
+    [Description("Interactive grid helper: set X/Y grid lines (and optional levels) from bay/storey sizes with auto names X1..Xn, Y1..Yn, BASE/2F... "
+        + "Creates the project if missing. Does not place members — use hs_project_frame for a full frame, or hs_member_add afterwards.")]
+    public string GridFromBays(
+        string name,
+        [Description("Bay widths along X mm")] double[] spansX,
+        [Description("Bay widths along Y mm")] double[] spansY,
+        [Description("Optional storey heights mm from base")] double[]? storeys = null,
+        string prefixX = "X",
+        string prefixY = "Y",
+        string date = "",
+        bool overwriteGrids = true)
+    {
+        RequireLengths(nameof(spansX), spansX, allowEmpty: true);
+        RequireLengths(nameof(spansY), spansY, allowEmpty: true);
+        Project p;
+        if (File.Exists(ws.PathOf(name)))
+        {
+            p = ws.Load(name);
+        }
+        else
+        {
+            p = new Project { Name = name, Date = date };
+        }
+
+        if (!overwriteGrids && (p.GridX.Count > 0 || p.GridY.Count > 0))
+        {
+            throw Fail($"Project '{name}' already has grids; pass overwriteGrids=true to replace them.");
+        }
+
+        p.GridX = BuildGrid(prefixX, spansX);
+        p.GridY = BuildGrid(prefixY, spansY);
+        if (storeys is { Length: > 0 })
+        {
+            RequireLengths(nameof(storeys), storeys, allowEmpty: false);
+            p.Levels = BuildLevels(storeys);
+        }
+
+        if (string.IsNullOrWhiteSpace(p.Date) && !string.IsNullOrWhiteSpace(date))
+        {
+            p.Date = date;
+        }
+
+        ws.Save(p);
+        return Json(new
+        {
+            project = p.Name,
+            grid_x = p.GridX.Select(g => new { g.Name, g.Position }),
+            grid_y = p.GridY.Select(g => new { g.Name, g.Position }),
+            levels = p.Levels.Select(l => new { l.Name, l.Elevation }),
+        });
+    }
+
+    [McpServerTool(Name = "hs_project_rules")]
+    [Description("Get or set fabrication DetailRules on a project (scallop/스캘럽, end gauge, hole dia, weld gap, connection gap, material). "
+        + "Omit a field to keep the current/default value. Rules drive cope depth/radius and connection cuts on hs_model_build.")]
+    public string ProjectRules(
+        string name,
+        double? scallop = null,
+        double? endGauge = null,
+        double? holeDia = null,
+        double? weldGap = null,
+        double? connectionGap = null,
+        string? material = null)
+    {
+        var p = ws.Load(name);
+        var cur = p.Rules ?? new DetailRules();
+        var next = cur with
+        {
+            Scallop = scallop ?? cur.Scallop,
+            EndGauge = endGauge ?? cur.EndGauge,
+            HoleDia = holeDia ?? cur.HoleDia,
+            WeldGap = weldGap ?? cur.WeldGap,
+            ConnectionGap = connectionGap ?? cur.ConnectionGap,
+            Material = string.IsNullOrWhiteSpace(material) ? cur.Material : material!,
+        };
+        p.Rules = next;
+        ws.Save(p);
+        return Json(new
+        {
+            project = p.Name,
+            rules = new
+            {
+                scallop = next.Scallop,
+                end_gauge = next.EndGauge,
+                hole_dia = next.HoleDia,
+                weld_gap = next.WeldGap,
+                connection_gap = next.ConnectionGap,
+                material = next.Material,
+            },
+        });
     }
 
     [McpServerTool(Name = "hs_member_add")]
@@ -438,11 +539,67 @@ public sealed class HsTools(Workspace ws)
         return k;
     }
 
+    private static BeamConnectionKind ParseBeamConnection(string? value)
+    {
+        var key = (value ?? "shear_tab").Trim().ToLowerInvariant().Replace("-", "_").Replace(" ", "");
+        return key switch
+        {
+            "shear_tab" or "sheartab" or "shear" or "gusset" or "전단" or "전단접합" or "1면마찰" => BeamConnectionKind.ShearTab,
+            "end_plate" or "endplate" or "end" or "엔드플레이트" or "엔드" => BeamConnectionKind.EndPlate,
+            _ => throw Fail($"Unknown beam_connection '{value}'. Use shear_tab or end_plate."),
+        };
+    }
+
+    private static DetailRules? BuildRules(double scallop, double connectionGap, double weldGap, string material)
+    {
+        if (scallop <= 0 && connectionGap <= 0 && weldGap <= 0 && string.IsNullOrWhiteSpace(material))
+        {
+            return null;
+        }
+
+        var d = new DetailRules();
+        return d with
+        {
+            Scallop = scallop > 0 ? scallop : d.Scallop,
+            ConnectionGap = connectionGap > 0 ? connectionGap : d.ConnectionGap,
+            WeldGap = weldGap > 0 ? weldGap : d.WeldGap,
+            Material = string.IsNullOrWhiteSpace(material) ? d.Material : material,
+        };
+    }
+
+    private static List<GridLine> BuildGrid(string prefix, double[] spans)
+    {
+        var lines = new List<GridLine> { new($"{prefix}1", 0) };
+        double pos = 0;
+        for (var i = 0; i < spans.Length; i++)
+        {
+            pos += spans[i];
+            lines.Add(new GridLine($"{prefix}{i + 2}", pos));
+        }
+
+        return lines;
+    }
+
+    private static List<Level> BuildLevels(double[] storeys)
+    {
+        var levels = new List<Level> { new("BASE", 0) };
+        double z = 0;
+        for (var i = 0; i < storeys.Length; i++)
+        {
+            z += storeys[i];
+            levels.Add(new Level($"{i + 2}F", z));
+        }
+
+        return levels;
+    }
+
     private static string Summary(Project p, ModelResult r) => Json(new
     {
         project = p.Name,
         members = p.Members.Count,
         connections = p.Connections.Count,
+        beam_connection = p.Connections.OfType<EndPlateDef>().Any() ? "end_plate" : p.Connections.OfType<ShearTabDef>().Any() ? "shear_tab" : null,
+        rules = p.Rules is null ? null : new { scallop = p.Rules.Scallop, connection_gap = p.Rules.ConnectionGap, weld_gap = p.Rules.WeldGap, material = p.Rules.Material },
         assemblies = r.Assemblies.Select(a => $"{a.Mark} x{a.Quantity} ({a.Main.Profile.Spec} L={a.Main.Length}, {a.Weight} kg)"),
         shape_parts = r.ShapeParts.Count,
         plate_parts = r.PlateParts.Count,
