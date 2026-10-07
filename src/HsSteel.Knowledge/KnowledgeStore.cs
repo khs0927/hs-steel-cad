@@ -171,12 +171,12 @@ public sealed class KnowledgeStore : IDisposable
 
         var lex = SearchLexical(query, kind, pool);
         var exact = lex.Where(h => h.MatchedBy == "exact").ToList();
-        var fused = new Dictionary<(string, string), (double Score, string Label, List<string> By)>();
-        void Add(string k, string key, string label, double w, string by)
+        var fused = new Dictionary<(string, string), (double Score, double VecSim, string Label, List<string> By)>();
+        void Add(string k, string key, string label, double w, string by, double vecSim = 0)
         {
             if (!fused.TryGetValue((k, key), out var e))
             {
-                e = (0, label, []);
+                e = (0, 0, label, []);
             }
 
             if (!e.By.Contains(by))
@@ -184,7 +184,7 @@ public sealed class KnowledgeStore : IDisposable
                 e.By.Add(by);
             }
 
-            fused[(k, key)] = (e.Score + w, e.Label, e.By);
+            fused[(k, key)] = (e.Score + w, Math.Max(e.VecSim, vecSim), e.Label, e.By);
         }
 
         var rank = 0;
@@ -198,16 +198,21 @@ public sealed class KnowledgeStore : IDisposable
         foreach (var (id, sim) in vec)
         {
             rank++;
-            // Blend cosine into RRF so auto-mode scores stay interpretable (pure RRF ~0.03 for strong hits).
-            Add("doc_chunk", id, vecLabels[id], (1.0 / (RrfK + rank)) + (0.5 * sim), "vector");
+            // Pure RRF for cross-kind ranking; cosine kept for display so auto scores are not stuck ~0.03.
+            Add("doc_chunk", id, vecLabels[id], 1.0 / (RrfK + rank), "vector", sim);
         }
 
         var exactKeys = exact.Select(h => (h.Kind, h.Key)).ToHashSet();
         var rest = fused
             .Where(f => !exactKeys.Contains(f.Key))
-            .Select(f => new SearchHit(f.Key.Item1, f.Key.Item2, f.Value.Label,
-                f.Value.Score * (f.Key.Item1 == "doc_chunk" && lowValue.Contains(f.Key.Item2) ? LowValueWeight : 1), string.Join("+", f.Value.By)))
-            .OrderByDescending(h => h.Score).ThenBy(h => h.Kind, StringComparer.Ordinal).ThenBy(h => h.Key, StringComparer.Ordinal);
+            .Select(f =>
+            {
+                var rrf = f.Value.Score * (f.Key.Item1 == "doc_chunk" && lowValue.Contains(f.Key.Item2) ? LowValueWeight : 1);
+                var shown = Math.Max(rrf, 0.5 * f.Value.VecSim);
+                return (Hit: new SearchHit(f.Key.Item1, f.Key.Item2, f.Value.Label, shown, string.Join("+", f.Value.By)), Rank: rrf);
+            })
+            .OrderByDescending(x => x.Rank).ThenByDescending(x => x.Hit.Score).ThenBy(x => x.Hit.Kind, StringComparer.Ordinal).ThenBy(x => x.Hit.Key, StringComparer.Ordinal)
+            .Select(x => x.Hit);
         return exact.Concat(rest).Take(limit).ToList();
     }
 
