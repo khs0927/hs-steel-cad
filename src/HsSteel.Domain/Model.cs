@@ -142,6 +142,45 @@ public sealed class SectionCatalog
         return c;
     }
 
-    public Profile Resolve(string spec) =>
-        _rows.TryGetValue(spec, out var r) ? Profile.FromRecord(r) : Profile.Parse(spec);
+    public Profile Resolve(string spec)
+    {
+        if (_rows.TryGetValue(spec, out var r))
+        {
+            return Profile.FromRecord(r);
+        }
+
+        // WT-002 fallback: a rolled H/I, channel or angle not in the table borrows the root radius of the nearest
+        // tabulated section of the same kind, so its (4?믋)쨌r짼 fillet term is a catalog value, not an estimate.
+        var p = Profile.Parse(spec);
+        var root = NearestRootRadius(p);
+        return root is { } rr && Math.Abs(rr - p.RootRadius) > 1e-9 ? Profile.Parse(spec, rr) : p;
+    }
+
+    /// <summary>Root radius of the tabulated rolled section of the same kind closest in depth + width (null if none).</summary>
+    public double? NearestRootRadius(Profile p)
+    {
+        if (!p.IsRolled || p.Kind is not (ShapeKind.I or ShapeKind.L or ShapeKind.Channel))
+        {
+            return null;
+        }
+
+        double? best = null;
+        var bestDist = double.MaxValue;
+        foreach (var row in _rows.Values)
+        {
+            var q = Profile.FromRecord(row);
+            if (q.Kind != p.Kind || !q.IsRolled || q.RootRadius <= 0)
+            {
+                continue;
+            }
+
+            var dist = Math.Abs(q.Depth - p.Depth) + Math.Abs(q.Width - p.Width);
+            if (dist < bestDist)
+            {
+                (best, bestDist) = (q.RootRadius, dist);
+            }
+        }
+
+        return best;
+    }
 }

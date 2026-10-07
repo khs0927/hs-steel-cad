@@ -305,8 +305,18 @@ public sealed record Profile(string Spec, string Family, ShapeKind Kind, IReadOn
         return new Profile(r.Spec, r.Family, kind, d, r.UnitWeight, r.PaintArea);
     }
 
-    /// <summary>Parses a spec when no table row exists. Weight from geometry x 7.85e-6 kg/mm³; paint from perimeter.</summary>
-    public static Profile Parse(string spec)
+    /// <summary>
+    /// Parses a spec when no table row exists. Paint from perimeter. Weight (WT-002): H/I/BH/LH/PH use the legacy
+    /// 단중.xlsx formula ROUND((2·B·tf + (H−2·tf)·tw + (4−π)·r²)·0.00785, 1) with r = tw for built-up sections and the
+    /// rolled root radius otherwise; angles and channels get their root fillet(s) in the outline and weigh
+    /// area × 7.85e-3 (2 dp).
+    /// </summary>
+    /// <param name="spec">Section spec, e.g. "H400x200x8x13".</param>
+    /// <param name="rootRadius">
+    /// Root fillet radius of a rolled H/I, channel or angle (e.g. from the nearest catalog row). When null:
+    /// H/I ≈ 0.059·√(H·B) rounded (fit to H-BEAM.dat), channel = tf, angle = t. Ignored for built-up BH/LH/PH (r = tw).
+    /// </param>
+    public static Profile Parse(string spec, double? rootRadius = null)
     {
         var s = spec.Trim();
         var n = Numbers.Matches(s).Select(m => double.Parse(m.Value, CultureInfo.InvariantCulture)).ToArray();
@@ -319,15 +329,17 @@ public sealed record Profile(string Spec, string Family, ShapeKind Kind, IReadOn
         }
         else if (Regex.IsMatch(s, "^(BH|LH|PH|H|I)", RegexOptions.IgnoreCase) && n.Length >= 4)
         {
-            (kind, family, d) = (ShapeKind.I, "H-BEAM", [n[0], n[1], n[2], n[3], 0]);
+            var rolled = s.StartsWith('H') || s.StartsWith('I'); // same test as IsRolled
+            var r = rolled ? rootRadius ?? Math.Round(0.059 * Math.Sqrt(n[0] * n[1])) : n[2];
+            (kind, family, d) = (ShapeKind.I, "H-BEAM", [n[0], n[1], n[2], n[3], r]);
         }
         else if (s.StartsWith('L') && n.Length >= 3)
         {
-            (kind, family, d) = (ShapeKind.L, "ANGLE", [n[0], n[1], n[2]]);
+            (kind, family, d) = (ShapeKind.L, "ANGLE", [n[0], n[1], n[2], n[2], rootRadius ?? n[2], 0]);
         }
         else if ((s.StartsWith('[') || s.StartsWith('ㄷ')) && n.Length >= 4)
         {
-            (kind, family, d) = (ShapeKind.Channel, "CHANNEL", [n[0], n[1], n[2], n[3]]);
+            (kind, family, d) = (ShapeKind.Channel, "CHANNEL", [n[0], n[1], n[2], n[3], rootRadius ?? n[3], 0]);
         }
         else if (s.StartsWith('C') && n.Length >= 4)
         {
@@ -363,9 +375,16 @@ public sealed record Profile(string Spec, string Family, ShapeKind Kind, IReadOn
         }
 
         var p = new Profile(spec, family, kind, d, 0, 0);
-        var area = Area(p);
-        return p with { UnitWeight = Math.Round(area * 7.85e-3, 2), PaintArea = Math.Round(Perimeter(p) / 1000.0, 3) };
+        var weight = kind == ShapeKind.I ? HUnitWeight(d[0], d[1], d[2], d[3], d[4]) : Math.Round(Area(p) * 7.85e-3, 2);
+        return p with { UnitWeight = weight, PaintArea = Math.Round(Perimeter(p) / 1000.0, 3) };
     }
+
+    /// <summary>
+    /// WT-002: H/BH unit weight [kg/m] = ROUND((2·B·tf + (H−2·tf)·tw + (4−π)·r²)·0.00785, 1); the (4−π)·r² term is the
+    /// four root fillets (BH: r = tw). Matches BH-BEAM.dat 159/159 and H-BEAM.dat 81/81 (RULES_CATALOG).
+    /// </summary>
+    public static double HUnitWeight(double h, double b, double tw, double tf, double r) =>
+        Math.Round(((2 * b * tf) + ((h - (2 * tf)) * tw) + ((4 - Math.PI) * r * r)) * 0.00785, 1, MidpointRounding.AwayFromZero);
 
     /// <summary>Net cross-section area in mm² from the outline loops (fillets and bends included; tapered: mean depth).</summary>
     public static double Area(Profile p)
