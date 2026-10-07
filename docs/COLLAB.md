@@ -144,3 +144,11 @@ Sibling may extend; prefer additive edits over rewrite fights.
 | 미구현 | — | 그립 기반 볼트 길이, 자재 할증(형강 9%·판 12%·볼트 3%), 커팅플랜, 앵커 길이 |
 
 **사용자 결정 대기**: 볼트 추가 길이 — `.dat` SCSS(M16 25/M20 30/M22 35) vs `단중.xlsx`(30/35/40), 175행 중 174행이 5mm 차이.
+
+## Engine fixes claim (Grok Bot executor, 2026-10-08 ~08:40 KST)
+
+| 규칙 | 담당 | 경로 |
+|---|---|---|
+| HL-001 hole d+2/d+3, NUM-001 mark heads, WT-002 fallback root fillet, DFT-001 dim text 3.4 | **Grok Bot executor** | `src/HsSteel.Domain/{Connections,Model,Profile}.cs`, `src/HsSteel.Modeling/ModelBuilder.cs`, `src/HsSteel.Drafting/{Layout,DxfExporter}.cs`, `src/HsSteel.Mcp/Workspace.cs` (Numbering.dat load), `tests/HsSteel.Tests/EngineRulesV2FixTests.cs` (new) |
+
+Not touching: `src/HsSteel.Knowledge/Rules/` / `docs/RULES_CATALOG.md` (Claude), bolt add-length (waiting on Mus).
