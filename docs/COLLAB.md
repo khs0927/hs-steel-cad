@@ -38,3 +38,10 @@ Grok봇은 이 기간 `KnowledgeDbBuilder.cs`/`Program.cs` 편집을 피해 주�
 | 영역 | 담당 | 경로 |
 |---|---|---|
 | Claude-sonnet 보조: 한글 문자 스타일(#4), 도면 검증 회귀(#3 확인 + 페이로드 회귀 테스트) | Claude-sonnet | `src/HsSteel.Drafting`(문자 스타일 최소 변경), `tests/HsSteel.Tests/` 신규 테스트 |
+
+### Claude-sonnet 결과 (2026-10-08)
+
+- **#4 한글 문자 스타일**: `TextStyles.Korean="HS-KOR"` (원본 템플릿 Standard 스타일과 같은 `txt.shx` + 한글 빅폰트 `whgtxt.shx`). `DrawPlan.Text`/`Dim`이 `style:"HS-KOR"`를 내고, `hs_drawings_to_powercad` 첫 페이로드에 `text_styles`/`dim_styles` 정의를 싣는다.
+  **power-cad 추가 필요**: `cad_create_many`는 `style`이 도면에 *이미 있는지*만 검사(없으면 묶음 전체 거부)하고 문자/치수 스타일을 만들지 못한다. `text_styles[{name,font,big_font,width_factor}]`, `dim_styles[{name,based_on,text_style}]`를 레이어처럼 선(先)생성하는 기능 추가 전까지는 AutoCAD에서 HS-KOR 문자/치수 스타일을 수동 생성하거나 템플릿에 포함해야 한다.
+- **#3 짧은 인출선**: 8fe3884(`LeaderIfLongEnough`, 최소 3mm×축척)로 해결 확인. 페이로드 회귀 테스트 `PowerCadPayloadRegressionTests`(빈 text 없음, 인출선 구간 ≥ 2.5×축척, 레이어/문자·치수 스타일 모두 정의됨) 추가.
+- `dotnet test`: 128개 전부 통과 (DraftingD4Tests 포함).

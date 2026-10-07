@@ -75,7 +75,7 @@ public sealed class DrawPlan
         Add(new JsonObject
         {
             ["type"] = "text", ["layer"] = layer, ["text"] = text, ["position"] = Pt(x, y),
-            ["height"] = Math.Round(height, 3), ["justify"] = justify, ["rotation"] = rotation,
+            ["height"] = Math.Round(height, 3), ["justify"] = justify, ["rotation"] = rotation, ["style"] = TextStyles.Korean,
         });
 
     /// <summary>Linear dimension. rotation 0 = horizontal, 90 = vertical; linePoint fixes the dimension line.</summary>
@@ -85,6 +85,7 @@ public sealed class DrawPlan
         {
             ["type"] = "dimension", ["layer"] = layer, ["kind"] = "rotated",
             ["p1"] = Pt(p1.X, p1.Y), ["p2"] = Pt(p2.X, p2.Y), ["line_point"] = Pt(linePoint.X, linePoint.Y), ["rotation"] = rotation,
+            ["style"] = TextStyles.Korean,
         };
         if (text is not null)
         {
