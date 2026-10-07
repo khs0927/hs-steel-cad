@@ -60,3 +60,17 @@ Grok봇은 이 기간 `KnowledgeDbBuilder.cs`/`Program.cs` 편집을 피해 주�
 **Avoid editing**: KnowledgeDbBuilder.cs / Program.cs (Claude phase-2); Drafting HS-KOR (Claude-sonnet done).
 
 Started: 2026-10-08 03:16 Asia/Seoul
+
+### Overnight Grok Bot executor results (2026-10-08)
+
+- GAP_AUDIT: `docs/GAP_AUDIT.md`
+- RULES_CATALOG: **100** rules (64 with engine_refs) → `docs/RULES_CATALOG.md`, `src/HsSteel.Knowledge/Rules/`
+- Graph RAG: MCP `hs_graph_rag` / `hs_explain` / `hs_rules_search`; eval **32/32 (100%)** → `docs/GRAPH_RAG_EVAL.md`
+- Gold: redacted numeric summary → `docs/GOLD_SUMMARIES.md` (DWG not committed; `out/` gitignored)
+
+
+### power-cad style path (2026-10-08 overnight)
+
+- Landed: https://github.com/khs0927/power-cad-mcp/pull/41 (`01f31ac`) — `cad_create_many` creates `text_styles`/`dim_styles` when missing (never mutates existing). HS-KOR need not be pre-created.
+- hs-steel payload: `TextStyles` width_factor **0.85** (`934e536`).
+- Live AutoCAD verify: **skipped** overnight (preferred).
