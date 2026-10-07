@@ -32,3 +32,9 @@
 | H: `C:\HS-STEEL` 미적재 자산(SLD 슬라이드, 아이콘, DCL 전부, 새공사 템플릿) | Claude | `src/HsSteel.Assets/{Slides,Dialogs,Templates}/`(신규), `src/HsSteel.Knowledge/Ingest/`(신규) |
 
 Grok봇은 이 기간 `KnowledgeDbBuilder.cs`/`Program.cs` 편집을 피해 주세요(QueryExpand/KnowledgeStore 검색 튜닝은 계속 가능).
+
+## Claude-sonnet 보조 (2026-10-08)
+
+| 영역 | 담당 | 경로 |
+|---|---|---|
+| Claude-sonnet 보조: 한글 문자 스타일(#4), 도면 검증 회귀(#3 확인 + 페이로드 회귀 테스트) | Claude-sonnet | `src/HsSteel.Drafting`(문자 스타일 최소 변경), `tests/HsSteel.Tests/` 신규 테스트 |
