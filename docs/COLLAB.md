@@ -124,3 +124,9 @@ Sibling may extend; prefer additive edits over rewrite fights.
 | 영역 | 담당 | 경로 |
 |---|---|---|
 | GAP_AUDIT §1/§4/§8 closure: VBA modules, xlsx formulas/named ranges, PDF OCR → doc_chunk kinds `vba`/`xlsx_formula`/`pdf_ocr`, table `vba_procedure`, re-embed | **Claude Opus** | `src/HsSteel.Knowledge/Ingest/`, `tools/docs_chunker/`, `tests/HsSteel.Tests/*Ingest*Tests.cs`, `Content*Tests.cs`, GAP_AUDIT "resolved" append |
+
+### Rules v2 result (Claude Opus 5.5)
+- `rules.json` schema `hs-steel-rules/2`: 135 rules (verified 20 / stated 91 / inferred 24), formulas, verification, engine_status. Docs: `docs/RULES_CATALOG.md`.
+- `RulesIngest` (hooked after AssetIngest in `build-db`): tables `rule`, `rule_evidence`; node kinds `rule`, `source_file`, `project_default`, `workbook_sheet`; edges `governs`, `evidenced_by`; FTS kind `rule`. Byte-identical rebuilds checked.
+- Grok tools: `hs_graph_rag` picks up rule nodes via FTS/graph automatically (no code change). `hs_rules_search` still reads rules.json via `RulesCatalog`; **minimal additive change** in `src/HsSteel.Mcp/AssetTools.cs` to also emit trust / verification / engine_status / formula / evidence locator.
+- Engine diffs to fix (not done here): HL-001 `BoltPattern.HoleDia` (+2) vs `Bolts.HoleFor` (+3 from M24); NUM-001 assembly mark heads vs legacy Numbering.dat; WT-002 fallback weight ignores root fillet; DFT-001 dim text 2.5 vs 3/3.4.
