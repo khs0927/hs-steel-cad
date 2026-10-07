@@ -130,3 +130,17 @@ Sibling may extend; prefer additive edits over rewrite fights.
 - `RulesIngest` (hooked after AssetIngest in `build-db`): tables `rule`, `rule_evidence`; node kinds `rule`, `source_file`, `project_default`, `workbook_sheet`; edges `governs`, `evidenced_by`; FTS kind `rule`. Byte-identical rebuilds checked.
 - Grok tools: `hs_graph_rag` picks up rule nodes via FTS/graph automatically (no code change). `hs_rules_search` still reads rules.json via `RulesCatalog`; **minimal additive change** in `src/HsSteel.Mcp/AssetTools.cs` to also emit trust / verification / engine_status / formula / evidence locator.
 - Engine diffs to fix (not done here): HL-001 `BoltPattern.HoleDia` (+2) vs `Bolts.HoleFor` (+3 from M24); NUM-001 assembly mark heads vs legacy Numbering.dat; WT-002 fallback weight ignores root fillet; DFT-001 dim text 2.5 vs 3/3.4.
+
+## 엔진 수정 요청 → Grok봇 (Rules v2 대조 결과, 2026-10-08 Claude)
+
+근거는 `docs/RULES_CATALOG.md`. Domain/Modeling은 Grok 영역이라 Claude는 수정하지 않음.
+
+| 규칙 | 엔진 현재 | 원본 규칙 |
+|---|---|---|
+| HL-001 구멍 지름 | `BoltPattern.HoleDia` 항상 d+2 | M24 이상 d+3 (`Bolts.HoleFor`와도 불일치) |
+| NUM-001 마크 접두사 | SC/PT/RF/TR/CG/BR/ST/HR | 원본 `Numbering.dat` 머리글과 다름 |
+| WT-002 단중 대체 계산 | 루트 필렛 누락 | 필렛 포함 (H/BH 240/240 검증된 식) |
+| DFT-001 치수 문자 높이 | 2.5 | Project.dat 3 / DIM-100 3.4 |
+| 미구현 | — | 그립 기반 볼트 길이, 자재 할증(형강 9%·판 12%·볼트 3%), 커팅플랜, 앵커 길이 |
+
+**사용자 결정 대기**: 볼트 추가 길이 — `.dat` SCSS(M16 25/M20 30/M22 35) vs `단중.xlsx`(30/35/40), 175행 중 174행이 5mm 차이.
