@@ -272,9 +272,13 @@ public sealed class AssetTools(Workspace ws, AssetOptions opt)
                 ["title"] = r.Title,
                 ["statement"] = r.Statement,
                 ["category"] = r.Category,
+                ["trust"] = r.Trust,
+                ["verification"] = r.Verification is { } v ? $"{v.Method}:{v.Result} {v.Detail}".Trim() : null,
+                ["engine_status"] = r.EngineStatus,
+                ["formula"] = r.Formula is { } f ? JsonNode.Parse(f.GetRawText()) : null,
                 ["tags"] = new JsonArray([.. r.Tags]),
                 ["engine_refs"] = new JsonArray([.. r.EngineRefs]),
-                ["evidence"] = new JsonArray([.. r.Evidence.Select(e => (JsonNode)new JsonObject { ["source"] = e.Source, ["note"] = e.Note })]),
+                ["evidence"] = new JsonArray([.. r.Evidence.Select(e => (JsonNode)new JsonObject { ["source"] = e.Source, ["locator"] = e.Locator, ["note"] = e.Note })]),
             })]),
         }.ToJsonString();
     }
