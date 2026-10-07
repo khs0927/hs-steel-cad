@@ -45,3 +45,18 @@ Grok봇은 이 기간 `KnowledgeDbBuilder.cs`/`Program.cs` 편집을 피해 주�
   **power-cad 추가 필요**: `cad_create_many`는 `style`이 도면에 *이미 있는지*만 검사(없으면 묶음 전체 거부)하고 문자/치수 스타일을 만들지 못한다. `text_styles[{name,font,big_font,width_factor}]`, `dim_styles[{name,based_on,text_style}]`를 레이어처럼 선(先)생성하는 기능 추가 전까지는 AutoCAD에서 HS-KOR 문자/치수 스타일을 수동 생성하거나 템플릿에 포함해야 한다.
 - **#3 짧은 인출선**: 8fe3884(`LeaderIfLongEnough`, 최소 3mm×축척)로 해결 확인. 페이로드 회귀 테스트 `PowerCadPayloadRegressionTests`(빈 text 없음, 인출선 구간 ≥ 2.5×축척, 레이어/문자·치수 스타일 모두 정의됨) 추가.
 - `dotnet test`: 128개 전부 통과 (DraftingD4Tests 포함).
+
+## Overnight Grok Bot executor (2026-10-08 ~03:16 KST) — zone claim
+
+| 영역 | 담당 | 경로 |
+|---|---|---|
+| **GAP_AUDIT** 콘텐츠 누락(VBA/수식, VLX/DLL, 이미지·PDF 페이지) | **Grok Bot executor (this)** | docs/GAP_AUDIT.md |
+| **RULES_CATALOG** ≥80 evidence-backed rules → KG + docs | **Grok Bot executor (this)** | docs/RULES_CATALOG.md, src/HsSteel.Knowledge/Rules/ (신규), graph edges |
+| **Graph RAG** hs_graph_rag + hs_explain + ~30q eval | **Grok Bot executor (this)** | src/HsSteel.Knowledge/GraphRag*.cs, src/HsSteel.Mcp/AssetTools.cs(도구 추가만), 	ests/.../graph_rag_eval.json, docs/GRAPH_RAG_EVAL.md |
+| Gold member/BOM 요약 (DWG 본문 비커밋) | **Grok Bot executor (this)** | docs/GOLD_SUMMARIES.md / out/gold/ 숫자·요약만 |
+
+**Sibling Grok Bot** owns: COLLAB drafting/HS-KOR verify, power-cad eat/create-many-styles PR landing.
+**Leave alone**: Claude WIP (Legacy/, GoldenMxxTests.cs, asset phase-2 dirs), full M merge, live AutoCAD draws.
+**Avoid editing**: KnowledgeDbBuilder.cs / Program.cs (Claude phase-2); Drafting HS-KOR (Claude-sonnet done).
+
+Started: 2026-10-08 03:16 Asia/Seoul
