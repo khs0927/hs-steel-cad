@@ -498,8 +498,11 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
             };
             if (!assemblies.TryGetValue(asm.Signature, out var existing))
             {
-                var n = assemblies.Values.Count(x => x.Type == asm.Type) + 1;
-                asm.Mark = $"{AssemblyTypes.Prefix(asm.Type)}{n}";
+                // Several types share a Numbering.dat head (Column/SubColumn/Post = C, Girder/Rafter/Truss/CraneGirder = G),
+                // so the running number is per prefix, not per type, or marks would collide (NUM-001).
+                var prefix = AssemblyTypes.Prefix(asm.Type, result.Rules.MarkHeads);
+                var n = assemblies.Values.Count(x => AssemblyTypes.Prefix(x.Type, result.Rules.MarkHeads) == prefix) + 1;
+                asm.Mark = $"{prefix}{n}";
                 assemblies[asm.Signature] = asm;
                 existing = asm;
             }

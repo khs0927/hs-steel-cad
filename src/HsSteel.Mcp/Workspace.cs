@@ -53,13 +53,22 @@ public sealed class Workspace
     {
         var attr = Path.Combine(assetsRoot, "attributes");
         var projectDat = Path.Combine(attr, "Project.dat");
+        var numberingDat = Path.Combine(attr, "Numbering.dat");
+        var rules = File.Exists(projectDat) ? DetailRules.From(ProjectSettings.Load(projectDat)) : new DetailRules();
+        if (File.Exists(numberingDat))
+        {
+            // NUM-001: assembly mark heads from the legacy Numbering.dat (M83-*-HD-BOX) when the asset folder has one.
+            var heads = AssemblyTypes.HeadsFrom(ProjectSettings.Load(numberingDat));
+            rules = rules with { MarkHeads = heads.Count > 0 ? heads : rules.MarkHeads };
+        }
+
         return new Workspace
         {
             AttributesDir = attr,
             ProjectsDir = projectsDir,
             Catalog = SectionCatalog.Load(attr),
             Splices = SpliceStandards.Load(attr),
-            Rules = File.Exists(projectDat) ? DetailRules.From(ProjectSettings.Load(projectDat)) : new DetailRules(),
+            Rules = rules,
         };
     }
 

@@ -81,7 +81,7 @@ public static class DxfExporter
 
         private double Tick => 1.0 * scale;
 
-        private double DimText => 2.2 * scale;
+        private double DimText => AnnotationBoxes.DimTextHeight(scale);
 
         public IEnumerable<Entity> Convert(JsonObject s)
         {

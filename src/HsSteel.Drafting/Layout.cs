@@ -23,11 +23,12 @@ public readonly record struct Box(double X0, double Y0, double X1, double Y1)
 
 /// <summary>
 /// Bounding boxes of everything a reader has to read on a plan: texts, dimension texts (placed the way the
-/// backends place them: 2.2 mm × scale, 0.4 h off the dimension line, above / left of it) and mark balloons.
+/// backends place them: <see cref="DimTextPaper"/> mm × scale, 0.4 h off the dimension line, above / left of it) and mark balloons.
 /// </summary>
 public static class AnnotationBoxes
 {
-    public const double DimTextPaper = 2.2;
+    /// <summary>Dimension text height on paper (mm): the template DIM-100 / Standard value 3.4 (DFT-001).</summary>
+    public const double DimTextPaper = HsSteel.Domain.DetailRules.TemplateDimText;
 
     public static double DimTextHeight(double scale) => DimTextPaper * scale;
 

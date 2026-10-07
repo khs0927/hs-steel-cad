@@ -43,19 +43,39 @@ public readonly record struct V3(double X, double Y, double Z)
 /// <param name="HoleDia">Default hole diameter [SHOLE].</param>
 /// <param name="WeldGap">Gap for welded fit-up [WDGAP].</param>
 /// <param name="Material">Default steel grade [SWS].</param>
-/// <param name="TextHeight">Paper text height (mm).</param>
+/// <param name="TextHeight">Paper text height (mm) of notes and marks.</param>
 /// <param name="DimGap">Paper distance between dimension rows (mm).</param>
 /// <param name="ConnectionGap">Clearance between a beam end and the supporting web (mm).</param>
+/// <param name="DimTextHeight">
+/// Paper height (mm) of dimension text (DFT-001): the template 새공사-2019.dwg dimension styles DIM-100 and Standard
+/// both use text 3.4 / arrow 3 / gap 1 / baseline step 5 (at DIMSCALE 50). Model height = this × view scale.
+/// Project.dat m32-dim-txt-box (3) is not used: the template is the canonical source.
+/// </param>
 public sealed record DetailRules(
     double Scallop = 30, double EndGauge = 40, double HoleDia = 22, double WeldGap = 5, string Material = "SS275",
-    double TextHeight = 2.5, double DimGap = 7, double ConnectionGap = 10)
+    double TextHeight = 2.5, double DimGap = 7, double ConnectionGap = 10, double DimTextHeight = 3.4)
 {
+    /// <summary>Template (DIM-100 / Standard) dimension text height on paper, mm (DFT-001).</summary>
+    public const double TemplateDimText = 3.4;
+
+    /// <summary>
+    /// Assembly mark heads overriding <see cref="AssemblyTypes.Prefix(AssemblyType)"/> (NUM-001), normally read from the
+    /// legacy Numbering.dat (M83-*-HD-BOX). Null = the Numbering.dat defaults built into <see cref="AssemblyTypes"/>.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public IReadOnlyDictionary<AssemblyType, string>? MarkHeads { get; init; }
+
+    /// <summary>Rules from Project.dat keys; Numbering.dat keys (M83-*-HD-BOX) may be merged into the same map.</summary>
     public static DetailRules From(IReadOnlyDictionary<string, string> p)
     {
         double Get(string k, double d) =>
             p.TryGetValue(k, out var v) && double.TryParse(v, NumberStyles.Float, CultureInfo.InvariantCulture, out var x) ? x : d;
         var material = p.TryGetValue("SWS", out var m) && m.Length > 0 ? m : "SS275";
-        return new DetailRules(Get("SCALLOP", 30), Get("ENDGAGE", 40), Get("SHOLE", 22), Get("WDGAP", 5), material);
+        var heads = AssemblyTypes.HeadsFrom(p);
+        return new DetailRules(Get("SCALLOP", 30), Get("ENDGAGE", 40), Get("SHOLE", 22), Get("WDGAP", 5), material)
+        {
+            MarkHeads = heads.Count > 0 ? heads : null,
+        };
     }
 }
 
@@ -64,25 +84,69 @@ public enum AssemblyType { Column, SubColumn, Post, Girder, Beam, CraneGirder, B
 
 public static class AssemblyTypes
 {
-    /// <summary>Mark prefix used for assembly numbering.</summary>
+    /// <summary>
+    /// Mark prefix used for assembly numbering (NUM-001): the heads of the legacy new-project Numbering.dat
+    /// (M83-COLUMN/SUBCOL/POST-HD-BOX C001, RAFTER/TRUSS/CRANEG/GIRDER G001, BEAM B001, BRACE R001, PURLIN PU001,
+    /// GIRTH GT001, STAIR S001, HANDRL H001, NGNGNG X001). Embed has no Numbering.dat head and keeps EM.
+    /// </summary>
     public static string Prefix(AssemblyType t) => t switch
     {
-        AssemblyType.Column => "C",
-        AssemblyType.SubColumn => "SC",
-        AssemblyType.Post => "PT",
-        AssemblyType.Girder => "G",
+        AssemblyType.Column or AssemblyType.SubColumn or AssemblyType.Post => "C",
+        AssemblyType.Girder or AssemblyType.Rafter or AssemblyType.Truss or AssemblyType.CraneGirder => "G",
         AssemblyType.Beam => "B",
-        AssemblyType.CraneGirder => "CG",
-        AssemblyType.Brace => "BR",
+        AssemblyType.Brace => "R",
         AssemblyType.Purlin => "PU",
         AssemblyType.Girth => "GT",
-        AssemblyType.Rafter => "RF",
-        AssemblyType.Truss => "TR",
-        AssemblyType.Stair => "ST",
-        AssemblyType.HandRail => "HR",
+        AssemblyType.Stair => "S",
+        AssemblyType.HandRail => "H",
         AssemblyType.Embed => "EM",
         _ => "X",
     };
+
+    /// <summary>Mark prefix with project overrides (e.g. from Numbering.dat via <see cref="HeadsFrom"/>).</summary>
+    public static string Prefix(AssemblyType t, IReadOnlyDictionary<AssemblyType, string>? heads) =>
+        heads is not null && heads.TryGetValue(t, out var h) && h.Length > 0 ? h : Prefix(t);
+
+    /// <summary>Numbering.dat head keys (M83-&lt;KEY&gt;-HD-BOX, dashes padded to 6 chars) for each engine type.</summary>
+    public static IReadOnlyDictionary<AssemblyType, string> NumberingKeys { get; } = new Dictionary<AssemblyType, string>
+    {
+        [AssemblyType.Column] = "M83-COLUMN-HD-BOX",
+        [AssemblyType.SubColumn] = "M83-SUBCOL-HD-BOX",
+        [AssemblyType.Post] = "M83-POST---HD-BOX",
+        [AssemblyType.Rafter] = "M83-RAFTER-HD-BOX",
+        [AssemblyType.Truss] = "M83-TRUSS--HD-BOX",
+        [AssemblyType.CraneGirder] = "M83-CRANEG-HD-BOX",
+        [AssemblyType.Girder] = "M83-GIRDER-HD-BOX",
+        [AssemblyType.Beam] = "M83-BEAM---HD-BOX",
+        [AssemblyType.Brace] = "M83-BRACE--HD-BOX",
+        [AssemblyType.Purlin] = "M83-PURLIN-HD-BOX",
+        [AssemblyType.Girth] = "M83-GIRTH--HD-BOX",
+        [AssemblyType.Stair] = "M83-STAIR--HD-BOX",
+        [AssemblyType.HandRail] = "M83-HANDRL-HD-BOX",
+        [AssemblyType.Other] = "M83-NGNGNG-HD-BOX",
+    };
+
+    /// <summary>
+    /// Mark heads found in Numbering.dat settings: "C001" -&gt; "C" (the trailing start number is dropped).
+    /// Types whose key is missing or blank are left out (they fall back to <see cref="Prefix(AssemblyType)"/>).
+    /// </summary>
+    public static IReadOnlyDictionary<AssemblyType, string> HeadsFrom(IReadOnlyDictionary<string, string> numbering)
+    {
+        var heads = new Dictionary<AssemblyType, string>();
+        foreach (var (t, key) in NumberingKeys)
+        {
+            if (numbering.TryGetValue(key, out var v))
+            {
+                var head = v.Trim().TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+                if (head.Length > 0)
+                {
+                    heads[t] = head;
+                }
+            }
+        }
+
+        return heads;
+    }
 
     /// <summary>HS-STEEL centre-line layer name for the type (used by the drawing recogniser).</summary>
     public static string CenterLineLayer(AssemblyType t) => t switch
@@ -150,7 +214,7 @@ public sealed class SectionCatalog
         }
 
         // WT-002 fallback: a rolled H/I, channel or angle not in the table borrows the root radius of the nearest
-        // tabulated section of the same kind, so its (4?믋)쨌r짼 fillet term is a catalog value, not an estimate.
+        // tabulated section of the same kind, so its (4−π)·r² fillet term is a catalog value, not an estimate.
         var p = Profile.Parse(spec);
         var root = NearestRootRadius(p);
         return root is { } rr && Math.Abs(rr - p.RootRadius) > 1e-9 ? Profile.Parse(spec, rr) : p;
