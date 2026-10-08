@@ -58,8 +58,14 @@ public sealed class Workspace
         if (File.Exists(numberingDat))
         {
             // NUM-001: assembly mark heads from the legacy Numbering.dat (M83-*-HD-BOX) when the asset folder has one.
-            var heads = AssemblyTypes.HeadsFrom(ProjectSettings.Load(numberingDat));
-            rules = rules with { MarkHeads = heads.Count > 0 ? heads : rules.MarkHeads };
+            // NUM-002: mark number width from the same templates (C001 → 3 digits).
+            var numbering = ProjectSettings.Load(numberingDat);
+            var heads = AssemblyTypes.HeadsFrom(numbering);
+            rules = rules with
+            {
+                MarkHeads = heads.Count > 0 ? heads : rules.MarkHeads,
+                MarkDigits = AssemblyTypes.DigitsFrom(numbering) ?? rules.MarkDigits,
+            };
         }
 
         return new Workspace

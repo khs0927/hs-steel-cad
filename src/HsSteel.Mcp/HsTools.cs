@@ -124,17 +124,18 @@ public sealed class HsTools(Workspace ws)
         string name,
         [Description("Date for title blocks, e.g. 2026.10.02")] string date = "",
         bool overwrite = false,
-        [Description("Bolt length table: kcs (default) | ts_one_washer | by_bolt_set")] string boltLengthTable = "",
+        [Description("Bolt length table: by_bolt_set (default: TS grip+25/30/35, HTB grip+30/35/40) | kcs | ts_one_washer")] string boltLengthTable = "",
         [Description("Hole rule: standard (default) | oversize | legacy")] string holeRule = "",
         [Description("Mark scheme: legacy (default) | alt")] string markScheme = "",
-        [Description("Mark format: plain (default) | floor_prefix")] string markFormat = "")
+        [Description("Mark format: plain (default) | floor_prefix")] string markFormat = "",
+        [Description("Assembly mark number width: 3 = C001 (default), 2 = C01, 1 = C1; 0 = keep")] int markDigits = 0)
     {
         if (File.Exists(ws.PathOf(name)) && !overwrite)
         {
             throw Fail($"Project '{name}' exists; pass overwrite=true to replace it.");
         }
 
-        var p = new Project { Name = name, Date = date, Rules = ApplyOptions(null, boltLengthTable, holeRule, markScheme, markFormat) };
+        var p = new Project { Name = name, Date = date, Rules = ApplyOptions(null, boltLengthTable, holeRule, markScheme, markFormat, markDigits) };
         ws.Save(p);
         return Json(new { created = ws.PathOf(name) });
     }
@@ -161,10 +162,11 @@ public sealed class HsTools(Workspace ws)
         [Description("Default material, e.g. SS275")] string material = "",
         string date = "",
         bool overwrite = false,
-        [Description("Bolt length table: kcs (default) | ts_one_washer | by_bolt_set")] string boltLengthTable = "",
+        [Description("Bolt length table: by_bolt_set (default: TS grip+25/30/35, HTB grip+30/35/40) | kcs | ts_one_washer")] string boltLengthTable = "",
         [Description("Hole rule: standard (default) | oversize | legacy")] string holeRule = "",
         [Description("Mark scheme: legacy (default) | alt")] string markScheme = "",
-        [Description("Mark format: plain (default) | floor_prefix")] string markFormat = "")
+        [Description("Mark format: plain (default) | floor_prefix")] string markFormat = "",
+        [Description("Assembly mark number width: 3 = C001 (default), 2 = C01, 1 = C1; 0 = keep")] int markDigits = 0)
     {
         if (File.Exists(ws.PathOf(name)) && !overwrite)
         {
@@ -175,7 +177,7 @@ public sealed class HsTools(Workspace ws)
         RequireLengths(nameof(spansY), spansY, allowEmpty: true);
         RequireLengths(nameof(storeys), storeys, allowEmpty: false);
         var conn = ParseBeamConnection(beamConnection);
-        var rules = ApplyOptions(BuildRules(scallop, connectionGap, weldGap, material), boltLengthTable, holeRule, markScheme, markFormat);
+        var rules = ApplyOptions(BuildRules(scallop, connectionGap, weldGap, material), boltLengthTable, holeRule, markScheme, markFormat, markDigits);
         var p = ProjectTemplates.Frame(name, new FrameSpec(spansX, spansY, storeys, column, girderX, girderY, maxColumnPiece, subBeams, subBeam, conn), rules);
         p.Date = date;
         ws.Save(p);
@@ -270,22 +272,24 @@ public sealed class HsTools(Workspace ws)
     }
 
     [McpServerTool(Name = "hs_project_options")]
-    [Description("Get or set the project standard options (stored in the project JSON): boltLengthTable kcs|ts_one_washer|by_bolt_set "
-        + "(grip + add length, rounded up to 5 mm; kcs = KCS 14 31 25 table 2.1-5), holeRule standard|oversize|legacy, "
-        + "markScheme legacy|alt, markFormat plain|floor_prefix. Omit all to just read (no change is written). Rebuild afterwards.")]
+    [Description("Get or set the project standard options (stored in the project JSON): boltLengthTable by_bolt_set|kcs|ts_one_washer "
+        + "(grip + add length, rounded up to 5 mm; by_bolt_set (default) = TS 1-washer 25/30/35/40, HTB KCS 14 31 25 table 2.1-5 30/35/40/45), "
+        + "holeRule standard|oversize|legacy, markScheme legacy|alt (legacy embed head EB, alt AB), markFormat plain|floor_prefix, "
+        + "markDigits 1..6 (3 = C001 default, 1 = C1). Omit all to just read (no change is written). Rebuild afterwards.")]
     public string ProjectOptions(
         string name,
-        [Description("kcs (default) | ts_one_washer | by_bolt_set")] string boltLengthTable = "",
+        [Description("by_bolt_set (default) | kcs | ts_one_washer")] string boltLengthTable = "",
         [Description("standard (default) | oversize | legacy")] string holeRule = "",
         [Description("legacy (default) | alt")] string markScheme = "",
-        [Description("plain (default) | floor_prefix")] string markFormat = "")
+        [Description("plain (default) | floor_prefix")] string markFormat = "",
+        [Description("Mark number width 1..6: 3 = C001 (default), 1 = C1; 0 = keep")] int markDigits = 0)
     {
         var p = ws.Load(name);
         var changed = !string.IsNullOrWhiteSpace(boltLengthTable) || !string.IsNullOrWhiteSpace(holeRule)
-            || !string.IsNullOrWhiteSpace(markScheme) || !string.IsNullOrWhiteSpace(markFormat);
+            || !string.IsNullOrWhiteSpace(markScheme) || !string.IsNullOrWhiteSpace(markFormat) || markDigits != 0;
         if (changed)
         {
-            p.Rules = ApplyOptions(p.Rules, boltLengthTable, holeRule, markScheme, markFormat);
+            p.Rules = ApplyOptions(p.Rules, boltLengthTable, holeRule, markScheme, markFormat, markDigits);
             ws.Save(p);
         }
 
@@ -301,6 +305,7 @@ public sealed class HsTools(Workspace ws)
                 holeRule = StandardOptions.HoleRules,
                 markScheme = StandardOptions.MarkSchemes,
                 markFormat = StandardOptions.MarkFormats,
+                markDigits = $"1..{StandardOptions.MaxMarkDigits}",
             },
         });
     }
@@ -603,6 +608,7 @@ public sealed class HsTools(Workspace ws)
         holeRule = StandardOptions.NormalizeHoleRule(r.HoleRule),
         markScheme = StandardOptions.NormalizeMarkScheme(r.MarkScheme),
         markFormat = StandardOptions.NormalizeMarkFormat(r.MarkFormat),
+        markDigits = StandardOptions.NormalizeMarkDigits(r.MarkDigits),
     };
 
     private static string PickOption(string? value, string[] allowed, string what, string current)
@@ -621,12 +627,17 @@ public sealed class HsTools(Workspace ws)
     }
 
     /// <summary>Standard options onto <paramref name="rules"/> (null = workspace rules); returns <paramref name="rules"/> unchanged when no option is given.</summary>
-    private DetailRules? ApplyOptions(DetailRules? rules, string? boltLengthTable, string? holeRule, string? markScheme, string? markFormat)
+    private DetailRules? ApplyOptions(DetailRules? rules, string? boltLengthTable, string? holeRule, string? markScheme, string? markFormat, int markDigits = 0)
     {
         if (string.IsNullOrWhiteSpace(boltLengthTable) && string.IsNullOrWhiteSpace(holeRule)
-            && string.IsNullOrWhiteSpace(markScheme) && string.IsNullOrWhiteSpace(markFormat))
+            && string.IsNullOrWhiteSpace(markScheme) && string.IsNullOrWhiteSpace(markFormat) && markDigits == 0)
         {
             return rules;
+        }
+
+        if (markDigits < 0 || markDigits > StandardOptions.MaxMarkDigits)
+        {
+            throw Fail($"markDigits must be 1..{StandardOptions.MaxMarkDigits} (got {markDigits}).");
         }
 
         var cur = rules ?? ws.Rules;
@@ -636,6 +647,7 @@ public sealed class HsTools(Workspace ws)
             HoleRule = PickOption(holeRule, StandardOptions.HoleRules, nameof(holeRule), cur.HoleRule),
             MarkScheme = PickOption(markScheme, StandardOptions.MarkSchemes, nameof(markScheme), cur.MarkScheme),
             MarkFormat = PickOption(markFormat, StandardOptions.MarkFormats, nameof(markFormat), cur.MarkFormat),
+            MarkDigits = markDigits == 0 ? cur.MarkDigits : markDigits,
         };
     }
 

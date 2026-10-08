@@ -65,7 +65,7 @@ public sealed record DetailRules(
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IReadOnlyDictionary<AssemblyType, string>? MarkHeads { get; init; }
 
-    /// <summary>Bolt length table: "kcs" (default), "ts_one_washer" or "by_bolt_set" (see <see cref="StandardOptions"/>).</summary>
+    /// <summary>Bolt length table: "by_bolt_set" (default: TS 1 washer, HTB KCS), "kcs" or "ts_one_washer" (see <see cref="StandardOptions"/>).</summary>
     public string BoltLengthTable { get; init; } = StandardOptions.DefaultBoltLengthTable;
 
     /// <summary>Bolt hole rule: "standard" (default), "oversize" or "legacy" (d+2 always).</summary>
@@ -74,8 +74,14 @@ public sealed record DetailRules(
     /// <summary>Mark heads: "legacy" (Numbering.dat, default) or "alt" (V brace, ST stair, HR handrail, T truss, AB anchor).</summary>
     public string MarkScheme { get; init; } = StandardOptions.DefaultMarkScheme;
 
-    /// <summary>Mark format: "plain" ("C1", default) or "floor_prefix" ("2C1").</summary>
+    /// <summary>Mark format: "plain" ("C001", default) or "floor_prefix" ("2C001").</summary>
     public string MarkFormat { get; init; } = StandardOptions.DefaultMarkFormat;
+
+    /// <summary>
+    /// Assembly mark number width (NUM-002): 3 = "C001" (default, legacy Numbering.dat), 2 = "C01", 1 = "C1".
+    /// Read from Numbering.dat (the digits of the M83-*-HD-BOX templates) when the asset folder has one.
+    /// </summary>
+    public int MarkDigits { get; init; } = StandardOptions.DefaultMarkDigits;
 
     /// <summary>Hole diameter for <paramref name="boltDia"/> under <see cref="HoleRule"/>.</summary>
     public double HoleFor(double boltDia) => StandardOptions.HoleFor(boltDia, HoleRule);
@@ -94,6 +100,7 @@ public sealed record DetailRules(
         return new DetailRules(Get("SCALLOP", 30), Get("ENDGAGE", 40), Get("SHOLE", 22), Get("WDGAP", 5), material)
         {
             MarkHeads = heads.Count > 0 ? heads : null,
+            MarkDigits = AssemblyTypes.DigitsFrom(p) ?? StandardOptions.DefaultMarkDigits,
         };
     }
 }
@@ -106,7 +113,8 @@ public static class AssemblyTypes
     /// <summary>
     /// Mark prefix used for assembly numbering (NUM-001): the heads of the legacy new-project Numbering.dat
     /// (M83-COLUMN/SUBCOL/POST-HD-BOX C001, RAFTER/TRUSS/CRANEG/GIRDER G001, BEAM B001, BRACE R001, PURLIN PU001,
-    /// GIRTH GT001, STAIR S001, HANDRL H001, NGNGNG X001). Embed has no Numbering.dat head and keeps EM.
+    /// GIRTH GT001, STAIR S001, HANDRL H001, NGNGNG X001). Embed has no M83 head; it uses the legacy M80 EMBED head
+    /// "EB" (AutoSaveLoad.M80 M80-EMBED--HD-TXT = EB01), not GITA's Z (misc) — docs/DECISIONS_BOLT_MARKS.md.
     /// </summary>
     public static string Prefix(AssemblyType t) => t switch
     {
@@ -118,7 +126,7 @@ public static class AssemblyTypes
         AssemblyType.Girth => "GT",
         AssemblyType.Stair => "S",
         AssemblyType.HandRail => "H",
-        AssemblyType.Embed => "EM",
+        AssemblyType.Embed => "EB",
         _ => "X",
     };
 
@@ -143,7 +151,13 @@ public static class AssemblyTypes
         [AssemblyType.Stair] = "M83-STAIR--HD-BOX",
         [AssemblyType.HandRail] = "M83-HANDRL-HD-BOX",
         [AssemblyType.Other] = "M83-NGNGNG-HD-BOX",
+
+        // Not in the legacy M83 Numbering.dat (which has no EMBED head): an engine extension so a project can override EB.
+        [AssemblyType.Embed] = "M83-EMBED--HD-BOX",
     };
+
+    /// <summary>Legacy M80 (AutoSaveLoad.M80) embed head key, used for Embed when no M83 EMBED key is given ("EB01" → "EB").</summary>
+    public const string LegacyEmbedKey = "M80-EMBED--HD-TXT";
 
     /// <summary>
     /// Mark heads found in Numbering.dat settings: "C001" -&gt; "C" (the trailing start number is dropped).
@@ -164,7 +178,39 @@ public static class AssemblyTypes
             }
         }
 
+        if (!heads.ContainsKey(AssemblyType.Embed) && numbering.TryGetValue(LegacyEmbedKey, out var eb))
+        {
+            var head = eb.Trim().TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+            if (head.Length > 0)
+            {
+                heads[AssemblyType.Embed] = head;
+            }
+        }
+
         return heads;
+    }
+
+    /// <summary>
+    /// Mark number width of the Numbering.dat HD-BOX templates ("C001" → 3): the most common count of trailing digits
+    /// (ties → the wider). Null when no template carries digits.
+    /// </summary>
+    public static int? DigitsFrom(IReadOnlyDictionary<string, string> numbering)
+    {
+        var widths = new List<int>();
+        foreach (var key in NumberingKeys.Values)
+        {
+            if (numbering.TryGetValue(key, out var v))
+            {
+                var s = v.Trim();
+                var n = s.Length - s.TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9').Length;
+                if (n > 0)
+                {
+                    widths.Add(Math.Min(n, StandardOptions.MaxMarkDigits));
+                }
+            }
+        }
+
+        return widths.Count == 0 ? null : widths.GroupBy(w => w).OrderByDescending(g => g.Count()).ThenByDescending(g => g.Key).First().Key;
     }
 
     /// <summary>HS-STEEL centre-line layer name for the type (used by the drawing recogniser).</summary>
@@ -211,7 +257,9 @@ public sealed class SectionCatalog
         foreach (var f in Directory.GetFiles(attributesDir, "*.dat"))
         {
             var name = Path.GetFileNameWithoutExtension(f);
-            if (name.Equals("Project", StringComparison.OrdinalIgnoreCase) || name.StartsWith("SCSS", StringComparison.OrdinalIgnoreCase))
+            // Project.dat / Numbering.dat are settings files (ProjectSettings), not section tables.
+            if (name.Equals("Project", StringComparison.OrdinalIgnoreCase) || name.Equals("Numbering", StringComparison.OrdinalIgnoreCase)
+                || name.StartsWith("SCSS", StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }

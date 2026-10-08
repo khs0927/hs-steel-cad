@@ -502,7 +502,7 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
                 Attachments = attachments,
                 Bolts = w.Bolts.OrderBy(k => k.Key.Name, StringComparer.Ordinal).ThenBy(k => k.Key.Length).Select(k => new BoltSet(k.Key.Name, k.Value, k.Key.Length)).ToList(),
             };
-            // "floor_prefix" marks ("2C1") carry the floor of the member's lower end, so identical assemblies on
+            // "floor_prefix" marks ("2C001") carry the floor of the member's lower end, so identical assemblies on
             // different floors get different marks; "plain" marks share one mark per identical assembly.
             var floor = floorMarks ? StandardOptions.FloorTag(levels, Math.Min(w.Def.Start.Z, w.Def.End.Z)) : "";
             var key = floorMarks ? $"{floor}|{asm.Signature}" : asm.Signature;
@@ -513,7 +513,7 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
                 var head = floor + result.Rules.MarkHead(asm.Type);
                 var n = headCount.GetValueOrDefault(head) + 1;
                 headCount[head] = n;
-                asm.Mark = $"{head}{n}";
+                asm.Mark = StandardOptions.FormatMark(head, n, result.Rules.MarkDigits); // NUM-002: C001 (MarkDigits 3)
                 assemblies[key] = asm;
                 existing = asm;
             }

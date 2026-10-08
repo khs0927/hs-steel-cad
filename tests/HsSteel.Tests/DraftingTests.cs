@@ -361,7 +361,7 @@ public class McpToolTests
         var res = JsonNode.Parse(tools.DrawingsGenerate("T1", outFile))!;
         Assert.True(File.Exists(outFile));
         Assert.True(res["sheets"]!.AsArray().Count >= 5);
-        var plan = JsonNode.Parse(tools.DrawPlanOf("T1", kind: "assembly", mark: "C1"))!;
+        var plan = JsonNode.Parse(tools.DrawPlanOf("T1", kind: "assembly", mark: "C001"))!; // Numbering.dat C001 → 3-digit marks
         Assert.True(plan["entities"]!.AsArray().Count > 20);
         Assert.Contains("H300x300x10x15", tools.SectionSearch("H300x300"));
     }

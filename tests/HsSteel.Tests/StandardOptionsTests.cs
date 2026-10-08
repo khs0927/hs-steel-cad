@@ -10,7 +10,8 @@ namespace HsSteel.Tests;
 
 /// <summary>
 /// Project-level standard options (docs/STANDARDS_RESEARCH.md): bolt length table, hole rule, mark scheme/format.
-/// Defaults must equal the engine's pre-option behaviour except where noted (hole M24+ in ModelBuilder: d+3, HL-001).
+/// Defaults must equal the engine's pre-option behaviour except where noted (hole M24+ in ModelBuilder: d+3, HL-001;
+/// docs/DECISIONS_BOLT_MARKS.md: bolt add length by bolt type, marks zero-padded to 3 digits "C001", embed head EB).
 /// </summary>
 public sealed class StandardOptionsTests
 {
@@ -34,15 +35,24 @@ public sealed class StandardOptionsTests
     // ---- defaults ----
 
     [Fact]
-    public void Defaults_are_kcs_standard_legacy_plain_and_survive_json()
+    public void Defaults_are_by_bolt_set_standard_legacy_plain_3_digits_and_survive_json()
     {
         var d = new DetailRules();
-        Assert.Equal(("kcs", "standard", "legacy", "plain"), (d.BoltLengthTable, d.HoleRule, d.MarkScheme, d.MarkFormat));
-        var p = ShearTab(new DetailRules { BoltLengthTable = "ts_one_washer", HoleRule = "oversize", MarkScheme = "alt", MarkFormat = "floor_prefix" });
+        Assert.Equal(("by_bolt_set", "standard", "legacy", "plain", 3), (d.BoltLengthTable, d.HoleRule, d.MarkScheme, d.MarkFormat, d.MarkDigits));
+        var p = ShearTab(new DetailRules { BoltLengthTable = "ts_one_washer", HoleRule = "oversize", MarkScheme = "alt", MarkFormat = "floor_prefix", MarkDigits = 1 });
         var back = Project.FromJson(p.ToJson()).Rules!;
-        Assert.Equal(("ts_one_washer", "oversize", "alt", "floor_prefix"), (back.BoltLengthTable, back.HoleRule, back.MarkScheme, back.MarkFormat));
-        Assert.Equal("kcs", StandardOptions.NormalizeBoltLengthTable("garbage"));
-        Assert.Equal("kcs", StandardOptions.NormalizeBoltLengthTable(null));
+        Assert.Equal(("ts_one_washer", "oversize", "alt", "floor_prefix", 1), (back.BoltLengthTable, back.HoleRule, back.MarkScheme, back.MarkFormat, back.MarkDigits));
+        Assert.Equal("by_bolt_set", StandardOptions.NormalizeBoltLengthTable("garbage"));
+        Assert.Equal("by_bolt_set", StandardOptions.NormalizeBoltLengthTable(null));
+    }
+
+    [Fact]
+    public void Project_json_without_mark_digits_gets_the_default()
+    {
+        var node = JsonNode.Parse(ShearTab(new DetailRules { HoleRule = "oversize", MarkDigits = 2 }).ToJson())!;
+        Assert.True(node["rules"]!.AsObject().Remove("mark_digits")); // a project saved before markDigits existed
+        var rules = Project.FromJson(node.ToJsonString()).Rules!;
+        Assert.Equal((3, "oversize"), (rules.MarkDigits, rules.HoleRule));
     }
 
     // ---- bolt length ----
@@ -59,11 +69,20 @@ public sealed class StandardOptionsTests
     [InlineData("ts_one_washer", "F10T", 20, 30)]
     [InlineData("ts_one_washer", "S10T", 22, 35)]
     [InlineData("ts_one_washer", "S10T", 24, 40)]
+    [InlineData("ts_one_washer", "S10T", 27, 45)] // JASS 6 / maker TC tables (was 40: table stopped at M24)
+    [InlineData("ts_one_washer", "S10T", 30, 50)]
+    [InlineData("by_bolt_set", "S10T", 16, 25)]
+    [InlineData("by_bolt_set", "F10T", 16, 30)]
+    [InlineData("by_bolt_set", "S10T", 30, 50)]
+    [InlineData("by_bolt_set", "F10T", 30, 55)]
+    [InlineData("by_bolt_set", "F8T", 22, 40)]
+    [InlineData(null, "S10T", 20, 30)]  // default = by bolt type
+    [InlineData(null, "F10T", 20, 35)]
     [InlineData("by_bolt_set", "S10T", 20, 30)]
     [InlineData("by_bolt_set", "F10T", 20, 35)]
     [InlineData("by_bolt_set", "S10T", 22, 35)]
     [InlineData("by_bolt_set", "F10T", 24, 45)]
-    public void Add_length_per_table(string table, string grade, double dia, double add) =>
+    public void Add_length_per_table(string? table, string grade, double dia, double add) =>
         Assert.Equal(add, StandardOptions.AddLength(table, grade, dia));
 
     [Theory]
@@ -79,7 +98,9 @@ public sealed class StandardOptionsTests
     [Fact]
     public void Builder_computes_grip_based_length_and_label()
     {
-        var kcs = GirderBolts(Build(ShearTab(null))); // default = kcs, TS set, grip 8 + 9 = 17
+        var def = GirderBolts(Build(ShearTab(null))); // default = by_bolt_set, TS set, grip 8 + 9 = 17, 17 + 30 = 47 -> 50
+        Assert.Equal(("TS M20", 50d, "TS M20x50"), (def.Name, def.Length, def.Label));
+        var kcs = GirderBolts(Build(ShearTab(new DetailRules { BoltLengthTable = "kcs" }))); // 17 + 35 = 52 -> 55
         Assert.Equal(("TS M20", 55d, "TS M20x55"), (kcs.Name, kcs.Length, kcs.Label));
         var ts = GirderBolts(Build(ShearTab(new DetailRules { BoltLengthTable = "ts_one_washer" })));
         Assert.Equal(50d, ts.Length);
@@ -92,7 +113,9 @@ public sealed class StandardOptionsTests
     public void Bom_bolt_table_shows_length()
     {
         var bom = BomTable.From(Build(ShearTab(null)));
-        Assert.Contains(bom.Bolts, b => b.Name == "TS M20x55");
+        Assert.Contains(bom.Bolts, b => b.Name == "TS M20x50");
+        var kcs = BomTable.From(Build(ShearTab(new DetailRules { BoltLengthTable = "kcs" })));
+        Assert.Contains(kcs.Bolts, b => b.Name == "TS M20x55");
     }
 
     // ---- hole rule ----
@@ -170,19 +193,19 @@ public sealed class StandardOptionsTests
     public void Legacy_plain_is_the_default_and_matches_numbering_dat_heads()
     {
         var r = Build(Marks(null));
-        Assert.Equal("C1", r.MemberMarks["C1"]);
-        Assert.Equal("C1", r.MemberMarks["C2"]); // identical assembly shares the mark
-        Assert.Equal("G1", r.MemberMarks["G1"]);
-        Assert.Equal("G2", r.MemberMarks["T1"]);
-        Assert.Equal("R1", r.MemberMarks["BR1"]);
-        Assert.Equal("S1", r.MemberMarks["ST1"]);
-        Assert.Equal("H1", r.MemberMarks["HR1"]);
+        Assert.Equal("C001", r.MemberMarks["C1"]);
+        Assert.Equal("C001", r.MemberMarks["C2"]); // identical assembly shares the mark
+        Assert.Equal("G001", r.MemberMarks["G1"]);
+        Assert.Equal("G002", r.MemberMarks["T1"]);
+        Assert.Equal("R001", r.MemberMarks["BR1"]);
+        Assert.Equal("S001", r.MemberMarks["ST1"]);
+        Assert.Equal("H001", r.MemberMarks["HR1"]);
     }
 
     [Fact]
     public void Alt_scheme_uses_alt_heads()
     {
-        var r = Build(Marks(new DetailRules { MarkScheme = "alt" }));
+        var r = Build(Marks(new DetailRules { MarkScheme = "alt", MarkDigits = 1 }));
         Assert.Equal("V1", r.MemberMarks["BR1"]);
         Assert.Equal("ST1", r.MemberMarks["ST1"]);
         Assert.Equal("HR1", r.MemberMarks["HR1"]);
@@ -196,22 +219,46 @@ public sealed class StandardOptionsTests
     public void Alt_scheme_wins_over_numbering_dat_heads_but_legacy_honours_them()
     {
         var r = Build(Marks(new DetailRules { MarkScheme = "alt", MarkHeads = new Dictionary<AssemblyType, string> { [AssemblyType.Brace] = "R" } }));
-        Assert.Equal("V1", r.MemberMarks["BR1"]);
+        Assert.Equal("V001", r.MemberMarks["BR1"]);
         var legacy = Build(Marks(new DetailRules { MarkHeads = new Dictionary<AssemblyType, string> { [AssemblyType.Brace] = "BX" } }));
-        Assert.Equal("BX1", legacy.MemberMarks["BR1"]);
+        Assert.Equal("BX001", legacy.MemberMarks["BR1"]);
     }
 
     [Fact]
     public void Floor_prefix_format_puts_the_floor_in_front()
     {
         var r = Build(Marks(new DetailRules { MarkFormat = "floor_prefix" }));
-        Assert.Equal("1C1", r.MemberMarks["C1"]); // column standing on BASE (floor 1)
-        Assert.Equal("2C1", r.MemberMarks["C2"]); // column standing on 2F
-        Assert.Equal("2G1", r.MemberMarks["G1"]);
-        Assert.Equal("3G1", r.MemberMarks["T1"]);
-        Assert.Equal("1R1", r.MemberMarks["BR1"]);
+        Assert.Equal("1C001", r.MemberMarks["C1"]); // column standing on BASE (floor 1)
+        Assert.Equal("2C001", r.MemberMarks["C2"]); // column standing on 2F
+        Assert.Equal("2G001", r.MemberMarks["G1"]);
+        Assert.Equal("3G001", r.MemberMarks["T1"]);
+        Assert.Equal("1R001", r.MemberMarks["BR1"]);
         var marks = r.Assemblies.Select(a => a.Mark).ToList();
         Assert.Equal(marks.Count, marks.Distinct(StringComparer.Ordinal).Count());
+        var plain = Build(Marks(new DetailRules { MarkFormat = "floor_prefix", MarkDigits = 1 }));
+        Assert.Equal("2C1", plain.MemberMarks["C2"]);
+    }
+
+    [Theory]
+    [InlineData(3, "C001", "G002")]
+    [InlineData(2, "C01", "G02")]
+    [InlineData(1, "C1", "G2")]
+    [InlineData(0, "C001", "G002")] // 0 = default width
+    public void Mark_digits_pad_the_running_number(int digits, string column, string truss)
+    {
+        var r = Build(Marks(new DetailRules { MarkDigits = digits }));
+        Assert.Equal(column, r.MemberMarks["C1"]);
+        Assert.Equal(truss, r.MemberMarks["T1"]);
+    }
+
+    [Fact]
+    public void Format_mark_rules()
+    {
+        Assert.Equal("C007", StandardOptions.FormatMark("C", 7, 3));
+        Assert.Equal("C1000", StandardOptions.FormatMark("C", 1000, 3)); // overflow widens, never truncates
+        Assert.Equal("PU12", StandardOptions.FormatMark("PU", 12, 1));
+        Assert.Equal("2G010", StandardOptions.FormatMark("2G", 10, 3));
+        Assert.Equal(6, StandardOptions.NormalizeMarkDigits(9));
     }
 
     [Fact]
@@ -248,13 +295,15 @@ public sealed class StandardOptionsTests
         t.ProjectNew("P1");
         var get = JsonNode.Parse(t.ProjectOptions("P1"))!;
         Assert.False(get["changed"]!.GetValue<bool>());
-        Assert.Equal("kcs", get["options"]!["bolt_length_table"]!.GetValue<string>());
+        Assert.Equal("by_bolt_set", get["options"]!["bolt_length_table"]!.GetValue<string>());
         Assert.Equal("legacy", get["options"]!["mark_scheme"]!.GetValue<string>());
+        Assert.Equal(3, get["options"]!["mark_digits"]!.GetValue<int>());
 
-        var set = JsonNode.Parse(t.ProjectOptions("P1", boltLengthTable: "by_bolt_set", holeRule: "oversize", markScheme: "alt", markFormat: "floor_prefix"))!;
+        var set = JsonNode.Parse(t.ProjectOptions("P1", boltLengthTable: "kcs", holeRule: "oversize", markScheme: "alt", markFormat: "floor_prefix", markDigits: 1))!;
         Assert.True(set["changed"]!.GetValue<bool>());
         var again = JsonNode.Parse(t.ProjectOptions("P1"))!;
-        Assert.Equal("by_bolt_set", again["options"]!["bolt_length_table"]!.GetValue<string>());
+        Assert.Equal("kcs", again["options"]!["bolt_length_table"]!.GetValue<string>());
+        Assert.Equal(1, again["options"]!["mark_digits"]!.GetValue<int>());
         Assert.Equal("floor_prefix", again["options"]!["mark_format"]!.GetValue<string>());
         Assert.Contains("\"hole_rule\": \"oversize\"", t.ProjectGet("P1"));
 
@@ -263,7 +312,10 @@ public sealed class StandardOptionsTests
         Assert.Equal("legacy", partial["options"]!["hole_rule"]!.GetValue<string>());
         Assert.Equal("alt", partial["options"]!["mark_scheme"]!.GetValue<string>());
 
+        Assert.Equal(1, partial["options"]!["mark_digits"]!.GetValue<int>());
+
         Assert.Throws<McpException>(() => t.ProjectOptions("P1", holeRule: "huge"));
+        Assert.Throws<McpException>(() => t.ProjectOptions("P1", markDigits: 7));
     }
 
     [Fact]
@@ -280,5 +332,9 @@ public sealed class StandardOptionsTests
         Assert.Equal("oversize", s["rules"]!["options"]!["hole_rule"]!.GetValue<string>());
         Assert.Equal("floor_prefix", s["rules"]!["options"]!["mark_format"]!.GetValue<string>());
         Assert.StartsWith("1C", ((string?)s["assemblies"]![0])!);
+
+        var two = JsonNode.Parse(t.ProjectFrame("F2", [6000], [6000], [4000], markDigits: 2))!;
+        Assert.Equal(2, two["rules"]!["options"]!["mark_digits"]!.GetValue<int>());
+        Assert.Contains(two["assemblies"]!.AsArray(), a => ((string?)a)!.StartsWith("C01 ", StringComparison.Ordinal));
     }
 }

@@ -13,7 +13,12 @@ public static class StandardOptions
     public const string BoltTsOneWasher = "ts_one_washer";
     public const string BoltByBoltSet = "by_bolt_set";
     public static readonly string[] BoltLengthTables = [BoltKcs, BoltTsOneWasher, BoltByBoltSet];
-    public const string DefaultBoltLengthTable = BoltKcs;
+    /// <summary>
+    /// Default = by bolt type: TS (S10T) sets use the one-washer table, hex HTB (F10T/F8T) sets the KCS table
+    /// (KCS 14 31 25 table 2.1-5 and its note 2; legacy SCSS .dat TS 25/30/35 vs 단중.xlsx 2-washer set 30/35/40).
+    /// See docs/DECISIONS_BOLT_MARKS.md. "kcs" / "ts_one_washer" force one table for every bolt.
+    /// </summary>
+    public const string DefaultBoltLengthTable = BoltByBoltSet;
 
     public const string HoleStandard = "standard";
     public const string HoleOversize = "oversize";
@@ -53,8 +58,11 @@ public static class StandardOptions
     /// <summary>KCS 14 31 25 table 2.1-5 (hex F10T, nut + 2 washers + 3 pitches): M16 30 ... M30 55.</summary>
     private static readonly (double Dia, double Add)[] Kcs = [(16, 30), (20, 35), (22, 40), (24, 45), (27, 50), (30, 55)];
 
-    /// <summary>Legacy SCSS .dat (TS set, 1 washer; uncertain, STANDARDS_RESEARCH 1.2): M16 25 ... M24 40. TS sets exist only to M24.</summary>
-    private static readonly (double Dia, double Add)[] TsOneWasher = [(16, 25), (20, 30), (22, 35), (24, 40)];
+    /// <summary>
+    /// TS (torque-shear) set, 1 washer: the KCS value minus one washer (KCS 14 31 25 table 2.1-5 note 2) = JASS 6 / maker
+    /// TC-bolt tables M16 25, M20 30, M22 35, M24 40, M27 45, M30 50; matches the legacy SCSS .dat bolts (TS M20 grip+30).
+    /// </summary>
+    private static readonly (double Dia, double Add)[] TsOneWasher = [(16, 25), (20, 30), (22, 35), (24, 40), (27, 45), (30, 50)];
 
     /// <summary>The concrete table ("kcs" or "ts_one_washer") used for a bolt grade under the project option.</summary>
     public static string ResolveBoltTable(string? option, string grade)
@@ -78,6 +86,23 @@ public static class StandardOptions
     /// <summary>Bolt label with length, e.g. "TS M20x75".</summary>
     public static string BoltLabel(string name, double length) =>
         length > 0 ? string.Create(CultureInfo.InvariantCulture, $"{name}x{length:0}") : name;
+
+    // ------------------------------------------------------------ mark number width (NUM-002)
+
+    /// <summary>
+    /// Default assembly-mark number width: 3 ("C001"), as in the legacy M83 Numbering.dat HD-BOX templates
+    /// (C001, G001, B001 ...). 1 gives the old unpadded engine marks ("C1"). See docs/DECISIONS_BOLT_MARKS.md.
+    /// </summary>
+    public const int DefaultMarkDigits = 3;
+
+    public const int MaxMarkDigits = 6;
+
+    /// <summary>Width clamped to 1..<see cref="MaxMarkDigits"/>; 0 or less means the default.</summary>
+    public static int NormalizeMarkDigits(int digits) => digits <= 0 ? DefaultMarkDigits : Math.Min(digits, MaxMarkDigits);
+
+    /// <summary>Assembly mark: head + running number zero-padded to <paramref name="digits"/> ("C" 7 3 → "C007"; 1 → "C7").</summary>
+    public static string FormatMark(string head, int n, int digits) =>
+        head + n.ToString(CultureInfo.InvariantCulture).PadLeft(NormalizeMarkDigits(digits), '0');
 
     // ------------------------------------------------------------ hole diameter (HL-001)
 
@@ -107,7 +132,8 @@ public static class StandardOptions
 
     /// <summary>
     /// "alt" mark heads: C column, G girder/rafter/crane girder, B beam, V brace, PU purlin, GT girth, ST stair,
-    /// HR handrail, T truss, AB anchor/embed, X other. (The brief's "J" joist has no engine assembly type.)
+    /// HR handrail, T truss, AB anchor/embed, X other.
+    /// (AB is how the legacy sheets name the anchor-bolt item, e.g. "AB M20(L-740)"; the legacy scheme uses EB.) (The brief's "J" joist has no engine assembly type.)
     /// </summary>
     public static string AltPrefix(AssemblyType t) => t switch
     {

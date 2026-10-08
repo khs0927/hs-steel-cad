@@ -50,7 +50,7 @@ public sealed class EngineRulesV2FixTests
             Assert.Equal(head, AssemblyTypes.Prefix(t));
         }
 
-        Assert.Equal("EM", AssemblyTypes.Prefix(AssemblyType.Embed)); // no Numbering.dat head
+        Assert.Equal("EB", AssemblyTypes.Prefix(AssemblyType.Embed)); // no M83 head: legacy M80 EMBED head EB01 (DECISIONS_BOLT_MARKS.md)
     }
 
     [Fact]
@@ -94,9 +94,9 @@ public sealed class EngineRulesV2FixTests
         var r = new ModelBuilder(SectionCatalog.Empty, SpliceStandards.Empty).Build(p);
         var marks = r.Assemblies.Select(a => a.Mark).ToList();
         Assert.Equal(marks.Count, marks.Distinct(StringComparer.Ordinal).Count());
-        Assert.Equal(["C1", "C2", "C3"], new[] { "C1", "SC1", "P1" }.Select(id => r.MemberMarks[id]).Order(StringComparer.Ordinal));
-        Assert.Equal(["G1", "G2"], new[] { "G1", "R1" }.Select(id => r.MemberMarks[id]).Order(StringComparer.Ordinal));
-        Assert.Equal("R1", r.MemberMarks["BR1"]);
+        Assert.Equal(["C001", "C002", "C003"], new[] { "C1", "SC1", "P1" }.Select(id => r.MemberMarks[id]).Order(StringComparer.Ordinal));
+        Assert.Equal(["G001", "G002"], new[] { "G1", "R1" }.Select(id => r.MemberMarks[id]).Order(StringComparer.Ordinal));
+        Assert.Equal("R001", r.MemberMarks["BR1"]);
     }
 
     [Fact]
@@ -109,7 +109,7 @@ public sealed class EngineRulesV2FixTests
             Members = [new MemberDef("B1", AssemblyType.Beam, "H400x200x8x13", new V3(0, 0, 4000), new V3(6000, 0, 4000))],
         };
         var r = new ModelBuilder(SectionCatalog.Empty, SpliceStandards.Empty).Build(p);
-        Assert.Equal("SB1", r.MemberMarks["B1"]);
+        Assert.Equal("SB001", r.MemberMarks["B1"]);
     }
 
     [LegacyAssetFact]
@@ -121,9 +121,12 @@ public sealed class EngineRulesV2FixTests
             return; // new-project template set not installed
         }
 
-        var heads = AssemblyTypes.HeadsFrom(ProjectSettings.Load(path));
-        Assert.Equal(AssemblyTypes.NumberingKeys.Count, heads.Count);
+        var numbering = ProjectSettings.Load(path);
+        var heads = AssemblyTypes.HeadsFrom(numbering);
+        Assert.Equal(AssemblyTypes.NumberingKeys.Count - 1, heads.Count); // every M83 head except the engine-only EMBED key
+        Assert.False(heads.ContainsKey(AssemblyType.Embed));
         Assert.All(heads, kv => Assert.Equal(kv.Value, AssemblyTypes.Prefix(kv.Key)));
+        Assert.Equal(3, AssemblyTypes.DigitsFrom(numbering)); // C001, G001 ... (NUM-002)
     }
 
     // ---- WT-002: fallback unit weight includes the root fillet (4−π)·r² ----
