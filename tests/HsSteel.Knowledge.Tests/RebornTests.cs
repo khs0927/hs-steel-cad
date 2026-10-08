@@ -67,7 +67,12 @@ public sealed class RebornTests(RebornFixture fx) : IClassFixture<RebornFixture>
         }
 
         var m = RebornManifest.Load(ManifestPath);
-        var disk = RebornManifest.ListFiles(fx.RebornRoot);
+        // REBORN is a live analysis workspace: its runner keeps writing heartbeat files (engine/out/*/STATUS/hb_*.md).
+        // Those are volatile and not assets, so the ledger check ignores ones added after the manifest was built.
+        var known = m.Files.Select(f => f.RelPath).ToHashSet(StringComparer.Ordinal);
+        var disk = RebornManifest.ListFiles(fx.RebornRoot)
+            .Where(d => known.Contains(d.RelPath) || !IsVolatile(d.RelPath))
+            .ToList();
         Assert.Equal(disk.Count, m.FileCount);
         Assert.Equal(disk.Count, m.Files.Count);
         Assert.Equal(disk.Select(d => d.RelPath), m.Files.Select(f => f.RelPath));
@@ -77,6 +82,9 @@ public sealed class RebornTests(RebornFixture fx) : IClassFixture<RebornFixture>
         Assert.All(m.Files.Where(f => f.Sha256 is not null), f => Assert.Equal(64, f.Sha256!.Length));
         Assert.Equal(RebornManifest.IngestFiles.Count(r => disk.Any(d => d.RelPath == r)), m.Files.Count(f => f.Disposition == "ingest"));
     }
+
+    private static bool IsVolatile(string relPath) =>
+        relPath.StartsWith("engine/out/", StringComparison.Ordinal) && relPath.Contains("/STATUS/hb_", StringComparison.Ordinal);
 
     [Fact]
     public void Manifest_ToJson_RoundTripsByteIdentical()
