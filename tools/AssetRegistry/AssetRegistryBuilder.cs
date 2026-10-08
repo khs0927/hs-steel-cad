@@ -86,6 +86,10 @@ public static partial class AssetRegistryBuilder
 
     public static string Serialize(JsonObject doc) => doc.ToJsonString(Out).ReplaceLineEndings("\n") + "\n";
 
+    /// <summary>CRLF -> LF so the manifest hash does not depend on git autocrlf.</summary>
+    private static byte[] NormalizeEol(byte[] bytes) =>
+        System.Text.Encoding.UTF8.GetBytes(System.Text.Encoding.UTF8.GetString(bytes).ReplaceLineEndings("\n"));
+
     public static JsonObject Build(string repoRoot)
     {
         var manifestPath = Path.Combine(repoRoot, ManifestRel);
@@ -133,7 +137,7 @@ public static partial class AssetRegistryBuilder
             {
                 ["path"] = ManifestRel,
                 ["schema"] = manifest.RootElement.GetProperty("schema").GetString(),
-                ["sha256"] = Convert.ToHexStringLower(SHA256.HashData(manifestBytes)),
+                ["sha256"] = Convert.ToHexStringLower(SHA256.HashData(NormalizeEol(manifestBytes))), // EOL-normalised: identical on LF and CRLF (Windows autocrlf) checkouts
                 ["fileCount"] = manifest.RootElement.GetProperty("fileCount").GetInt32(),
             },
             ["categories"] = categories,
