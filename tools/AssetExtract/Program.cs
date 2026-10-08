@@ -3,7 +3,7 @@
 //
 //   dotnet run --project tools/AssetExtract -- --root <dwg dir> --out <dir> --namespace <ns> [--prefix hsa-] [--source-root "C:\cad\HSSTEEL"] [--modelspace-as-block]
 //
-// 출력: manifest.json, catalog.jsonl, blocks/<id>.json, geometry/<id>.json (+ tables/<id>.json: ACAD_TABLE 셀 텍스트)
+// 출력: manifest.json, catalog.jsonl, blocks/<id>.json, geometry/<id>.json (블록 지오메트리, 또는 ACAD_TABLE 셀 텍스트 — tables/ 디렉터리는 없음)
 using HsSteel.AssetExtract;
 
 bool msp = false; int mspMax = 5000;

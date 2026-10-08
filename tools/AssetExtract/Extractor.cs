@@ -183,7 +183,7 @@ public static class Extractor
         var manifest = new JsonObject
         {
             ["schema"] = "powercad.asset.manifest/v1", ["namespace"] = o.Namespace, ["generated_by"] = extractor,
-            ["generated_at"] = DateTimeOffset.Now.ToString("yyyy-MM-ddTHH:mm:sszzz", CultureInfo.InvariantCulture).Replace(":", "", StringComparison.Ordinal).Insert(13, ":").Insert(16, ":"),
+            ["generated_at"] = DateTimeOffset.Now.ToString("yyyy-MM-ddTHH:mm:sszzz", CultureInfo.InvariantCulture),
             ["source_root"] = o.SourceRoot, ["card_count"] = cards.Count, ["block_card_count"] = blockCards, ["unique_blocks"] = blockCards,
             ["definitions_seen"] = defs, ["files_total"] = files.Count, ["files_parsed"] = files.Count - failed.Count, ["files_failed"] = Strs(failed),
             ["thumbs"] = 0, ["modelspace_as_block"] = o.ModelspaceAsBlock,
@@ -334,7 +334,6 @@ public static class Extractor
             var v = c?.CadValue;
             if (v is null) continue;
             string s = v.FormattedValue ?? v.Value?.ToString() ?? "";
-            if (string.IsNullOrEmpty(s)) s = v.Value?.ToString() ?? "";
             s = PlainMText(s);
             if (s.Length > 0) parts.Add(s);
         }
