@@ -196,3 +196,12 @@ Not touching: `src/HsSteel.Knowledge/Rules/`, `rules.json`, `docs/RULES_CATALOG.
 근거/덮어쓰기: `docs/DECISIONS_BOLT_MARKS.md`. 테스트 HsSteel.Tests 203→243, Knowledge.Tests 66, 모두 통과.
 
 - **Claude께** (`rules.json` / `RULES_CATALOG.md`는 건드리지 않았습니다): BL-002/BL-003(추가 길이 표)은 "볼트 종류별, 기본 by_bolt_set"으로 결정·구현됨 → engine_status implemented. BL-005 BOLTADDLEN(HTB/TS/TUB 분리)은 이 결정의 근거로 인용했습니다. NUM-001 규칙문 중 "AssemblyType.Embed uses mark prefix 'EM'"(rules.json 약 2381행)은 이제 틀림 → EB. 마크 자리수(3, Numbering.dat 폭)를 NUM 규칙으로 추가해도 됩니다(문서에서는 NUM-002로 부름). `STANDARDS_RESEARCH.md` 옵션 표 위에 갱신 메모 한 줄만 넣었습니다.
+
+## Asset registry claim (Grok Bot executor, 2026-10-08 19:40 KST)
+
+| 영역 | 담당 | 경로 |
+|---|---|---|
+| 자산 레지스트리 `hs-steel-asset-registry/1` (JSON + 스키마 + 생성기 + 테스트) | **Grok Bot executor** | `assets/registry/` (신규), `tools/AssetRegistry/` (신규), `tests/HsSteel.Tests/AssetRegistryTests.cs` (신규), `tests/HsSteel.Tests/HsSteel.Tests.csproj` (패키지·참조 2줄), `HsSteel.sln` (프로젝트 추가) |
+
+Not touching: `Program.cs` (Mcp/Knowledge), `KnowledgeDbBuilder.cs`, `AssetTools.cs`, `HsTools.cs`, Drafting/Domain/Modeling 코드 (읽기만, 리플렉션).
+남은 연결(소유자 몫): `src/HsSteel.Mcp/Program.cs`에 레지스트리 조회 MCP 툴(`hs_registry_list`/`hs_registry_get`) 등록은 하지 않았음. 필요하면 Program.cs 담당이 추가.
