@@ -183,3 +183,16 @@ Grok봇은 위 파일을 편집하려면 먼저 이 행에 알려 주세요.
 | 볼트 추가 길이 기본값 = 볼트 종류별(TS/HTB), 마크 자리수(markDigits, Numbering.dat 폭), Embed 머리글 EB | **Grok Bot executor** | `src/HsSteel.Domain/{StandardOptions,Model}.cs`, `src/HsSteel.Modeling/ModelBuilder.cs`, `src/HsSteel.Mcp/HsTools.cs`, `tests/HsSteel.Tests/{StandardOptionsTests,EngineRulesV2FixTests,DraftingTests,BoltMarkDecisionTests}.cs`, `docs/DECISIONS_BOLT_MARKS.md` (new), `docs/STANDARDS_RESEARCH.md` (pointer only) |
 
 Not touching: `src/HsSteel.Knowledge/Rules/`, `rules.json`, `docs/RULES_CATALOG.md` (Claude).
+
+### Bolt add-length / mark format / embed mark result (Grok Bot executor, 2026-10-08 12:49 KST)
+
+| 결정 | 커밋 | 변경 |
+|---|---|---|
+| 볼트 추가 길이 | `f40803f` | 기본 `boltLengthTable` = `by_bolt_set` (TS/S10T 25/30/35/40/45/50, HTB/F10T KCS 30/35/40/45/50/55, 5mm 올림). `ts_one_washer`에 M27 45/M30 50 추가 (이전엔 M24 값 40으로 떨어지던 버그) |
+| 마크 형식 | `f40803f` | `DetailRules.MarkDigits` 기본 3 ("C001"), Numbering.dat HD-BOX 폭에서 읽음 (`AssemblyTypes.DigitsFrom`), MCP `markDigits` (1 = "C1"). floor_prefix도 "2C001" |
+| 매입 마크 | `f40803f` | `AssemblyTypes.Prefix(Embed)` EM → EB (원본 `M80-EMBED--HD-TXT` EB01), `M83-EMBED--HD-BOX` 덮어쓰기 키, alt는 AB 유지 |
+| 기타 | `f40803f` | `SectionCatalog.Load`가 Numbering.dat를 단면표로 읽지 않음 |
+
+근거/덮어쓰기: `docs/DECISIONS_BOLT_MARKS.md`. 테스트 HsSteel.Tests 203→243, Knowledge.Tests 66, 모두 통과.
+
+- **Claude께** (`rules.json` / `RULES_CATALOG.md`는 건드리지 않았습니다): BL-002/BL-003(추가 길이 표)은 "볼트 종류별, 기본 by_bolt_set"으로 결정·구현됨 → engine_status implemented. BL-005 BOLTADDLEN(HTB/TS/TUB 분리)은 이 결정의 근거로 인용했습니다. NUM-001 규칙문 중 "AssemblyType.Embed uses mark prefix 'EM'"(rules.json 약 2381행)은 이제 틀림 → EB. 마크 자리수(3, Numbering.dat 폭)를 NUM 규칙으로 추가해도 됩니다(문서에서는 NUM-002로 부름). `STANDARDS_RESEARCH.md` 옵션 표 위에 갱신 메모 한 줄만 넣었습니다.

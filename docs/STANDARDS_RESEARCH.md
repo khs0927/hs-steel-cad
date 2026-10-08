@@ -110,6 +110,8 @@ C(기둥계), G(거더/래프터/트러스/크레인거더), B, R(브레이스),
 
 프로젝트 JSON의 `rules`에 저장된다. MCP: `hs_project_new` / `hs_project_frame`에 `boltLengthTable`, `holeRule`, `markScheme`, `markFormat`를 주거나 `hs_project_options(name, ...)`로 조회/변경(인자 없으면 변경 없음). 변경 후 모델을 다시 빌드한다.
 
+> **갱신 2026-10-08 (Grok Bot, Mus 요청 결정 → `docs/DECISIONS_BOLT_MARKS.md`)**: `boltLengthTable` 기본값이 `by_bolt_set`으로 바뀜 (TS 25/30/35/40/45/50, HTB 30/35/40/45/50/55; `ts_one_washer`에 M27 45/M30 50 추가). 새 옵션 `markDigits`(기본 3 = "C001", Numbering.dat 폭; 1 = "C1"). legacy 매입 머리글 EM → EB. 아래 표의 기본값 표시는 그 이전 상태다.
+
 | 옵션 | 값 (기본값 **굵게**) | 언제 |
 |---|---|---|
 | `boltLengthTable` | **`kcs`** / `ts_one_washer` / `by_bolt_set` | `kcs`: KCS 14 31 25 표 2.1-5(30/35/40/45/50/55), 가장 많이 인용. `ts_one_washer`: 레거시 SCSS .dat(25/30/35/40, TS 와셔 1장, 불확실; TS는 M24까지라 M27/M30은 kcs 값). `by_bolt_set`: TS(S10T)는 ts_one_washer, 육각 F10T/HTB는 kcs - 제조사 TS 표를 확보했거나 세트별로 갈릴 때. 길이 = 올림((그립+더하는 길이)/5)x5, 그립은 접합판 두께 합(스플라이스 웹 tw+2xPL, 플랜지 tf+내판+외판, 전단탭 tw+PL, 엔드플레이트 PL+지지재 두께). 볼트 표기 "TS M20x55". |
