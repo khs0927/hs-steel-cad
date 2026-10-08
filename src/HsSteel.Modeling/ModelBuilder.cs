@@ -83,7 +83,8 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
         /// <summary>Plates in local coordinates measured from the axis start (shifted by StartCut later).</summary>
         public List<(PlatePart Plate, Placement At, bool Welded)> Plates { get; } = [];
 
-        public Dictionary<string, int> Bolts { get; } = [];
+        /// <summary>Bolts by (name, length): the length comes from the grip and the project bolt-length table (BL-001).</summary>
+        public Dictionary<(string Name, double Length), int> Bolts { get; } = [];
 
         public double Length => Def.AxisLength - StartCut - EndCut;
     }
@@ -187,8 +188,8 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
         var gap = spec.Gap;
         a.EndCut += gap / 2;
         b.StartCut += gap / 2;
-        var webHole = spec.WebBoltDia + 2;
-        var flgHole = spec.FlangeBoltDia + 2;
+        var webHole = rules.HoleFor(spec.WebBoltDia);
+        var flgHole = rules.HoleFor(spec.FlangeBoltDia);
         var webY0 = (p.Depth - spec.WebY.Total) / 2;
         var flangeLines = spec.FlangeLineOffsets(p.Width).ToArray();
         if (spec.WebBoltCountTable != spec.WebBoltCount)
@@ -243,8 +244,9 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
             a.Plates.Add((innerR, new Placement(PlateOrientation.Flange, new V3(xf, y, p.Width - wi), 1, n), false));
         }
 
-        Add(a.Bolts, spec.WebBolt, spec.WebBoltCount);
-        Add(a.Bolts, spec.FlangeBolt, spec.FlangeBoltCount);
+        // Grips per BL-004: web = tw + 2 splice plates, flange = tf + inner + outer splice plate.
+        Add(a.Bolts, spec.WebBolt, spec.WebBoltDia, p.Tw + (2 * spec.WebPlateT), spec.WebBoltCount, rules);
+        Add(a.Bolts, spec.FlangeBolt, spec.FlangeBoltDia, p.Tf + spec.FlangeInnerT + spec.FlangeOuterT, spec.FlangeBoltCount, rules);
     }
 
     private void ShearTab(Work beam, MemberEnd end, Work support, ShearTabDef t, DetailRules rules, ModelResult result)
@@ -273,7 +275,7 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
             result.Warnings.Add($"{t.Id}: beam {beam.Def.Id} ({bp.Spec}): {flag}");
         }
 
-        var hole = boltDia + 2;
+        var hole = rules.HoleFor(boltDia);
         var plateT = t.PlateT > 0 ? t.PlateT : spec?.WebPlateT ?? 9;
         var gap = rules.ConnectionGap;
         var e = rules.EndGauge;
@@ -347,7 +349,7 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
             }
         }
 
-        Add(beam.Bolts, $"TS M{boltDia:0}", rowsAxis.Count);
+        Add(beam.Bolts, $"TS M{boltDia:0}", boltDia, bp.Tw + plateT, rowsAxis.Count, rules);
         _ = bx;
     }
 
@@ -376,7 +378,7 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
             result.Warnings.Add($"{t.Id}: beam {beam.Def.Id} ({bp.Spec}): {flag}");
         }
 
-        var hole = boltDia + 2;
+        var hole = rules.HoleFor(boltDia);
         var plateT = t.PlateT > 0 ? t.PlateT : spec?.WebPlateT ?? 12;
         var ext = Math.Max(0, t.Extension);
         var e = rules.EndGauge;
@@ -403,7 +405,7 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
         var plate = PlatePart.Rect(plateT, u, v, holes, "END-PLATE", rules.Material);
         var x = end == MemberEnd.Start ? -plateT : beam.Def.AxisLength;
         beam.Plates.Add((plate, new Placement(PlateOrientation.End, new V3(x, -ext, -ext), 1, 1), true));
-        Add(beam.Bolts, $"TS M{boltDia:0}", rowsAxis.Count);
+        Add(beam.Bolts, $"TS M{boltDia:0}", boltDia, plateT + (vertical ? sp.Tf : sp.Tw), rowsAxis.Count, rules);
         _ = local;
     }
 
@@ -432,11 +434,12 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
         return half.Select(h => axis.Total - h).Concat(half.Select(h => total - axis.Total + h)).Select(v => Math.Round(v, 3)).Order();
     }
 
-    private static void Add(Dictionary<string, int> bolts, string name, int n)
+    private static void Add(Dictionary<(string Name, double Length), int> bolts, string name, double dia, double grip, int n, DetailRules rules)
     {
         if (n > 0)
         {
-            bolts[name] = bolts.GetValueOrDefault(name) + n;
+            var key = (name, StandardOptions.BoltLength(rules.BoltLengthTable, Bolts.GradeOf(name), dia, grip));
+            bolts[key] = bolts.GetValueOrDefault(key) + n;
         }
     }
 
@@ -447,6 +450,9 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
         var shapes = new Dictionary<string, ShapePart>(StringComparer.Ordinal);
         var plates = new Dictionary<string, PlatePart>(StringComparer.Ordinal);
         var assemblies = new Dictionary<string, Assembly>(StringComparer.Ordinal);
+        var headCount = new Dictionary<string, int>(StringComparer.Ordinal);
+        var floorMarks = StandardOptions.NormalizeMarkFormat(result.Rules.MarkFormat) == StandardOptions.FormatFloorPrefix;
+        var levels = result.Project.Levels.Select(l => (l.Name, l.Elevation)).ToList();
 
         PlatePart Intern(PlatePart p)
         {
@@ -494,16 +500,21 @@ public sealed class ModelBuilder(SectionCatalog catalog, SpliceStandards splices
                 Type = w.Def.Type,
                 Main = shape,
                 Attachments = attachments,
-                Bolts = w.Bolts.OrderBy(k => k.Key, StringComparer.Ordinal).Select(k => new BoltSet(k.Key, k.Value)).ToList(),
+                Bolts = w.Bolts.OrderBy(k => k.Key.Name, StringComparer.Ordinal).ThenBy(k => k.Key.Length).Select(k => new BoltSet(k.Key.Name, k.Value, k.Key.Length)).ToList(),
             };
-            if (!assemblies.TryGetValue(asm.Signature, out var existing))
+            // "floor_prefix" marks ("2C1") carry the floor of the member's lower end, so identical assemblies on
+            // different floors get different marks; "plain" marks share one mark per identical assembly.
+            var floor = floorMarks ? StandardOptions.FloorTag(levels, Math.Min(w.Def.Start.Z, w.Def.End.Z)) : "";
+            var key = floorMarks ? $"{floor}|{asm.Signature}" : asm.Signature;
+            if (!assemblies.TryGetValue(key, out var existing))
             {
                 // Several types share a Numbering.dat head (Column/SubColumn/Post = C, Girder/Rafter/Truss/CraneGirder = G),
-                // so the running number is per prefix, not per type, or marks would collide (NUM-001).
-                var prefix = AssemblyTypes.Prefix(asm.Type, result.Rules.MarkHeads);
-                var n = assemblies.Values.Count(x => AssemblyTypes.Prefix(x.Type, result.Rules.MarkHeads) == prefix) + 1;
-                asm.Mark = $"{prefix}{n}";
-                assemblies[asm.Signature] = asm;
+                // so the running number is per head, not per type, or marks would collide (NUM-001).
+                var head = floor + result.Rules.MarkHead(asm.Type);
+                var n = headCount.GetValueOrDefault(head) + 1;
+                headCount[head] = n;
+                asm.Mark = $"{head}{n}";
+                assemblies[key] = asm;
                 existing = asm;
             }
 

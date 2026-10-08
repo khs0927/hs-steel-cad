@@ -66,7 +66,7 @@ public sealed class BomTable
         }
 
         var bolts = model.Assemblies
-            .SelectMany(a => a.Bolts.Select(b => (b.Name, Count: b.Count * a.Quantity, Assy: 1)))
+            .SelectMany(a => a.Bolts.Select(b => (Name: b.Label, Count: b.Count * a.Quantity, Assy: 1)))
             .GroupBy(b => b.Name)
             .OrderBy(g => g.Key, StringComparer.Ordinal)
             .Select(g => new BomBoltRow(g.Key, g.Sum(x => x.Count), g.Sum(x => x.Assy)))

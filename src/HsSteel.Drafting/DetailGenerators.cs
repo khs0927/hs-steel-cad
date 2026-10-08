@@ -299,7 +299,7 @@ public static class AssemblyDetail
 
         foreach (var b in a.Bolts)
         {
-            rows.Add(["", b.Name, "", $"{b.Count}", "", "", "BOLT"]);
+            rows.Add(["", b.Label, "", $"{b.Count}", "", "", "BOLT"]);
         }
 
         rows.Add(["", "TOTAL", "", "", "", $"{a.Weight:0.0}", ""]);

@@ -186,7 +186,12 @@ public sealed record Placement(PlateOrientation Orientation, V3 Origin, int USig
 /// <summary>A part attached to an assembly's main member. Loose parts (splice plates) are shipped with the assembly.</summary>
 public sealed record Attachment(PlatePart Part, Placement At, bool Welded);
 
-public sealed record BoltSet(string Name, int Count);
+/// <summary>Bolt count by set name ("TS M20"); <paramref name="Length"/> is the bolt length in mm (0 = unknown).</summary>
+public sealed record BoltSet(string Name, int Count, double Length = 0)
+{
+    /// <summary>Name with length for notes and the BOM, e.g. "TS M20x75".</summary>
+    public string Label => StandardOptions.BoltLabel(Name, Length);
+}
 
 /// <summary>A unique shipping assembly after numbering.</summary>
 public sealed class Assembly

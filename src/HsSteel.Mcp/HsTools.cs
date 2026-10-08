@@ -120,14 +120,21 @@ public sealed class HsTools(Workspace ws)
 
     [McpServerTool(Name = "hs_project_new")]
     [Description("Create an empty project (grids, levels, members and connections are added with the other tools).")]
-    public string ProjectNew(string name, [Description("Date for title blocks, e.g. 2026.10.02")] string date = "", bool overwrite = false)
+    public string ProjectNew(
+        string name,
+        [Description("Date for title blocks, e.g. 2026.10.02")] string date = "",
+        bool overwrite = false,
+        [Description("Bolt length table: kcs (default) | ts_one_washer | by_bolt_set")] string boltLengthTable = "",
+        [Description("Hole rule: standard (default) | oversize | legacy")] string holeRule = "",
+        [Description("Mark scheme: legacy (default) | alt")] string markScheme = "",
+        [Description("Mark format: plain (default) | floor_prefix")] string markFormat = "")
     {
         if (File.Exists(ws.PathOf(name)) && !overwrite)
         {
             throw Fail($"Project '{name}' exists; pass overwrite=true to replace it.");
         }
 
-        var p = new Project { Name = name, Date = date };
+        var p = new Project { Name = name, Date = date, Rules = ApplyOptions(null, boltLengthTable, holeRule, markScheme, markFormat) };
         ws.Save(p);
         return Json(new { created = ws.PathOf(name) });
     }
@@ -153,7 +160,11 @@ public sealed class HsTools(Workspace ws)
         [Description("Weld gap mm (0 = default 5)")] double weldGap = 0,
         [Description("Default material, e.g. SS275")] string material = "",
         string date = "",
-        bool overwrite = false)
+        bool overwrite = false,
+        [Description("Bolt length table: kcs (default) | ts_one_washer | by_bolt_set")] string boltLengthTable = "",
+        [Description("Hole rule: standard (default) | oversize | legacy")] string holeRule = "",
+        [Description("Mark scheme: legacy (default) | alt")] string markScheme = "",
+        [Description("Mark format: plain (default) | floor_prefix")] string markFormat = "")
     {
         if (File.Exists(ws.PathOf(name)) && !overwrite)
         {
@@ -164,7 +175,7 @@ public sealed class HsTools(Workspace ws)
         RequireLengths(nameof(spansY), spansY, allowEmpty: true);
         RequireLengths(nameof(storeys), storeys, allowEmpty: false);
         var conn = ParseBeamConnection(beamConnection);
-        var rules = BuildRules(scallop, connectionGap, weldGap, material);
+        var rules = ApplyOptions(BuildRules(scallop, connectionGap, weldGap, material), boltLengthTable, holeRule, markScheme, markFormat);
         var p = ProjectTemplates.Frame(name, new FrameSpec(spansX, spansY, storeys, column, girderX, girderY, maxColumnPiece, subBeams, subBeam, conn), rules);
         p.Date = date;
         ws.Save(p);
@@ -255,6 +266,42 @@ public sealed class HsTools(Workspace ws)
             grid_x = p.GridX.Select(g => new { g.Name, g.Position }),
             grid_y = p.GridY.Select(g => new { g.Name, g.Position }),
             levels = p.Levels.Select(l => new { l.Name, l.Elevation }),
+        });
+    }
+
+    [McpServerTool(Name = "hs_project_options")]
+    [Description("Get or set the project standard options (stored in the project JSON): boltLengthTable kcs|ts_one_washer|by_bolt_set "
+        + "(grip + add length, rounded up to 5 mm; kcs = KCS 14 31 25 table 2.1-5), holeRule standard|oversize|legacy, "
+        + "markScheme legacy|alt, markFormat plain|floor_prefix. Omit all to just read (no change is written). Rebuild afterwards.")]
+    public string ProjectOptions(
+        string name,
+        [Description("kcs (default) | ts_one_washer | by_bolt_set")] string boltLengthTable = "",
+        [Description("standard (default) | oversize | legacy")] string holeRule = "",
+        [Description("legacy (default) | alt")] string markScheme = "",
+        [Description("plain (default) | floor_prefix")] string markFormat = "")
+    {
+        var p = ws.Load(name);
+        var changed = !string.IsNullOrWhiteSpace(boltLengthTable) || !string.IsNullOrWhiteSpace(holeRule)
+            || !string.IsNullOrWhiteSpace(markScheme) || !string.IsNullOrWhiteSpace(markFormat);
+        if (changed)
+        {
+            p.Rules = ApplyOptions(p.Rules, boltLengthTable, holeRule, markScheme, markFormat);
+            ws.Save(p);
+        }
+
+        var cur = p.Rules ?? ws.Rules;
+        return Json(new
+        {
+            project = p.Name,
+            changed,
+            options = OptionsOf(cur),
+            allowed = new
+            {
+                boltLengthTable = StandardOptions.BoltLengthTables,
+                holeRule = StandardOptions.HoleRules,
+                markScheme = StandardOptions.MarkSchemes,
+                markFormat = StandardOptions.MarkFormats,
+            },
         });
     }
 
@@ -550,6 +597,48 @@ public sealed class HsTools(Workspace ws)
         };
     }
 
+    private static object OptionsOf(DetailRules r) => new
+    {
+        boltLengthTable = StandardOptions.NormalizeBoltLengthTable(r.BoltLengthTable),
+        holeRule = StandardOptions.NormalizeHoleRule(r.HoleRule),
+        markScheme = StandardOptions.NormalizeMarkScheme(r.MarkScheme),
+        markFormat = StandardOptions.NormalizeMarkFormat(r.MarkFormat),
+    };
+
+    private static string PickOption(string? value, string[] allowed, string what, string current)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return current;
+        }
+
+        if (!StandardOptions.IsValid(value, allowed))
+        {
+            throw Fail($"{what} must be one of: {string.Join(", ", allowed)} (got '{value}').");
+        }
+
+        return value.Trim().ToLowerInvariant().Replace('-', '_');
+    }
+
+    /// <summary>Standard options onto <paramref name="rules"/> (null = workspace rules); returns <paramref name="rules"/> unchanged when no option is given.</summary>
+    private DetailRules? ApplyOptions(DetailRules? rules, string? boltLengthTable, string? holeRule, string? markScheme, string? markFormat)
+    {
+        if (string.IsNullOrWhiteSpace(boltLengthTable) && string.IsNullOrWhiteSpace(holeRule)
+            && string.IsNullOrWhiteSpace(markScheme) && string.IsNullOrWhiteSpace(markFormat))
+        {
+            return rules;
+        }
+
+        var cur = rules ?? ws.Rules;
+        return cur with
+        {
+            BoltLengthTable = PickOption(boltLengthTable, StandardOptions.BoltLengthTables, nameof(boltLengthTable), cur.BoltLengthTable),
+            HoleRule = PickOption(holeRule, StandardOptions.HoleRules, nameof(holeRule), cur.HoleRule),
+            MarkScheme = PickOption(markScheme, StandardOptions.MarkSchemes, nameof(markScheme), cur.MarkScheme),
+            MarkFormat = PickOption(markFormat, StandardOptions.MarkFormats, nameof(markFormat), cur.MarkFormat),
+        };
+    }
+
     private static DetailRules? BuildRules(double scallop, double connectionGap, double weldGap, string material)
     {
         if (scallop <= 0 && connectionGap <= 0 && weldGap <= 0 && string.IsNullOrWhiteSpace(material))
@@ -599,7 +688,7 @@ public sealed class HsTools(Workspace ws)
         members = p.Members.Count,
         connections = p.Connections.Count,
         beam_connection = p.Connections.OfType<EndPlateDef>().Any() ? "end_plate" : p.Connections.OfType<ShearTabDef>().Any() ? "shear_tab" : null,
-        rules = p.Rules is null ? null : new { scallop = p.Rules.Scallop, connection_gap = p.Rules.ConnectionGap, weld_gap = p.Rules.WeldGap, material = p.Rules.Material },
+        rules = p.Rules is null ? null : new { scallop = p.Rules.Scallop, connection_gap = p.Rules.ConnectionGap, weld_gap = p.Rules.WeldGap, material = p.Rules.Material, options = OptionsOf(p.Rules) },
         assemblies = r.Assemblies.Select(a => $"{a.Mark} x{a.Quantity} ({a.Main.Profile.Spec} L={a.Main.Length}, {a.Weight} kg)"),
         shape_parts = r.ShapeParts.Count,
         plate_parts = r.PlateParts.Count,

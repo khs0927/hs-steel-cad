@@ -65,6 +65,25 @@ public sealed record DetailRules(
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IReadOnlyDictionary<AssemblyType, string>? MarkHeads { get; init; }
 
+    /// <summary>Bolt length table: "kcs" (default), "ts_one_washer" or "by_bolt_set" (see <see cref="StandardOptions"/>).</summary>
+    public string BoltLengthTable { get; init; } = StandardOptions.DefaultBoltLengthTable;
+
+    /// <summary>Bolt hole rule: "standard" (default), "oversize" or "legacy" (d+2 always).</summary>
+    public string HoleRule { get; init; } = StandardOptions.DefaultHoleRule;
+
+    /// <summary>Mark heads: "legacy" (Numbering.dat, default) or "alt" (V brace, ST stair, HR handrail, T truss, AB anchor).</summary>
+    public string MarkScheme { get; init; } = StandardOptions.DefaultMarkScheme;
+
+    /// <summary>Mark format: "plain" ("C1", default) or "floor_prefix" ("2C1").</summary>
+    public string MarkFormat { get; init; } = StandardOptions.DefaultMarkFormat;
+
+    /// <summary>Hole diameter for <paramref name="boltDia"/> under <see cref="HoleRule"/>.</summary>
+    public double HoleFor(double boltDia) => StandardOptions.HoleFor(boltDia, HoleRule);
+
+    /// <summary>Mark head of an assembly type under <see cref="MarkScheme"/> ("legacy" honours <see cref="MarkHeads"/>).</summary>
+    public string MarkHead(AssemblyType t) =>
+        StandardOptions.NormalizeMarkScheme(MarkScheme) == StandardOptions.MarkAlt ? StandardOptions.AltPrefix(t) : AssemblyTypes.Prefix(t, MarkHeads);
+
     /// <summary>Rules from Project.dat keys; Numbering.dat keys (M83-*-HD-BOX) may be merged into the same map.</summary>
     public static DetailRules From(IReadOnlyDictionary<string, string> p)
     {
