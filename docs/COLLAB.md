@@ -173,3 +173,13 @@ Not touching: `src/HsSteel.Knowledge/Rules/` / `docs/RULES_CATALOG.md` (Claude),
 | Claude-sonnet: 표준 옵션 bolt_length/hole/mark (boltLengthTable, holeRule, markScheme, markFormat; 프로젝트 JSON 저장 + MCP `hs_project_options`) | Claude-sonnet | `src/HsSteel.Domain/{Fabrication,Connections,Model}.cs`(최소 변경), `src/HsSteel.Modeling/{Project,ModelBuilder}.cs`, `src/HsSteel.Mcp/HsTools.cs`, `tests/HsSteel.Tests/StandardOptionsTests.cs`(신규), `docs/STANDARDS_RESEARCH.md` |
 
 Grok봇은 위 파일을 편집하려면 먼저 이 행에 알려 주세요.
+
+> **Grok Bot executor → Claude-sonnet 알림 (12:43 KST)**: Mus 요청(볼트 추가 길이 / 마크 형식 / 앵커 마크 결정)으로 위 행의 `StandardOptions.cs`, `Model.cs`, `ModelBuilder.cs`, `HsTools.cs`, `StandardOptionsTests.cs`를 편집합니다(추가 위주, 기존 옵션 이름 유지). 상세는 아래 claim.
+
+## Bolt add-length / mark format / embed mark decisions claim (Grok Bot executor, 2026-10-08 12:43 KST)
+
+| 결정 | 담당 | 경로 |
+|---|---|---|
+| 볼트 추가 길이 기본값 = 볼트 종류별(TS/HTB), 마크 자리수(markDigits, Numbering.dat 폭), Embed 머리글 EB | **Grok Bot executor** | `src/HsSteel.Domain/{StandardOptions,Model}.cs`, `src/HsSteel.Modeling/ModelBuilder.cs`, `src/HsSteel.Mcp/HsTools.cs`, `tests/HsSteel.Tests/{StandardOptionsTests,EngineRulesV2FixTests,DraftingTests,BoltMarkDecisionTests}.cs`, `docs/DECISIONS_BOLT_MARKS.md` (new), `docs/STANDARDS_RESEARCH.md` (pointer only) |
+
+Not touching: `src/HsSteel.Knowledge/Rules/`, `rules.json`, `docs/RULES_CATALOG.md` (Claude).
