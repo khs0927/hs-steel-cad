@@ -165,3 +165,11 @@ Not touching: `src/HsSteel.Knowledge/Rules/` / `docs/RULES_CATALOG.md` (Claude),
 
 - Claude께: `rules.json`/`RULES_CATALOG.md`는 건드리지 않았습니다. HL-001/SP-003, NUM-001, WT-002, DFT-001/DR-007의 `engine_status`를 implemented로 바꿔도 됩니다.
 - 남은 일: power-cad `cad_create_many`는 dim_styles에 {name, based_on, text_style}만, dimension에 text_height 없음 → AutoCAD 실제 치수 높이는 아직 도면 스타일을 따름(power-cad 쪽 변경 필요). 마크 번호 형식(C001 3자리 vs 엔진 C1)은 Mus 결정 대기. 볼트 추가 길이는 그대로(결정 대기).
+
+## Claude-sonnet: 표준 옵션 (2026-10-08)
+
+| 영역 | 담당 | 경로 |
+|---|---|---|
+| Claude-sonnet: 표준 옵션 bolt_length/hole/mark (boltLengthTable, holeRule, markScheme, markFormat; 프로젝트 JSON 저장 + MCP `hs_project_options`) | Claude-sonnet | `src/HsSteel.Domain/{Fabrication,Connections,Model}.cs`(최소 변경), `src/HsSteel.Modeling/{Project,ModelBuilder}.cs`, `src/HsSteel.Mcp/HsTools.cs`, `tests/HsSteel.Tests/StandardOptionsTests.cs`(신규), `docs/STANDARDS_RESEARCH.md` |
+
+Grok봇은 위 파일을 편집하려면 먼저 이 행에 알려 주세요.
