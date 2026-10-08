@@ -4,3 +4,4 @@ out/
 *.user
 .vs/
 native/**/build/
+__pycache__/
