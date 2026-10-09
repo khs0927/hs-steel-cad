@@ -14406,7 +14406,13 @@
             "part",
             "plate",
             "plan",
-            "bom"
+            "bom",
+            "cover",
+            "notes",
+            "tables",
+            "anchor",
+            "docs",
+            "full"
           ],
           "description": "Subset of sheet kinds (array); default all"
         },
@@ -14456,7 +14462,13 @@
           "part",
           "plate",
           "plan",
-          "bom"
+          "bom",
+          "cover",
+          "notes",
+          "tables",
+          "anchor",
+          "docs",
+          "full"
         ]
       }
     },
