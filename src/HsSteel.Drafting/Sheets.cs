@@ -382,7 +382,7 @@ public sealed class SheetComposer(SheetFrame frame, string project, string date 
         }
 
         d.CurrentTag = new JsonObject { ["kind"] = "sheet", ["dwg_no"] = number };
-        d.Insert(Layers.Frame, frame.BlockName, ox + (frame.BaseX * scale), oy + (frame.BaseY * scale), scale, attrs);
+        d.Insert(Layers.Frame, frame.BlockName, ox + (frame.BaseX * scale), oy + (frame.BaseY * scale), scale / frame.BlockScale, attrs);
         if (frame.AttributeTags.Count == 0)
         {
             foreach (var (field, slot) in frame.TextSlots)

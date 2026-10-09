@@ -402,7 +402,7 @@ public sealed class AssetTools(Workspace ws, AssetOptions opt)
                 pl["text_styles"] = TextStyles.TextStyleDefs();
                 pl["dim_styles"] = TextStyles.DimStyleDefs();
                 // Original HS-STEEL blocks (일반사항, 용접표, HAS 앵커 …) are defined from HS_STEEL_LEGACY\block\<name>.dwg when present.
-                var defs = new JsonArray([.. blocks.Select(b => (Name: b, Path: LegacyBlockPath(b))).Where(b => b.Path is not null)
+                var defs = new JsonArray([.. blocks.Select(b => (Name: b, Path: b == ws.Frame.BlockName && File.Exists(ws.Frame.SourcePath) ? ws.Frame.SourcePath : LegacyBlockPath(b))).Where(b => b.Path is not null)
                     .Select(b => (JsonNode)new JsonObject { ["name"] = b.Name, ["path"] = b.Path })]);
                 if (defs.Count > 0)
                 {

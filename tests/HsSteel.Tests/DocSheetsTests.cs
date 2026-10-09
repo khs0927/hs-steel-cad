@@ -58,6 +58,25 @@ public class DocSheetsTests
     [InlineData(19, "HAS M16x190K")]
     public void Anchor_block_follows_hole_diameter(double hole, string block) => Assert.Equal(block, HsBlocks.Anchor(hole));
 
+    [LegacyAssetFact]
+    public void Zium_frame_is_inserted_at_sheet_scale_over_200()
+    {
+        var set = DrawingSet.Generate(Demo.Sample(), Fx.Ws.Value.Catalog, Fx.Ws.Value.Splices, SheetFrame.ZiumA3, DrawingSet.Kinds.Plan);
+        foreach (var s in set.Sheets)
+        {
+            var frame = s.Plan.Entities.Single(e => e.Type == "insert" && e.Spec["name"]!.GetValue<string>() == "ZIUM_sheet_architect");
+            Assert.Equal(s.Scale / 200, frame.Spec["scale"]!.GetValue<double>(), 6);
+        }
+    }
+
+    [Fact]
+    public void Workspace_default_frame_is_zium() => Assert.Equal("ZIUM_sheet_architect", new SheetFrameHolder().Frame.BlockName);
+
+    private sealed class SheetFrameHolder
+    {
+        public SheetFrame Frame { get; } = Fx.Ws.Value.Frame;
+    }
+
     [Fact]
     public void ParseKinds_accepts_doc_kinds()
     {
