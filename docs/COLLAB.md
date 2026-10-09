@@ -205,3 +205,11 @@ Not touching: `src/HsSteel.Knowledge/Rules/`, `rules.json`, `docs/RULES_CATALOG.
 
 Not touching: `Program.cs` (Mcp/Knowledge), `KnowledgeDbBuilder.cs`, `AssetTools.cs`, `HsTools.cs`, Drafting/Domain/Modeling 코드 (읽기만, 리플렉션).
 남은 연결(소유자 몫): `src/HsSteel.Mcp/Program.cs`에 레지스트리 조회 MCP 툴(`hs_registry_list`/`hs_registry_get`) 등록은 하지 않았음. 필요하면 Program.cs 담당이 추가.
+
+## CAD-less DWG 추출기 claim (Grok Bot executor P4, 2026-10-08 20:15 KST)
+
+| 영역 | 담당 | 경로 |
+|---|---|---|
+| ACadSharp 직접 읽기 DWG → Drive DB 카드(`powercad.asset.card/v1`), ACAD_TABLE 셀 텍스트 | **Grok Bot executor (P4)** | `tools/AssetExtract/` (신규), `tests/HsSteel.AssetExtract.Tests/` (신규), `HsSteel.sln` (프로젝트 2개 추가) |
+
+Not touching: `src/` 전부(읽기·참조만), `tests/HsSteel.Tests/`, `Program.cs`, `KnowledgeDbBuilder.cs`, `tools/AssetRegistry/`.
