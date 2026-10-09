@@ -27,6 +27,9 @@ public sealed record SheetFrame(string BlockName, double Width, double Height, d
 
     public double BaseY { get; init; }
 
+    /// <summary>Block drawing units per paper mm (1 when the block is drawn at 1:1 paper size). The frame is inserted at sheet scale ÷ this.</summary>
+    public double BlockScale { get; init; } = 1;
+
     public IReadOnlyDictionary<string, string> AttributeTags { get; init; } = new Dictionary<string, string>();
 
     public IReadOnlyDictionary<string, TextSlot> TextSlots { get; init; } = new Dictionary<string, TextSlot>();
@@ -41,6 +44,24 @@ public sealed record SheetFrame(string BlockName, double Width, double Height, d
             ["dwg_no"] = new(347, 70, 4),
             ["scale"] = new(347, 50, 3),
             ["date"] = new(347, 35, 3),
+        },
+    };
+
+    /// <summary>
+    /// 건축사사무소 지음 A3 frame: block <c>ZIUM_sheet_architect</c>, drawn 84000×59400 (A3 × 200), base point at the
+    /// lower-left corner, no attributes. Inner border 20,10–410,282 with the title column from x 372.5; the fields
+    /// are the positions measured on ZIUM sheets (docs/standards/zium_plan_sheet.json in power-cad, sheet mm ÷ 80).
+    /// </summary>
+    public static SheetFrame ZiumA3 { get; } = new("ZIUM_sheet_architect", 420, 297, 25, 15, 342, 262)
+    {
+        BlockScale = 200,
+        TextSlots = new Dictionary<string, TextSlot>
+        {
+            ["project"] = new(375, 272, 3),
+            ["title"] = new(374, 44.5, 1.9), // the column is 37.5 mm wide; "ERECTION PLAN EL. +4500" fits at 1.9
+            ["dwg_no"] = new(387.2, 13.6, 2.5),
+            ["scale"] = new(399, 26.3, 1.9),
+            ["date"] = new(397.1, 20.8, 1.9),
         },
     };
 

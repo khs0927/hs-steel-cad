@@ -26,7 +26,7 @@ public sealed class Workspace
 
     public required DetailRules Rules { get; init; }
 
-    public SheetFrame Frame { get; set; } = SheetFrame.A3Default;
+    public SheetFrame Frame { get; set; } = SheetFrame.ZiumA3;
 
     public static Workspace FromEnvironment()
     {
@@ -40,6 +40,13 @@ public sealed class Workspace
         var projects = Environment.GetEnvironmentVariable("HS_STEEL_WORKSPACE")
             ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "hs-steel-projects");
         var ws = Create(root, projects);
+        // 회사 도곽은 건축사사무소 지음 도곽(ZIUM_sheet_architect). HS_STEEL_ZIUM_FRAME = 그 블록 DWG 경로.
+        var zium = Environment.GetEnvironmentVariable("HS_STEEL_ZIUM_FRAME");
+        if (zium is not null && File.Exists(zium))
+        {
+            ws.Frame = SheetFrame.ZiumA3 with { SourcePath = zium };
+        }
+
         var frame = Environment.GetEnvironmentVariable("HS_STEEL_FRAME");
         if (frame is not null && File.Exists(frame))
         {

@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using HsSteel.Assets;
@@ -584,6 +584,12 @@ public sealed class HsTools(Workspace ws)
                 "plan" or "layout" or "erection" or "elevation" or "입면" => DrawingSet.Kinds.Plan,
                 "bom" => DrawingSet.Kinds.Bom,
                 "all" => DrawingSet.Kinds.All,
+                "cover" or "표지" => DrawingSet.Kinds.Cover,
+                "notes" or "일반사항" => DrawingSet.Kinds.Notes,
+                "tables" or "용접표" or "볼트표" => DrawingSet.Kinds.Tables,
+                "anchor" or "앵커" => DrawingSet.Kinds.Anchor,
+                "docs" => DrawingSet.Kinds.Docs,
+                "full" => DrawingSet.Kinds.Full,
                 _ => throw new McpException($"Unknown kind '{s}'."),
             };
         }

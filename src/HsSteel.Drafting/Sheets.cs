@@ -1,4 +1,4 @@
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 using HsSteel.Domain;
 using HsSteel.Modeling;
 
@@ -304,7 +304,7 @@ public sealed class SheetComposer(SheetFrame frame, string project, string date 
 
     public List<string> Warnings { get; } = [];
 
-    public IReadOnlyList<Sheet> Compose(string prefix, string title, IEnumerable<DrawPlan> views)
+    public IReadOnlyList<Sheet> Compose(string prefix, string title, IEnumerable<DrawPlan> views, int firstNumber = 1)
     {
         var sheets = new List<Sheet>();
         var gap = 8.0; // paper mm between views
@@ -331,7 +331,7 @@ public sealed class SheetComposer(SheetFrame frame, string project, string date 
 
                 if (placed.Count > 0 && rowY - h < 0)
                 {
-                    sheets.Add(Flush(prefix, title, scale, placed, sheets.Count + 1));
+                    sheets.Add(Flush(prefix, title, scale, placed, sheets.Count + firstNumber));
                     placed = [];
                     rowY = frame.AreaH;
                     rowX = 0;
@@ -345,7 +345,7 @@ public sealed class SheetComposer(SheetFrame frame, string project, string date 
 
             if (placed.Count > 0)
             {
-                sheets.Add(Flush(prefix, title, scale, placed, sheets.Count + 1));
+                sheets.Add(Flush(prefix, title, scale, placed, sheets.Count + firstNumber));
             }
         }
 
@@ -382,7 +382,7 @@ public sealed class SheetComposer(SheetFrame frame, string project, string date 
         }
 
         d.CurrentTag = new JsonObject { ["kind"] = "sheet", ["dwg_no"] = number };
-        d.Insert(Layers.Frame, frame.BlockName, ox + (frame.BaseX * scale), oy + (frame.BaseY * scale), scale, attrs);
+        d.Insert(Layers.Frame, frame.BlockName, ox + (frame.BaseX * scale), oy + (frame.BaseY * scale), scale / frame.BlockScale, attrs);
         if (frame.AttributeTags.Count == 0)
         {
             foreach (var (field, slot) in frame.TextSlots)
@@ -410,7 +410,7 @@ public sealed class DrawingSet
 
     /// <summary>Which drawing kinds to generate.</summary>
     [Flags]
-    public enum Kinds { Assembly = 1, Part = 2, Plate = 4, Plan = 8, Bom = 16, All = 31 }
+    public enum Kinds { Assembly = 1, Part = 2, Plate = 4, Plan = 8, Bom = 16, All = 31, Cover = 32, Notes = 64, Tables = 128, Anchor = 256, Docs = Cover | Notes | Tables | Anchor, Full = All | Docs }
 
     public static DrawingSet Generate(Project project, SectionCatalog catalog, SpliceStandards splices, SheetFrame frame, Kinds kinds = Kinds.All)
     {
@@ -444,7 +444,40 @@ public sealed class DrawingSet
             set.Sheets.AddRange(composer.Compose("M", "BOM / 물량표", BomSheets.Generate(model, frame)));
         }
 
+        if (kinds.HasFlag(Kinds.Anchor))
+        {
+            set.Sheets.AddRange(composer.Compose("F", "ANCHOR PLAN", AnchorPlan.Generate(model, frame)));
+        }
+
+        // General sheets (G): notes and standard tables from the original HS-STEEL blocks, then the cover with the
+        // index of everything (its own sheet numbers are known up front: cover, notes, then one per table scale).
+        var general = new List<DrawPlan>();
+        if (kinds.HasFlag(Kinds.Notes))
+        {
+            general.Add(HsBlocks.View(HsBlocks.Notes, "GENERAL NOTES / 일반사항", frame));
+        }
+
+        if (kinds.HasFlag(Kinds.Tables))
+        {
+            general.AddRange(new[] { HsBlocks.FilletWeld, HsBlocks.BracketWeld, HsBlocks.BoltData, HsBlocks.HoleDia }.Select(b => HsBlocks.View(b, b, frame)));
+        }
+
+        var first = kinds.HasFlag(Kinds.Cover) ? 2 : 1;
+        if (kinds.HasFlag(Kinds.Cover))
+        {
+            var probe = new SheetComposer(frame, project.Name, project.Date).Compose("G", "GENERAL", general, first);
+            var index = new List<(string, string, string)> { ("G-001", "COVER / 표지", "1/1") };
+            index.AddRange(probe.Select(s => (s.Number, ViewTitles(s), $"1/{Annotate.F(s.Scale)}")));
+            index.AddRange(set.Sheets.Select(s => (s.Number, $"{s.Title} {ViewTitles(s)}".Trim(), $"1/{Annotate.F(s.Scale)}")));
+            set.Sheets.InsertRange(0, composer.Compose("G", "COVER", [CoverSheet.Generate(project.Name, project.Date, index, frame)]));
+        }
+
+        set.Sheets.InsertRange(first - 1, composer.Compose("G", "GENERAL", general, first));
         set.Warnings.AddRange(composer.Warnings);
         return set;
     }
+
+    private static string ViewTitles(Sheet s) =>
+        s.Plan.Meta["views"] is not System.Text.Json.Nodes.JsonArray a ? ""
+        : a.Count <= 3 ? string.Join(", ", a.Select(x => x!.GetValue<string>())) : $"{a.Count} VIEWS";
 }

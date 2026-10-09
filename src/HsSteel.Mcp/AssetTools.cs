@@ -344,7 +344,7 @@ public sealed class AssetTools(Workspace ws, AssetOptions opt)
     public string DrawingsToPowerCad(
         [Description("Project name in the workspace or path to a project JSON file")] string project,
         [Description("Only this sheet, e.g. 'A-001'")] string? sheet = null,
-        [Description("assembly | part | plate | plan | bom (default all)")] string[]? kinds = null)
+        [Description("assembly | part | plate | plan | bom | cover | notes | tables | anchor | docs (cover+notes+tables+anchor) | full (default all = the five model kinds)")] string[]? kinds = null)
     {
         var p = File.Exists(project) ? Project.FromJson(File.ReadAllText(project)) : ws.Load(project);
         var set = ws.Drawings(p, HsTools.ParseKinds(kinds));
@@ -401,6 +401,13 @@ public sealed class AssetTools(Workspace ws, AssetOptions opt)
                 // cad_create_many creates these when missing (entities reference style HS-KOR). Existing styles are never changed.
                 pl["text_styles"] = TextStyles.TextStyleDefs();
                 pl["dim_styles"] = TextStyles.DimStyleDefs();
+                // Original HS-STEEL blocks (일반사항, 용접표, HAS 앵커 …) are defined from HS_STEEL_LEGACY\block\<name>.dwg when present.
+                var defs = new JsonArray([.. blocks.Select(b => (Name: b, Path: b == ws.Frame.BlockName && File.Exists(ws.Frame.SourcePath) ? ws.Frame.SourcePath : LegacyBlockPath(b))).Where(b => b.Path is not null)
+                    .Select(b => (JsonNode)new JsonObject { ["name"] = b.Name, ["path"] = b.Path })]);
+                if (defs.Count > 0)
+                {
+                    pl["blocks"] = defs;
+                }
             }
 
             pl["xdata_app"] = "HS-STEEL";
@@ -417,6 +424,18 @@ public sealed class AssetTools(Workspace ws, AssetOptions opt)
             ["warnings"] = new JsonArray([.. set.Warnings.Select(w => (JsonNode)w)]),
             ["payloads"] = payloads,
         });
+    }
+
+    private static string? LegacyBlockPath(string block)
+    {
+        var root = Environment.GetEnvironmentVariable("HS_STEEL_LEGACY");
+        if (string.IsNullOrWhiteSpace(root) || block.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+        {
+            return null;
+        }
+
+        var path = Path.Combine(root, "block", block + ".dwg");
+        return File.Exists(path) ? path : null;
     }
 
     /// <summary>Adds mark/spec/length/assembly (+ sheet) to the plan tags from the resolved model.</summary>
